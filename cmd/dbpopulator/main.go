@@ -14,26 +14,48 @@ import (
 	"syscall"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
+	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/mongoimg"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/tickexecutor"
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	databaseName         = "shiny_sorter"
-	imagesCollectionName = "images"
+var (
+	imageMetadataConnection imagedb.ImageMetadata
 )
 
 var (
-	imagesCollection *mongo.Collection
+	importDirFlag       = flag.String("import-dir", "./import", "The directory to import files from")
+	storageDirFlag      = flag.String("storage-dir", "./storage", "The directory to store files in")
+	rescanIntervalFlag  = flag.Duration("rescan-interval", time.Second*5, "How often to rescan the import dir for new files")
+	mongodbConectionURI = flag.String("mongodb-connection-uri", "mongodb://localhost:27017", "The connection URI for the MongoDB metadata database")
+	purgeFlag           = flag.Bool("purge", false, "WARNING: If set to true, will empty the storage directory and reset the database")
 )
 
-type Image struct {
-	Name   string `bson:"_id"`
-	Md5Sum string `bson:"md5sum"`
+func parseFlags() {
+	flag.Parse()
+
+	if result, err := os.Stat(*importDirFlag); err != nil {
+		if os.IsNotExist(err) {
+			logrus.Fatalf("Import directory '%s' does not exist: please create it and try again", *importDirFlag)
+		} else {
+			logrus.Fatalf("Error while checking info for import directory '%s'", *importDirFlag)
+		}
+	} else if !result.IsDir() {
+		logrus.Fatalf("Import path '%s' exists but is not a directory", *importDirFlag)
+	}
+
+	if result, err := os.Stat(*storageDirFlag); err != nil {
+		if os.IsNotExist(err) {
+			logrus.Fatalf("Storage directory '%s' does not exist: please create it and try again", *storageDirFlag)
+		} else {
+			logrus.Fatalf("Error while checking info for storage directory '%s'", *storageDirFlag)
+		}
+	} else if !result.IsDir() {
+		logrus.Fatalf("Storage path '%s' exists but is not a directory", *storageDirFlag)
+	}
+
+	return nil
 }
 
 func main() {
@@ -41,44 +63,18 @@ func main() {
 
 	logrus.SetLevel(logrus.DebugLevel)
 
-	importDirFlag := flag.String("import-dir", "./import", "The directory to import files from")
-	storageDirFlag := flag.String("storage-dir", "./storage", "The directory to store files in")
-	rescanIntervalFlag := flag.Duration("rescan-interval", time.Second*5, "How often to rescan the import dir for new files")
-	mongodbConectionURI := flag.String("mongodb-connection-uri", "mongodb://localhost:27017", "The connection URI for the MongoDB metadata database")
-	purgeFlag := flag.Bool("purge", false, "WARNING: If set to true, will empty the storage directory and reset the database")
+	parseFlags()
 
-	flag.Parse()
-
-	if _, err := os.Stat(*importDirFlag); err != nil {
-		if os.IsNotExist(err) {
-			logrus.Fatalf("Import directory '%s' does not exist: please create it and try again", *importDirFlag)
-		} else {
-			logrus.Fatalf("Error while checking info for import directory '%s'", *importDirFlag)
-		}
-	}
-
-	if _, err := os.Stat(*storageDirFlag); err != nil {
-		if os.IsNotExist(err) {
-			logrus.Fatalf("Storage directory '%s' does not exist: please create it and try again", *storageDirFlag)
-		} else {
-			logrus.Fatalf("Error while checking info for storage directory '%s'", *storageDirFlag)
-		}
-	}
-
-	cleanupFunc, err := initDB(rootCtx, *purgeFlag, *mongodbConectionURI)
-	if cleanupFunc != nil {
-		defer func() {
-			cleanupErr := cleanupFunc()
-			if cleanupErr != nil {
-				logrus.WithError(cleanupErr).Error("Failed to clean up database connection")
-			}
-		}()
-	}
-
+	// Initialize database connection
+	mongoConn, cleanupFunc, err := mongoimg.New(rootCtx, *mongodbConectionURI, *purgeFlag)
 	if err != nil {
 		logrus.WithError(err).Fatal("Failed to initialize database connection")
 	}
+	defer cleanupFunc()
 
+	imageMetadataConnection = mongoConn
+
+	// Set ourselves up to receive system interrupts
 	interruptSignals := make(chan os.Signal, 1)
 	signal.Notify(interruptSignals, syscall.SIGINT, syscall.SIGTERM)
 
@@ -90,28 +86,6 @@ func main() {
 	sig := <-interruptSignals
 	cancel()
 	logrus.Infof("Received interrupt '%s'", sig)
-}
-
-func initDB(ctx context.Context, purge bool, uri string) (func() error, error) {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	if err != nil {
-		return nil, err
-	}
-
-	cleanupFunc := func() error {
-		return client.Disconnect(context.TODO())
-	}
-
-	if purge {
-		err = client.Database(databaseName).Drop(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	imagesCollection = client.Database(databaseName).Collection(imagesCollectionName)
-
-	return cleanupFunc, nil
 }
 
 func scanForNewFiles(ctx context.Context, importDir string, storageDir string) error {
@@ -246,53 +220,25 @@ func copyImageToStorageDir(srcFilePath string, destFilePath string) error {
 
 // Filename
 func createOrCheckEntryForFile(ctx context.Context, storageDir string, fileName string) error {
-	// TODO: calculate hash
 	img, err := newImageEntry(ctx, storageDir, fileName)
 	if err != nil {
 		return err
 	}
 
-	// Find the existing entry. If we didn't, insert one.
-	res := imagesCollection.FindOne(ctx, bson.M{
-		"_id": img.Name,
-	})
-	if res.Err() == nil {
-		// Entry already existed, validate that it matches the entry we're uploading
-		existingEntry := Image{}
-		err = res.Decode(&existingEntry)
-		if err != nil {
-			return err
-		}
-
-		// Check all relevant parameters: if they all match, DO NOTHING (don't overwrite tags or anything)
-		if existingEntry.Md5Sum == img.Md5Sum {
-			return nil
-		}
-
-		// Entry already exists but it doesn't match up with this file: do nothing and wait for user intervention
-		return fmt.Errorf("database entry already exists for file '%s' and is different", img.Name)
-	}
-
-	if res.Err() != mongo.ErrNoDocuments {
-		return res.Err()
-	}
-
-	_, err = imagesCollection.InsertOne(ctx, img)
-	if err != nil {
-		return err
-	}
-	return nil
+	return imageMetadataConnection.CreateImageEntry(ctx, &img)
 }
 
-func newImageEntry(ctx context.Context, storageDir string, fileName string) (Image, error) {
+func newImageEntry(ctx context.Context, storageDir string, fileName string) (imagedb.Image, error) {
 	md5Sum, err := getFileMd5Sum(filepath.Join(storageDir, fileName))
 	if err != nil {
-		return Image{}, err
+		return imagedb.Image{}, err
 	}
 
-	imageEntry := Image{
-		Name:   fileName,
-		Md5Sum: md5Sum,
+	imageEntry := imagedb.Image{
+		FileMetadata: imagedb.FileMetadata{
+			Name:   fileName,
+			Md5Sum: md5Sum,
+		},
 	}
 	return imageEntry, nil
 }
