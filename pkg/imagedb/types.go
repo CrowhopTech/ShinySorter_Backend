@@ -40,12 +40,27 @@ func (i *Image) ConflictsWith(other *Image) error {
 	return nil
 }
 
+func (i *Image) Clone() *Image {
+	return &Image{
+		FileMetadata: FileMetadata{
+			Name:   i.Name,
+			Md5Sum: i.Md5Sum,
+		},
+	}
+}
+
 // ImageMetadata represents a service to access image metadata from a
 // given backing database.
 type ImageMetadata interface {
 	// GetImage will get the image with the given name.
 	// If not found, will return nil, not an error.
 	GetImage(ctx context.Context, name string) (*Image, error)
+
+	// ListImages will list images that match the given filter, if provided.
+	// If no filter is provided, all results will be returned (oh no).
+	// If no images match the filter, err will be nil and an empty slice will be returned.
+	// TODO: Implement a pagination strategy
+	ListImages(ctx context.Context, filter *ImageFilter) ([]*Image, error)
 
 	// CreateImageEntry will create the given entry in the database.
 	// If one already exists with the given name, this will check for conflicts

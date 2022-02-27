@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
-	"github.com/CrowhopTech/shinysorter/backend/pkg/mongoimg"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb/mongoimg"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/tickexecutor"
 	"github.com/sirupsen/logrus"
 )
@@ -54,8 +54,6 @@ func parseFlags() {
 	} else if !result.IsDir() {
 		logrus.Fatalf("Storage path '%s' exists but is not a directory", *storageDirFlag)
 	}
-
-	return nil
 }
 
 func main() {

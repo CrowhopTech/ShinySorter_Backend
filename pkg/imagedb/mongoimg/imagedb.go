@@ -2,6 +2,7 @@ package mongoimg
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
 	"go.mongodb.org/mongo-driver/bson"
@@ -30,6 +31,13 @@ func (mc *mongoConnection) GetImage(ctx context.Context, name string) (*imagedb.
 	}
 
 	return &img, nil
+}
+
+// ListImages will list images that match the given filter, if provided.
+// If no filter is provided, all results will be returned (oh no).
+// If no images match the filter, err will be nil and an empty slice will be returned.
+func (mc *mongoConnection) ListImages(ctx context.Context, filter *imagedb.ImageFilter) ([]*imagedb.Image, error) {
+	return nil, fmt.Errorf("not implemented for mongodb")
 }
 
 // CreateImageEntry will create the given entry in the database.
