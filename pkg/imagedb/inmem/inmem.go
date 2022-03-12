@@ -15,17 +15,27 @@ var dummyImageData []imagedb.Image = []imagedb.Image{
 			Name:   "dummy1.jpeg",
 			Md5Sum: "notahash",
 		},
+		Tags: map[string]string{
+			"test-tag": "testval",
+		},
 	},
 	{
 		FileMetadata: imagedb.FileMetadata{
 			Name:   "dummy2.jpeg",
 			Md5Sum: "stillnotahash",
 		},
+		Tags: map[string]string{
+			"test-tag":       "otherval",
+			"test-other-tag": "",
+		},
 	},
 	{
 		FileMetadata: imagedb.FileMetadata{
 			Name:   "dummy3.jpeg",
 			Md5Sum: "mostdefinitelynotahash",
+		},
+		Tags: map[string]string{
+			"test-other-tag": "testval",
 		},
 	},
 }

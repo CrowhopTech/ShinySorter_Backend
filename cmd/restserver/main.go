@@ -46,6 +46,7 @@ func getImages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(images)
 }
@@ -64,7 +65,7 @@ func deleteImage(w http.ResponseWriter, r *http.Request) {
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/image", imagesEndpoint)
-	log.Fatal(http.ListenAndServe(":10000", myRouter))
+	log.Fatal(http.ListenAndServe("0.0.0.0:10000", myRouter))
 }
 
 func parseFlags() {
