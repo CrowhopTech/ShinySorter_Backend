@@ -16,6 +16,7 @@ type FileMetadata struct {
 // as any user-added metadata (tags) or any other useful caching info
 type Image struct {
 	FileMetadata `bson:",inline"`
+	Tags         map[string]string `bson:"tags"`
 }
 
 // ConflictsWith returns if the provided image has unresolvable conflicts
@@ -41,11 +42,16 @@ func (i *Image) ConflictsWith(other *Image) error {
 }
 
 func (i *Image) Clone() *Image {
+	copiedTags := map[string]string{}
+	for k, v := range i.Tags {
+		copiedTags[k] = v
+	}
 	return &Image{
 		FileMetadata: FileMetadata{
 			Name:   i.Name,
 			Md5Sum: i.Md5Sum,
 		},
+		Tags: copiedTags,
 	}
 }
 

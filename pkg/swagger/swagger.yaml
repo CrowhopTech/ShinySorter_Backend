@@ -1,0 +1,179 @@
+consumes:
+- application/json
+info:
+  description: Endpoint definitions for the shiny-sorter image sorting project
+  title: shiny-sorter
+  version: alpha-v0.0
+produces:
+- application/json
+schemes:
+- http
+swagger: "2.0"
+
+parameters:
+  includeTags:
+    in: query
+    name: includeTags
+    description: "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs"
+    type: array
+    items:
+      type: string
+  includeOperator:
+    in: query
+    name: includeOperator
+    description: "Whether includeTags requires all tags to match, or just one"
+    type: string
+    enum: [all, any]
+    default: all
+  excludeTags:
+    in: query
+    name: excludeTags
+    description: "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs"
+    type: array
+    items:
+      type: string
+  excludeOperator:
+    in: query
+    name: excludeOperator
+    description: "Whether excludeTags requires all tags to match, or just one"
+    type: string
+    enum: [all, any]
+    default: all
+definitions:
+  image:
+    properties:
+      id:
+        type: string
+        example: "filename.jpg"
+      md5sum:
+        type: string
+        example: "0a8bd0c4863ec1720da0f69d2795d18a"
+      tags:
+        type: array
+        example:
+          - key1
+          - key2=value2
+          - key3
+        items:
+          type: string
+    required:
+      - id
+      - md5sum
+
+paths:
+  /healthz:
+    get:
+      operationId: checkHealth
+      produces:
+      - text/plain
+      responses:
+        '200':
+          description: OK message
+          schema:
+            type: string
+            enum:
+            - OK
+        '503':
+          description: Server still starting
+          schema:
+            type: string
+            enum:
+            - Service Unavailable
+  
+  /images:
+    get:
+      operationId: getImages
+      description: Lists and queries images
+      parameters:
+       - $ref: "#/parameters/includeTags"
+       - $ref: "#/parameters/includeOperator"
+       - $ref: "#/parameters/excludeTags"
+       - $ref: "#/parameters/excludeOperator"
+      responses:
+        200:
+          description: Images were found matching the given query
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/image"
+        400:
+          # This may happen when, for example, includeTags is specified without includeOperator or vice-versa
+          description: Some part of the request was invalid. More information will be included in the error string
+        404:
+          description: No images were found matching the given query. Also returns an empty array for easier parsing
+          schema:
+            type: string
+            enum:
+            - []
+  /images/{id}:
+    get:
+      operationId: getImageById
+      description: Gets the image metadata with the specified id
+      parameters:
+        - name: id
+          in: path
+          description: Image ID
+          type: string
+          required: true
+      responses:
+        200:
+          description: Returns the found image.
+          schema:
+            $ref: "#/definitions/image"
+        404:
+          description: The given image was not found.
+    patch:
+      operationId: patchImageById
+      description: Modifies the image metadata with the specified id
+      parameters:
+        - name: id
+          in: path
+          description: Image ID
+          type: string
+          required: true
+        - name: patch
+          in: body
+          description: Patch modifications for the image
+          required: true
+          schema:
+            $ref: "#/definitions/image"
+      responses:
+        200:
+          description: Returns the modified image.
+          schema:
+            $ref: "#/definitions/image"
+        400:
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+  /images/{id}/content:
+    get:
+      operationId: getImageContent
+      description: Gets the image contents with the specified id
+      produces:
+        - image/png
+        - image/gif
+        - image/jpeg
+        - image/bmp
+        - image/tiff
+        - video/H264
+        - video/H265
+        - video/JPEG
+        - video/mp4
+        - video/MP4
+        - video/mpeg4-generic
+        - video/ogg
+        - video/raw
+        - video/webm
+        - video/webp
+      parameters:
+        - name: id
+          in: path
+          description: Image ID
+          type: string
+          required: true
+      responses:
+        200:
+          description: Returns the image contents
+        404:
+          description: The given image was not found.

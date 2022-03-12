@@ -1,16 +1,16 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
-	"net/http"
+
+	"github.com/go-openapi/loads"
+	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb/inmem"
-	"github.com/gorilla/mux"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
 	"github.com/sirupsen/logrus"
 )
 
@@ -18,58 +18,30 @@ var (
 	imageMetadataConnection imagedb.ImageMetadata
 )
 
-// GET images with query
-// PATCH image (update image)
-// DELETE image (query option to delete original file too?) (move to trash bin?)
-
-func imagesEndpoint(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		getImages(w, r)
-		return
-	case http.MethodPatch:
-		patchImage(w, r)
-		return
-	case http.MethodDelete:
-		deleteImage(w, r)
-		return
-	}
-
-	w.WriteHeader(http.StatusMethodNotAllowed)
-}
-
-func getImages(w http.ResponseWriter, r *http.Request) {
-	images, err := imageMetadataConnection.ListImages(context.Background(), nil)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("failed to list images: %v", err)))
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(images)
-}
-
-func patchImage(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("PATCH image"))
-}
-
-func deleteImage(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("DELETE images"))
-}
-
-// Existing code from above
-func handleRequests() {
-	myRouter := mux.NewRouter().StrictSlash(true)
-	myRouter.HandleFunc("/image", imagesEndpoint)
-	log.Fatal(http.ListenAndServe(":10000", myRouter))
-}
-
 func parseFlags() {
 	// TODO: add logic to validate flag values here
 	flag.Parse()
+}
+
+func CheckHealth(params operations.CheckHealthParams) middleware.Responder {
+	return operations.NewCheckHealthServiceUnavailable()
+}
+
+//GetImages gets images matching the given query parameters
+func GetImages(params operations.GetImagesParams) middleware.Responder {
+	return operations.NewGetImagesBadRequest()
+}
+
+func GetImageByID(params operations.GetImageByIDParams) middleware.Responder {
+	return operations.NewGetImageByIDNotFound()
+}
+
+func PatchImageByID(params operations.PatchImageByIDParams) middleware.Responder {
+	return operations.NewPatchImageByIDBadRequest()
+}
+
+func GetImageContent(params operations.GetImageContentParams) middleware.Responder {
+	return operations.NewGetImageContentNotFound()
 }
 
 func main() {
@@ -82,5 +54,27 @@ func main() {
 
 	imageMetadataConnection = inmemDB
 
-	handleRequests()
+	// Initialize Swagger
+	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	api := operations.NewShinySorterAPI(swaggerSpec)
+	server := restapi.NewServer(api)
+
+	api.GetImagesHandler = operations.GetImagesHandlerFunc(GetImages)
+	api.GetImageByIDHandler = operations.GetImageByIDHandlerFunc(GetImageByID)
+	api.PatchImageByIDHandler = operations.PatchImageByIDHandlerFunc(PatchImageByID)
+	api.GetImageContentHandler = operations.GetImageContentHandlerFunc(GetImageContent)
+	api.CheckHealthHandler = operations.CheckHealthHandlerFunc(CheckHealth)
+	defer server.Shutdown()
+
+	server.Port = 10000
+
+	// Start listening using having the handlers and port
+	// already set up.
+	if err := server.Serve(); err != nil {
+		log.Fatalln(err)
+	}
 }
