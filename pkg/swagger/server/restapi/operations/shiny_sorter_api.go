@@ -435,7 +435,7 @@ func (o *ShinySorterAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/images/{id}/content"] = NewGetImageContent(o.context, o.GetImageContentHandler)
+	o.handlers["GET"]["/images/contents/{id}"] = NewGetImageContent(o.context, o.GetImageContentHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

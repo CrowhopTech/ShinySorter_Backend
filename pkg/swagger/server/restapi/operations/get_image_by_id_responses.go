@@ -80,3 +80,45 @@ func (o *GetImageByIDNotFound) WriteResponse(rw http.ResponseWriter, producer ru
 
 	rw.WriteHeader(404)
 }
+
+// GetImageByIDInternalServerErrorCode is the HTTP code returned for type GetImageByIDInternalServerError
+const GetImageByIDInternalServerErrorCode int = 500
+
+/*GetImageByIDInternalServerError Something else went wrong during the request
+
+swagger:response getImageByIdInternalServerError
+*/
+type GetImageByIDInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetImageByIDInternalServerError creates GetImageByIDInternalServerError with default headers values
+func NewGetImageByIDInternalServerError() *GetImageByIDInternalServerError {
+
+	return &GetImageByIDInternalServerError{}
+}
+
+// WithPayload adds the payload to the get image by Id internal server error response
+func (o *GetImageByIDInternalServerError) WithPayload(payload string) *GetImageByIDInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get image by Id internal server error response
+func (o *GetImageByIDInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetImageByIDInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+}

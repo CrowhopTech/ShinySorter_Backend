@@ -37,7 +37,27 @@ func (mc *mongoConnection) GetImage(ctx context.Context, name string) (*imagedb.
 // If no filter is provided, all results will be returned (oh no).
 // If no images match the filter, err will be nil and an empty slice will be returned.
 func (mc *mongoConnection) ListImages(ctx context.Context, filter *imagedb.ImageFilter) ([]*imagedb.Image, error) {
-	return nil, fmt.Errorf("not implemented for mongodb")
+	compiledFilter := getQueriesForFilter(filter)
+
+	fmt.Println(compiledFilter)
+
+	cursor, err := mc.imagesCollection.Find(ctx, compiledFilter)
+	if err != nil {
+		return nil, fmt.Errorf("error while running Find: %v", err)
+	}
+
+	results := []*imagedb.Image{}
+
+	for cursor.Next(ctx) {
+		var result imagedb.Image
+		err := cursor.Decode(&result)
+		if err != nil {
+			return nil, fmt.Errorf("error while running Decode: %v", err)
+		}
+		results = append(results, &result)
+	}
+
+	return results, nil
 }
 
 // CreateImageEntry will create the given entry in the database.
@@ -45,6 +65,7 @@ func (mc *mongoConnection) ListImages(ctx context.Context, filter *imagedb.Image
 // using ConflictsWith. If there is a conflict, an error will be returned.
 // If not, no action will be taken.
 func (mc *mongoConnection) CreateImageEntry(ctx context.Context, i *imagedb.Image) error {
+	// TODO: filter for valid name characters here! (mainly need to restrict colons (:) and pipes (|) for tagging query purposes)
 	existingImg, err := mc.GetImage(ctx, i.Name)
 	if err != nil {
 		return err

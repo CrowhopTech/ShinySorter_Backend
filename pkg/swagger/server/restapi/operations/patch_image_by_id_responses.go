@@ -98,3 +98,45 @@ func (o *PatchImageByIDBadRequest) WriteResponse(rw http.ResponseWriter, produce
 		panic(err) // let the recovery middleware deal with this
 	}
 }
+
+// PatchImageByIDInternalServerErrorCode is the HTTP code returned for type PatchImageByIDInternalServerError
+const PatchImageByIDInternalServerErrorCode int = 500
+
+/*PatchImageByIDInternalServerError Something else went wrong during the request
+
+swagger:response patchImageByIdInternalServerError
+*/
+type PatchImageByIDInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewPatchImageByIDInternalServerError creates PatchImageByIDInternalServerError with default headers values
+func NewPatchImageByIDInternalServerError() *PatchImageByIDInternalServerError {
+
+	return &PatchImageByIDInternalServerError{}
+}
+
+// WithPayload adds the payload to the patch image by Id internal server error response
+func (o *PatchImageByIDInternalServerError) WithPayload(payload string) *PatchImageByIDInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch image by Id internal server error response
+func (o *PatchImageByIDInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PatchImageByIDInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+}

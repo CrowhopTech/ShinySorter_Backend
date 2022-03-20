@@ -38,4 +38,9 @@ swagger.validate:
 swagger.doc:
 	mkdir -p doc && docker run --rm -i yousan/swagger-yaml-to-html < pkg/swagger/swagger.yaml > doc/index.html
 
-all: bin/dbpopulator bin/restserver swagger.doc
+swagger-all: swagger.validate generate swagger.doc
+
+all: bin/dbpopulator bin/restserver swagger-all
+
+localrest: bin/restserver
+	./bin/restserver 

@@ -10,6 +10,11 @@ schemes:
 - http
 swagger: "2.0"
 
+responses:
+  genericServerError:
+    description: Something else went wrong during the request
+    schema:
+      type: string
 parameters:
   includeTags:
     in: query
@@ -49,13 +54,12 @@ definitions:
         type: string
         example: "0a8bd0c4863ec1720da0f69d2795d18a"
       tags:
-        type: array
+        type: object
+        additionalProperties: true
         example:
-          - key1
-          - key2=value2
-          - key3
-        items:
-          type: string
+          "key1": ""
+          "key2": "value2"
+          "key3": ""
     required:
       - id
       - md5sum
@@ -99,12 +103,16 @@ paths:
         400:
           # This may happen when, for example, includeTags is specified without includeOperator or vice-versa
           description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
         404:
           description: No images were found matching the given query. Also returns an empty array for easier parsing
           schema:
             type: string
             enum:
             - []
+        500:
+          $ref: "#/responses/genericServerError"
   /images/{id}:
     get:
       operationId: getImageById
@@ -122,6 +130,8 @@ paths:
             $ref: "#/definitions/image"
         404:
           description: The given image was not found.
+        500:
+          $ref: "#/responses/genericServerError"
     patch:
       operationId: patchImageById
       description: Modifies the image metadata with the specified id
@@ -146,7 +156,9 @@ paths:
           description: Some part of the request was invalid. More information will be included in the error string
           schema:
             type: string
-  /images/{id}/content:
+        500:
+          $ref: "#/responses/genericServerError"
+  /images/contents/{id}:
     get:
       operationId: getImageContent
       description: Gets the image contents with the specified id
@@ -177,3 +189,5 @@ paths:
           description: Returns the image contents
         404:
           description: The given image was not found.
+        500:
+          $ref: "#/responses/genericServerError"

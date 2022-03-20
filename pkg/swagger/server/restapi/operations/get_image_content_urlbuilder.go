@@ -40,7 +40,7 @@ func (o *GetImageContentURL) SetBasePath(bp string) {
 func (o *GetImageContentURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/images/{id}/content"
+	var _path = "/images/contents/{id}"
 
 	id := o.ID
 	if id != "" {

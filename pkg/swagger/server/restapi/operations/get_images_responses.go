@@ -68,6 +68,11 @@ const GetImagesBadRequestCode int = 400
 swagger:response getImagesBadRequest
 */
 type GetImagesBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
 }
 
 // NewGetImagesBadRequest creates GetImagesBadRequest with default headers values
@@ -76,12 +81,25 @@ func NewGetImagesBadRequest() *GetImagesBadRequest {
 	return &GetImagesBadRequest{}
 }
 
+// WithPayload adds the payload to the get images bad request response
+func (o *GetImagesBadRequest) WithPayload(payload string) *GetImagesBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get images bad request response
+func (o *GetImagesBadRequest) SetPayload(payload string) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *GetImagesBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(400)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
 }
 
 // GetImagesNotFoundCode is the HTTP code returned for type GetImagesNotFound
@@ -120,6 +138,48 @@ func (o *GetImagesNotFound) SetPayload(payload string) {
 func (o *GetImagesNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
 	rw.WriteHeader(404)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+}
+
+// GetImagesInternalServerErrorCode is the HTTP code returned for type GetImagesInternalServerError
+const GetImagesInternalServerErrorCode int = 500
+
+/*GetImagesInternalServerError Something else went wrong during the request
+
+swagger:response getImagesInternalServerError
+*/
+type GetImagesInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetImagesInternalServerError creates GetImagesInternalServerError with default headers values
+func NewGetImagesInternalServerError() *GetImagesInternalServerError {
+
+	return &GetImagesInternalServerError{}
+}
+
+// WithPayload adds the payload to the get images internal server error response
+func (o *GetImagesInternalServerError) WithPayload(payload string) *GetImagesInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get images internal server error response
+func (o *GetImagesInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetImagesInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
 	payload := o.Payload
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this

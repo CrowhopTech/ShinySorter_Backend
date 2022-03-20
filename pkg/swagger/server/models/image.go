@@ -30,8 +30,8 @@ type Image struct {
 	Md5sum *string `json:"md5sum"`
 
 	// tags
-	// Example: ["key1","key2=value2","key3"]
-	Tags []string `json:"tags"`
+	// Example: {"key1":"","key2":"value2","key3":""}
+	Tags interface{} `json:"tags,omitempty"`
 }
 
 // Validate validates this image

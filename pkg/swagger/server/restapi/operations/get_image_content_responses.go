@@ -58,3 +58,45 @@ func (o *GetImageContentNotFound) WriteResponse(rw http.ResponseWriter, producer
 
 	rw.WriteHeader(404)
 }
+
+// GetImageContentInternalServerErrorCode is the HTTP code returned for type GetImageContentInternalServerError
+const GetImageContentInternalServerErrorCode int = 500
+
+/*GetImageContentInternalServerError Something else went wrong during the request
+
+swagger:response getImageContentInternalServerError
+*/
+type GetImageContentInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload string `json:"body,omitempty"`
+}
+
+// NewGetImageContentInternalServerError creates GetImageContentInternalServerError with default headers values
+func NewGetImageContentInternalServerError() *GetImageContentInternalServerError {
+
+	return &GetImageContentInternalServerError{}
+}
+
+// WithPayload adds the payload to the get image content internal server error response
+func (o *GetImageContentInternalServerError) WithPayload(payload string) *GetImageContentInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get image content internal server error response
+func (o *GetImageContentInternalServerError) SetPayload(payload string) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetImageContentInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(500)
+	payload := o.Payload
+	if err := producer.Produce(rw, payload); err != nil {
+		panic(err) // let the recovery middleware deal with this
+	}
+}

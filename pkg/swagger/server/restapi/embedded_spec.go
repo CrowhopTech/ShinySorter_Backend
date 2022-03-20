@@ -91,7 +91,10 @@ func init() {
             }
           },
           "400": {
-            "description": "Some part of the request was invalid. More information will be included in the error string"
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
           },
           "404": {
             "description": "No images were found matching the given query. Also returns an empty array for easier parsing",
@@ -101,6 +104,52 @@ func init() {
                 null
               ]
             }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      }
+    },
+    "/images/contents/{id}": {
+      "get": {
+        "description": "Gets the image contents with the specified id",
+        "produces": [
+          "image/png",
+          "image/gif",
+          "image/jpeg",
+          "image/bmp",
+          "image/tiff",
+          "video/H264",
+          "video/H265",
+          "video/JPEG",
+          "video/mp4",
+          "video/MP4",
+          "video/mpeg4-generic",
+          "video/ogg",
+          "video/raw",
+          "video/webm",
+          "video/webp"
+        ],
+        "operationId": "getImageContent",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Image ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the image contents"
+          },
+          "404": {
+            "description": "The given image was not found."
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
           }
         }
       }
@@ -127,6 +176,9 @@ func init() {
           },
           "404": {
             "description": "The given image was not found."
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
           }
         }
       },
@@ -163,46 +215,9 @@ func init() {
             "schema": {
               "type": "string"
             }
-          }
-        }
-      }
-    },
-    "/images/{id}/content": {
-      "get": {
-        "description": "Gets the image contents with the specified id",
-        "produces": [
-          "image/png",
-          "image/gif",
-          "image/jpeg",
-          "image/bmp",
-          "image/tiff",
-          "video/H264",
-          "video/H265",
-          "video/JPEG",
-          "video/mp4",
-          "video/MP4",
-          "video/mpeg4-generic",
-          "video/ogg",
-          "video/raw",
-          "video/webm",
-          "video/webp"
-        ],
-        "operationId": "getImageContent",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Image ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns the image contents"
           },
-          "404": {
-            "description": "The given image was not found."
+          "500": {
+            "$ref": "#/responses/genericServerError"
           }
         }
       }
@@ -224,15 +239,13 @@ func init() {
           "example": "0a8bd0c4863ec1720da0f69d2795d18a"
         },
         "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "example": [
-            "key1",
-            "key2=value2",
-            "key3"
-          ]
+          "type": "object",
+          "additionalProperties": true,
+          "example": {
+            "key1": "",
+            "key2": "value2",
+            "key3": ""
+          }
         }
       }
     }
@@ -277,6 +290,14 @@ func init() {
       "description": "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs",
       "name": "includeTags",
       "in": "query"
+    }
+  },
+  "responses": {
+    "genericServerError": {
+      "description": "Something else went wrong during the request",
+      "schema": {
+        "type": "string"
+      }
     }
   }
 }`))
@@ -382,7 +403,10 @@ func init() {
             }
           },
           "400": {
-            "description": "Some part of the request was invalid. More information will be included in the error string"
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
           },
           "404": {
             "description": "No images were found matching the given query. Also returns an empty array for easier parsing",
@@ -391,6 +415,58 @@ func init() {
               "enum": [
                 []
               ]
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/images/contents/{id}": {
+      "get": {
+        "description": "Gets the image contents with the specified id",
+        "produces": [
+          "image/bmp",
+          "image/gif",
+          "image/jpeg",
+          "image/png",
+          "image/tiff",
+          "video/H264",
+          "video/H265",
+          "video/JPEG",
+          "video/MP4",
+          "video/mp4",
+          "video/mpeg4-generic",
+          "video/ogg",
+          "video/raw",
+          "video/webm",
+          "video/webp"
+        ],
+        "operationId": "getImageContent",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Image ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the image contents"
+          },
+          "404": {
+            "description": "The given image was not found."
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
             }
           }
         }
@@ -418,6 +494,12 @@ func init() {
           },
           "404": {
             "description": "The given image was not found."
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
           }
         }
       },
@@ -454,46 +536,12 @@ func init() {
             "schema": {
               "type": "string"
             }
-          }
-        }
-      }
-    },
-    "/images/{id}/content": {
-      "get": {
-        "description": "Gets the image contents with the specified id",
-        "produces": [
-          "image/bmp",
-          "image/gif",
-          "image/jpeg",
-          "image/png",
-          "image/tiff",
-          "video/H264",
-          "video/H265",
-          "video/JPEG",
-          "video/MP4",
-          "video/mp4",
-          "video/mpeg4-generic",
-          "video/ogg",
-          "video/raw",
-          "video/webm",
-          "video/webp"
-        ],
-        "operationId": "getImageContent",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Image ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns the image contents"
           },
-          "404": {
-            "description": "The given image was not found."
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
           }
         }
       }
@@ -515,15 +563,13 @@ func init() {
           "example": "0a8bd0c4863ec1720da0f69d2795d18a"
         },
         "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "example": [
-            "key1",
-            "key2=value2",
-            "key3"
-          ]
+          "type": "object",
+          "additionalProperties": true,
+          "example": {
+            "key1": "",
+            "key2": "value2",
+            "key3": ""
+          }
         }
       }
     }
@@ -568,6 +614,14 @@ func init() {
       "description": "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs",
       "name": "includeTags",
       "in": "query"
+    }
+  },
+  "responses": {
+    "genericServerError": {
+      "description": "Something else went wrong during the request",
+      "schema": {
+        "type": "string"
+      }
     }
   }
 }`))

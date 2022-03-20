@@ -29,7 +29,7 @@ func NewGetImageContent(ctx *middleware.Context, handler GetImageContentHandler)
 	return &GetImageContent{Context: ctx, Handler: handler}
 }
 
-/* GetImageContent swagger:route GET /images/{id}/content getImageContent
+/* GetImageContent swagger:route GET /images/contents/{id} getImageContent
 
 Gets the image contents with the specified id
 
