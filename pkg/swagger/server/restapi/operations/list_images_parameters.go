@@ -6,6 +6,7 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-openapi/errors"
@@ -16,9 +17,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// NewGetImagesParams creates a new GetImagesParams object
+// NewListImagesParams creates a new ListImagesParams object
 // with the default values initialized.
-func NewGetImagesParams() GetImagesParams {
+func NewListImagesParams() ListImagesParams {
 
 	var (
 		// initialize parameters with default values
@@ -28,18 +29,18 @@ func NewGetImagesParams() GetImagesParams {
 		includeOperatorDefault = string("all")
 	)
 
-	return GetImagesParams{
+	return ListImagesParams{
 		ExcludeOperator: &excludeOperatorDefault,
 
 		IncludeOperator: &includeOperatorDefault,
 	}
 }
 
-// GetImagesParams contains all the bound params for the get images operation
+// ListImagesParams contains all the bound params for the list images operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters getImages
-type GetImagesParams struct {
+// swagger:parameters listImages
+type ListImagesParams struct {
 
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
@@ -49,26 +50,26 @@ type GetImagesParams struct {
 	  Default: "all"
 	*/
 	ExcludeOperator *string
-	/*Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs
+	/*Tags to exclude in this query, referenced by tag ID
 	  In: query
 	*/
-	ExcludeTags []string
+	ExcludeTags []int64
 	/*Whether includeTags requires all tags to match, or just one
 	  In: query
 	  Default: "all"
 	*/
 	IncludeOperator *string
-	/*Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs
+	/*Tags to include in this query, referenced by tag ID
 	  In: query
 	*/
-	IncludeTags []string
+	IncludeTags []int64
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls.
 //
-// To ensure default values, the struct must have been initialized with NewGetImagesParams() beforehand.
-func (o *GetImagesParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
+// To ensure default values, the struct must have been initialized with NewListImagesParams() beforehand.
+func (o *ListImagesParams) BindRequest(r *http.Request, route *middleware.MatchedRoute) error {
 	var res []error
 
 	o.HTTPRequest = r
@@ -101,7 +102,7 @@ func (o *GetImagesParams) BindRequest(r *http.Request, route *middleware.Matched
 }
 
 // bindExcludeOperator binds and validates parameter ExcludeOperator from query.
-func (o *GetImagesParams) bindExcludeOperator(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *ListImagesParams) bindExcludeOperator(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
@@ -111,7 +112,7 @@ func (o *GetImagesParams) bindExcludeOperator(rawData []string, hasKey bool, for
 	// AllowEmptyValue: false
 
 	if raw == "" { // empty values pass all other validations
-		// Default values have been previously initialized by NewGetImagesParams()
+		// Default values have been previously initialized by NewListImagesParams()
 		return nil
 	}
 	o.ExcludeOperator = &raw
@@ -124,7 +125,7 @@ func (o *GetImagesParams) bindExcludeOperator(rawData []string, hasKey bool, for
 }
 
 // validateExcludeOperator carries on validations for parameter ExcludeOperator
-func (o *GetImagesParams) validateExcludeOperator(formats strfmt.Registry) error {
+func (o *ListImagesParams) validateExcludeOperator(formats strfmt.Registry) error {
 
 	if err := validate.EnumCase("excludeOperator", "query", *o.ExcludeOperator, []interface{}{"all", "any"}, true); err != nil {
 		return err
@@ -136,7 +137,7 @@ func (o *GetImagesParams) validateExcludeOperator(formats strfmt.Registry) error
 // bindExcludeTags binds and validates array parameter ExcludeTags from query.
 //
 // Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
-func (o *GetImagesParams) bindExcludeTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *ListImagesParams) bindExcludeTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var qvExcludeTags string
 	if len(rawData) > 0 {
 		qvExcludeTags = rawData[len(rawData)-1]
@@ -148,9 +149,12 @@ func (o *GetImagesParams) bindExcludeTags(rawData []string, hasKey bool, formats
 		return nil
 	}
 
-	var excludeTagsIR []string
-	for _, excludeTagsIV := range excludeTagsIC {
-		excludeTagsI := excludeTagsIV
+	var excludeTagsIR []int64
+	for i, excludeTagsIV := range excludeTagsIC {
+		excludeTagsI, err := swag.ConvertInt64(excludeTagsIV)
+		if err != nil {
+			return errors.InvalidType(fmt.Sprintf("%s.%v", "excludeTags", i), "query", "int64", excludeTagsI)
+		}
 
 		excludeTagsIR = append(excludeTagsIR, excludeTagsI)
 	}
@@ -161,7 +165,7 @@ func (o *GetImagesParams) bindExcludeTags(rawData []string, hasKey bool, formats
 }
 
 // bindIncludeOperator binds and validates parameter IncludeOperator from query.
-func (o *GetImagesParams) bindIncludeOperator(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *ListImagesParams) bindIncludeOperator(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
@@ -171,7 +175,7 @@ func (o *GetImagesParams) bindIncludeOperator(rawData []string, hasKey bool, for
 	// AllowEmptyValue: false
 
 	if raw == "" { // empty values pass all other validations
-		// Default values have been previously initialized by NewGetImagesParams()
+		// Default values have been previously initialized by NewListImagesParams()
 		return nil
 	}
 	o.IncludeOperator = &raw
@@ -184,7 +188,7 @@ func (o *GetImagesParams) bindIncludeOperator(rawData []string, hasKey bool, for
 }
 
 // validateIncludeOperator carries on validations for parameter IncludeOperator
-func (o *GetImagesParams) validateIncludeOperator(formats strfmt.Registry) error {
+func (o *ListImagesParams) validateIncludeOperator(formats strfmt.Registry) error {
 
 	if err := validate.EnumCase("includeOperator", "query", *o.IncludeOperator, []interface{}{"all", "any"}, true); err != nil {
 		return err
@@ -196,7 +200,7 @@ func (o *GetImagesParams) validateIncludeOperator(formats strfmt.Registry) error
 // bindIncludeTags binds and validates array parameter IncludeTags from query.
 //
 // Arrays are parsed according to CollectionFormat: "" (defaults to "csv" when empty).
-func (o *GetImagesParams) bindIncludeTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
+func (o *ListImagesParams) bindIncludeTags(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var qvIncludeTags string
 	if len(rawData) > 0 {
 		qvIncludeTags = rawData[len(rawData)-1]
@@ -208,9 +212,12 @@ func (o *GetImagesParams) bindIncludeTags(rawData []string, hasKey bool, formats
 		return nil
 	}
 
-	var includeTagsIR []string
-	for _, includeTagsIV := range includeTagsIC {
-		includeTagsI := includeTagsIV
+	var includeTagsIR []int64
+	for i, includeTagsIV := range includeTagsIC {
+		includeTagsI, err := swag.ConvertInt64(includeTagsIV)
+		if err != nil {
+			return errors.InvalidType(fmt.Sprintf("%s.%v", "includeTags", i), "query", "int64", includeTagsI)
+		}
 
 		includeTagsIR = append(includeTagsIR, includeTagsI)
 	}

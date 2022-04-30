@@ -75,6 +75,31 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.CheckHealth has not yet been implemented")
 		})
 	}
+	if api.CreateImageHandler == nil {
+		api.CreateImageHandler = operations.CreateImageHandlerFunc(func(params operations.CreateImageParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.CreateImage has not yet been implemented")
+		})
+	}
+	if api.CreateQuestionHandler == nil {
+		api.CreateQuestionHandler = operations.CreateQuestionHandlerFunc(func(params operations.CreateQuestionParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.CreateQuestion has not yet been implemented")
+		})
+	}
+	if api.CreateTagHandler == nil {
+		api.CreateTagHandler = operations.CreateTagHandlerFunc(func(params operations.CreateTagParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.CreateTag has not yet been implemented")
+		})
+	}
+	if api.DeleteQuestionHandler == nil {
+		api.DeleteQuestionHandler = operations.DeleteQuestionHandlerFunc(func(params operations.DeleteQuestionParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.DeleteQuestion has not yet been implemented")
+		})
+	}
+	if api.DeleteTagHandler == nil {
+		api.DeleteTagHandler = operations.DeleteTagHandlerFunc(func(params operations.DeleteTagParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.DeleteTag has not yet been implemented")
+		})
+	}
 	if api.GetImageByIDHandler == nil {
 		api.GetImageByIDHandler = operations.GetImageByIDHandlerFunc(func(params operations.GetImageByIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation operations.GetImageByID has not yet been implemented")
@@ -85,14 +110,34 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.GetImageContent has not yet been implemented")
 		})
 	}
-	if api.GetImagesHandler == nil {
-		api.GetImagesHandler = operations.GetImagesHandlerFunc(func(params operations.GetImagesParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetImages has not yet been implemented")
+	if api.ListImagesHandler == nil {
+		api.ListImagesHandler = operations.ListImagesHandlerFunc(func(params operations.ListImagesParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.ListImages has not yet been implemented")
+		})
+	}
+	if api.ListQuestionsHandler == nil {
+		api.ListQuestionsHandler = operations.ListQuestionsHandlerFunc(func(params operations.ListQuestionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.ListQuestions has not yet been implemented")
+		})
+	}
+	if api.ListTagsHandler == nil {
+		api.ListTagsHandler = operations.ListTagsHandlerFunc(func(params operations.ListTagsParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.ListTags has not yet been implemented")
 		})
 	}
 	if api.PatchImageByIDHandler == nil {
 		api.PatchImageByIDHandler = operations.PatchImageByIDHandlerFunc(func(params operations.PatchImageByIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation operations.PatchImageByID has not yet been implemented")
+		})
+	}
+	if api.PatchQuestionByIDHandler == nil {
+		api.PatchQuestionByIDHandler = operations.PatchQuestionByIDHandlerFunc(func(params operations.PatchQuestionByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.PatchQuestionByID has not yet been implemented")
+		})
+	}
+	if api.PatchTagByIDHandler == nil {
+		api.PatchTagByIDHandler = operations.PatchTagByIDHandlerFunc(func(params operations.PatchTagByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.PatchTagByID has not yet been implemented")
 		})
 	}
 

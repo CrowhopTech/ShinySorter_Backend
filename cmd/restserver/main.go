@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
@@ -36,62 +35,24 @@ func CheckHealth(params operations.CheckHealthParams) middleware.Responder {
 }
 
 func translateDBImageToREST(img *imagedb.Image) *models.Image {
-	tags := map[string]string{}
-	for k, v := range img.Tags {
-		tags[k] = v
-	}
-
 	return &models.Image{
-		ID:     &img.Name,
-		Md5sum: &img.Md5Sum,
-		Tags:   tags,
+		ID:     img.Name,
+		Md5sum: img.Md5Sum,
+		Tags:   img.Tags,
 	}
 }
 
-// tagexists,tagemptyval:,tag:val,tag:val1|val2,tag:!notval1|notval2
-// Split by comma
-//   Split by colon
-//   If no colon, just an exists query
-//   If colon, check for exclamation (save as inverse)
-//   Split second part by comma
-
-func parseTagQueryString(tags []string) (map[string]*imagedb.TagSearch, error) {
-	const (
-		kvDelimeter     = ":"
-		inverseMarker   = "!"
-		valuesDelimeter = "|"
-	)
-
-	toReturn := map[string]*imagedb.TagSearch{}
-
-	for _, t := range tags {
-		tag := strings.TrimSpace(t)
-		if len(tag) == 0 {
-			continue
-		}
-		kvComps := strings.Split(tag, kvDelimeter)
-		if len(kvComps) == 1 {
-			// Just an exists query
-			toReturn[kvComps[0]] = nil
-			continue
-		}
-		if len(kvComps) > 2 {
-			return nil, fmt.Errorf("tag '%s' is malformatted", tag)
-		}
-		inverseQuery := strings.HasPrefix(kvComps[1], inverseMarker)
-		valuesString := strings.TrimPrefix(kvComps[1], inverseMarker)
-		values := strings.Split(valuesString, valuesDelimeter)
-		toReturn[kvComps[0]] = &imagedb.TagSearch{
-			TagValues: values,
-			Invert:    inverseQuery,
-		}
+func translateDBTagToREST(tag *imagedb.Tag) *models.Tag {
+	return &models.Tag{
+		Description:      tag.Description,
+		ID:               tag.ID,
+		Name:             tag.Name,
+		UserFriendlyName: tag.UserFriendlyName,
 	}
-
-	return toReturn, nil
 }
 
-//GetImages gets images matching the given query parameters
-func GetImages(params operations.GetImagesParams) middleware.Responder {
+//ListImages gets images matching the given query parameters
+func ListImages(params operations.ListImagesParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	filter := imagedb.ImageFilter{}
@@ -105,15 +66,10 @@ func GetImages(params operations.GetImagesParams) middleware.Responder {
 			case "all":
 				filter.RequireTagOperation = imagedb.All
 			default:
-				return operations.NewGetImagesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.IncludeOperator))
+				return operations.NewListImagesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.IncludeOperator))
 			}
 		}
-
-		requireTags, err := parseTagQueryString(params.IncludeTags)
-		if err != nil {
-			return operations.NewGetImagesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag query: %v", err))
-		}
-		filter.RequireTags = requireTags
+		filter.RequireTags = params.IncludeTags
 	}
 
 	if len(params.ExcludeTags) > 0 {
@@ -125,24 +81,19 @@ func GetImages(params operations.GetImagesParams) middleware.Responder {
 			case "all":
 				filter.ExcludeTagOperation = imagedb.All
 			default:
-				return operations.NewGetImagesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.ExcludeOperator))
+				return operations.NewListImagesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.ExcludeOperator))
 			}
 		}
-
-		excludeTags, err := parseTagQueryString(params.ExcludeTags)
-		if err != nil {
-			return operations.NewGetImagesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag query: %v", err))
-		}
-		filter.ExcludeTags = excludeTags
+		filter.ExcludeTags = params.ExcludeTags
 	}
 
 	results, err := imageMetadataConnection.ListImages(requestCtx, &filter)
 	if err != nil {
-		return operations.NewGetImagesInternalServerError().WithPayload(fmt.Sprintf("failed to list images: %v", err))
+		return operations.NewListImagesInternalServerError().WithPayload(fmt.Sprintf("failed to list images: %v", err))
 	}
 
 	if len(results) == 0 {
-		return operations.NewGetImagesNotFound().WithPayload("[]")
+		return operations.NewListImagesNotFound().WithPayload("[]")
 	}
 
 	output := []*models.Image{}
@@ -152,7 +103,7 @@ func GetImages(params operations.GetImagesParams) middleware.Responder {
 		output = append(output, converted)
 	}
 
-	return operations.NewGetImagesOK().WithPayload(output)
+	return operations.NewListImagesOK().WithPayload(output)
 }
 
 func GetImageByID(params operations.GetImageByIDParams) middleware.Responder {
@@ -178,12 +129,124 @@ func GetImageByID(params operations.GetImageByIDParams) middleware.Responder {
 	return operations.NewGetImageByIDOK().WithPayload(output)
 }
 
+func CreateImage(params operations.CreateImageParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	err := imageMetadataConnection.CreateImageEntry(requestCtx, &imagedb.Image{
+		FileMetadata: imagedb.FileMetadata{
+			Name:   params.NewImage.ID,
+			Md5Sum: params.NewImage.Md5sum,
+		},
+		// TODO: validate that tags actually exist
+		Tags: params.NewImage.Tags,
+	})
+	if err != nil {
+		return operations.NewCreateImageInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))
+	}
+
+	createdImage, err := imageMetadataConnection.GetImage(requestCtx, params.NewImage.ID)
+	if err != nil {
+		return operations.NewCreateImageInternalServerError().WithPayload(fmt.Sprintf("failed to get created image: %v", err))
+	}
+
+	output := translateDBImageToREST(createdImage)
+
+	return operations.NewCreateImageCreated().WithPayload(output)
+}
+
 func PatchImageByID(params operations.PatchImageByIDParams) middleware.Responder {
-	return operations.NewPatchImageByIDBadRequest()
+	requestCtx := rootCtx
+
+	img := imagedb.Image{
+		FileMetadata: imagedb.FileMetadata{
+			Name: params.ID,
+		},
+	}
+
+	if len(params.Patch.Md5sum) > 0 {
+		img.FileMetadata.Md5Sum = params.Patch.Md5sum
+	}
+
+	// TODO: validate that tags actually exist
+	img.Tags = params.Patch.Tags
+
+	newImg, err := imageMetadataConnection.ModifyImageEntry(requestCtx, &img)
+	if err != nil {
+		return operations.NewPatchImageByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify image entry %s: %v", params.ID, err))
+	}
+
+	output := translateDBImageToREST(newImg)
+
+	return operations.NewPatchImageByIDOK().WithPayload(output)
 }
 
 func GetImageContent(params operations.GetImageContentParams) middleware.Responder {
-	return operations.NewGetImageContentNotFound()
+	return operations.NewGetImageContentInternalServerError().WithPayload("not implemented")
+}
+
+//ListTags lists all registered tags
+func ListTags(params operations.ListTagsParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	results, err := imageMetadataConnection.ListTags(requestCtx)
+	if err != nil {
+		return operations.NewListTagsInternalServerError().WithPayload(fmt.Sprintf("failed to list tags: %v", err))
+	}
+
+	output := []*models.Tag{}
+
+	for _, tag := range results {
+		converted := translateDBTagToREST(tag)
+		output = append(output, converted)
+	}
+
+	return operations.NewListTagsOK().WithPayload(output)
+}
+
+func CreateTag(params operations.CreateTagParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	createdTag, err := imageMetadataConnection.CreateTag(requestCtx, &imagedb.Tag{
+		Name:             params.NewTag.Name,
+		UserFriendlyName: params.NewTag.UserFriendlyName,
+		Description:      params.NewTag.Description,
+	})
+	if err != nil {
+		return operations.NewCreateTagInternalServerError().WithPayload(fmt.Sprintf("failed to insert tag: %v", err))
+	}
+
+	output := translateDBTagToREST(createdTag)
+
+	return operations.NewCreateTagCreated().WithPayload(output)
+}
+
+func PatchTagByID(params operations.PatchTagByIDParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	tag := imagedb.Tag{
+		ID: params.ID,
+	}
+
+	if len(params.Patch.Name) > 0 {
+		tag.Name = params.Patch.Name
+	}
+
+	if len(params.Patch.UserFriendlyName) > 0 {
+		tag.UserFriendlyName = params.Patch.UserFriendlyName
+	}
+
+	if len(params.Patch.Description) > 0 {
+		tag.Description = params.Patch.Description
+	}
+
+	newTag, err := imageMetadataConnection.ModifyTag(requestCtx, &tag)
+	if err != nil {
+		return operations.NewPatchTagByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify tag entry %d: %v", params.ID, err))
+	}
+
+	output := translateDBTagToREST(newTag)
+
+	return operations.NewPatchTagByIDOK().WithPayload(output)
 }
 
 func main() {
@@ -211,11 +274,19 @@ func main() {
 	api := operations.NewShinySorterAPI(swaggerSpec)
 	server := restapi.NewServer(api)
 
-	api.GetImagesHandler = operations.GetImagesHandlerFunc(GetImages)
-	api.GetImageByIDHandler = operations.GetImageByIDHandlerFunc(GetImageByID)
-	api.PatchImageByIDHandler = operations.PatchImageByIDHandlerFunc(PatchImageByID)
-	api.GetImageContentHandler = operations.GetImageContentHandlerFunc(GetImageContent)
 	api.CheckHealthHandler = operations.CheckHealthHandlerFunc(CheckHealth)
+
+	api.ListImagesHandler = operations.ListImagesHandlerFunc(ListImages)
+	api.GetImageByIDHandler = operations.GetImageByIDHandlerFunc(GetImageByID)
+	api.CreateImageHandler = operations.CreateImageHandlerFunc(CreateImage)
+	api.PatchImageByIDHandler = operations.PatchImageByIDHandlerFunc(PatchImageByID)
+
+	api.GetImageContentHandler = operations.GetImageContentHandlerFunc(GetImageContent)
+
+	api.ListTagsHandler = operations.ListTagsHandlerFunc(ListTags)
+	api.CreateTagHandler = operations.CreateTagHandlerFunc(CreateTag)
+	api.PatchTagByIDHandler = operations.PatchTagByIDHandlerFunc(PatchTagByID)
+
 	defer server.Shutdown()
 
 	server.Port = 10000

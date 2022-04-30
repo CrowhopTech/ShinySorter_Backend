@@ -8,10 +8,8 @@ package models
 import (
 	"context"
 
-	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // Image image
@@ -21,52 +19,19 @@ type Image struct {
 
 	// id
 	// Example: filename.jpg
-	// Required: true
-	ID *string `json:"id"`
+	ID string `json:"id,omitempty"`
 
 	// md5sum
 	// Example: 0a8bd0c4863ec1720da0f69d2795d18a
-	// Required: true
-	Md5sum *string `json:"md5sum"`
+	Md5sum string `json:"md5sum,omitempty"`
 
 	// tags
-	// Example: {"key1":"","key2":"value2","key3":""}
-	Tags interface{} `json:"tags,omitempty"`
+	// Example: [5,7,37]
+	Tags []int64 `json:"tags"`
 }
 
 // Validate validates this image
 func (m *Image) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateMd5sum(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *Image) validateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("id", "body", m.ID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *Image) validateMd5sum(formats strfmt.Registry) error {
-
-	if err := validate.Required("md5sum", "body", m.Md5sum); err != nil {
-		return err
-	}
-
 	return nil
 }
 

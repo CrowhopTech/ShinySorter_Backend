@@ -65,7 +65,7 @@ func init() {
     "/images": {
       "get": {
         "description": "Lists and queries images",
-        "operationId": "getImages",
+        "operationId": "listImages",
         "parameters": [
           {
             "$ref": "#/parameters/includeTags"
@@ -104,6 +104,34 @@ func init() {
                 null
               ]
             }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new image entry",
+        "operationId": "createImage",
+        "parameters": [
+          {
+            "description": "The new image to create",
+            "name": "newImage",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/image"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Image was created successfully",
+            "schema": {
+              "$ref": "#/definitions/image"
+            }
+          },
+          "400": {
+            "description": "Some part of the provided Image was invalid."
           },
           "500": {
             "$ref": "#/responses/genericServerError"
@@ -221,14 +249,251 @@ func init() {
           }
         }
       }
+    },
+    "/questions": {
+      "get": {
+        "description": "Lists questions",
+        "operationId": "listQuestions",
+        "responses": {
+          "200": {
+            "description": "Questions were listed successfully (array may be empty if no questions are registered)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/question"
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new question",
+        "operationId": "createQuestion",
+        "parameters": [
+          {
+            "description": "The new question to create",
+            "name": "newQuestion",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/question"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Question was created successfully",
+            "schema": {
+              "$ref": "#/definitions/question"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      }
+    },
+    "/questions/{id}": {
+      "delete": {
+        "description": "Deletes a question.",
+        "operationId": "deleteQuestion",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "ID of the question to delete",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Question was deleted successfully"
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "patch": {
+        "description": "Modifies question metadata",
+        "operationId": "patchQuestionByID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "ID of the question to modify",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Patch modifications for the question",
+            "name": "patch",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/question"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Question was modified successfully",
+            "schema": {
+              "$ref": "#/definitions/question"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      }
+    },
+    "/tags": {
+      "get": {
+        "description": "Lists tags and their metadata",
+        "operationId": "listTags",
+        "responses": {
+          "200": {
+            "description": "Tags were listed successfully (array may be empty if no tags are registered)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/tag"
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new tag",
+        "operationId": "createTag",
+        "parameters": [
+          {
+            "description": "The new tag to create",
+            "name": "newTag",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Tag was created successfully",
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      }
+    },
+    "/tags/{id}": {
+      "delete": {
+        "description": "Deletes a tag. Should also remove it from all images that use it.",
+        "operationId": "deleteTag",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "ID of the tag to delete",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag was deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "patch": {
+        "description": "Modifies tag metadata such as description, icon, etc.",
+        "operationId": "patchTagByID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "ID of the tag to modify",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Patch modifications for the tag",
+            "name": "patch",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag was modified successfully",
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      }
     }
   },
   "definitions": {
     "image": {
-      "required": [
-        "id",
-        "md5sum"
-      ],
       "properties": {
         "id": {
           "type": "string",
@@ -239,13 +504,97 @@ func init() {
           "example": "0a8bd0c4863ec1720da0f69d2795d18a"
         },
         "tags": {
-          "type": "object",
-          "additionalProperties": true,
-          "example": {
-            "key1": "",
-            "key2": "value2",
-            "key3": ""
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "example": [
+            5,
+            7,
+            37
+          ]
+        }
+      }
+    },
+    "question": {
+      "required": [
+        "questionID",
+        "questionText",
+        "tagOptions"
+      ],
+      "properties": {
+        "orderingID": {
+          "type": "integer"
+        },
+        "questionID": {
+          "type": "integer"
+        },
+        "questionText": {
+          "type": "string"
+        },
+        "requiresQuestion": {
+          "type": "integer"
+        },
+        "tagOptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "tagID",
+              "optionText"
+            ],
+            "properties": {
+              "optionText": {
+                "type": "string"
+              },
+              "tagID": {
+                "type": "integer"
+              }
+            }
           }
+        }
+      },
+      "example": {
+        "orderingID": 500,
+        "questionID": 5,
+        "questionText": "What kinds of flowers are present in this picture?",
+        "requiresQuestion": 4,
+        "tagOptions": [
+          {
+            "optionText": "Tulips",
+            "tagID": 5
+          },
+          {
+            "optionText": "Roses",
+            "tagID": 6
+          },
+          {
+            "optionText": "Violets",
+            "tagID": 7
+          },
+          {
+            "optionText": "Daisies",
+            "tagID": 8
+          }
+        ]
+      }
+    },
+    "tag": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "This image contains a Tulip"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string",
+          "example": "flower:type:tulip"
+        },
+        "userFriendlyName": {
+          "type": "string",
+          "example": "Tulip"
         }
       }
     }
@@ -265,9 +614,9 @@ func init() {
     "excludeTags": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "integer"
       },
-      "description": "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs",
+      "description": "Tags to exclude in this query, referenced by tag ID",
       "name": "excludeTags",
       "in": "query"
     },
@@ -285,9 +634,9 @@ func init() {
     "includeTags": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "integer"
       },
-      "description": "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs",
+      "description": "Tags to include in this query, referenced by tag ID",
       "name": "includeTags",
       "in": "query"
     }
@@ -349,14 +698,14 @@ func init() {
     "/images": {
       "get": {
         "description": "Lists and queries images",
-        "operationId": "getImages",
+        "operationId": "listImages",
         "parameters": [
           {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "integer"
             },
-            "description": "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs",
+            "description": "Tags to include in this query, referenced by tag ID",
             "name": "includeTags",
             "in": "query"
           },
@@ -374,9 +723,9 @@ func init() {
           {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "integer"
             },
-            "description": "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs",
+            "description": "Tags to exclude in this query, referenced by tag ID",
             "name": "excludeTags",
             "in": "query"
           },
@@ -416,6 +765,37 @@ func init() {
                 []
               ]
             }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new image entry",
+        "operationId": "createImage",
+        "parameters": [
+          {
+            "description": "The new image to create",
+            "name": "newImage",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/image"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Image was created successfully",
+            "schema": {
+              "$ref": "#/definitions/image"
+            }
+          },
+          "400": {
+            "description": "Some part of the provided Image was invalid."
           },
           "500": {
             "description": "Something else went wrong during the request",
@@ -545,14 +925,290 @@ func init() {
           }
         }
       }
+    },
+    "/questions": {
+      "get": {
+        "description": "Lists questions",
+        "operationId": "listQuestions",
+        "responses": {
+          "200": {
+            "description": "Questions were listed successfully (array may be empty if no questions are registered)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/question"
+              }
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new question",
+        "operationId": "createQuestion",
+        "parameters": [
+          {
+            "description": "The new question to create",
+            "name": "newQuestion",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/question"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Question was created successfully",
+            "schema": {
+              "$ref": "#/definitions/question"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/questions/{id}": {
+      "delete": {
+        "description": "Deletes a question.",
+        "operationId": "deleteQuestion",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "ID of the question to delete",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Question was deleted successfully"
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Modifies question metadata",
+        "operationId": "patchQuestionByID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "ID of the question to modify",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Patch modifications for the question",
+            "name": "patch",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/question"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Question was modified successfully",
+            "schema": {
+              "$ref": "#/definitions/question"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/tags": {
+      "get": {
+        "description": "Lists tags and their metadata",
+        "operationId": "listTags",
+        "responses": {
+          "200": {
+            "description": "Tags were listed successfully (array may be empty if no tags are registered)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/tag"
+              }
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new tag",
+        "operationId": "createTag",
+        "parameters": [
+          {
+            "description": "The new tag to create",
+            "name": "newTag",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Tag was created successfully",
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/tags/{id}": {
+      "delete": {
+        "description": "Deletes a tag. Should also remove it from all images that use it.",
+        "operationId": "deleteTag",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "ID of the tag to delete",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag was deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Modifies tag metadata such as description, icon, etc.",
+        "operationId": "patchTagByID",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "ID of the tag to modify",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Patch modifications for the tag",
+            "name": "patch",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag was modified successfully",
+            "schema": {
+              "$ref": "#/definitions/tag"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
-    "image": {
+    "QuestionTagOptionsItems0": {
+      "type": "object",
       "required": [
-        "id",
-        "md5sum"
+        "tagID",
+        "optionText"
       ],
+      "properties": {
+        "optionText": {
+          "type": "string"
+        },
+        "tagID": {
+          "type": "integer"
+        }
+      }
+    },
+    "image": {
       "properties": {
         "id": {
           "type": "string",
@@ -563,13 +1219,85 @@ func init() {
           "example": "0a8bd0c4863ec1720da0f69d2795d18a"
         },
         "tags": {
-          "type": "object",
-          "additionalProperties": true,
-          "example": {
-            "key1": "",
-            "key2": "value2",
-            "key3": ""
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "example": [
+            5,
+            7,
+            37
+          ]
+        }
+      }
+    },
+    "question": {
+      "required": [
+        "questionID",
+        "questionText",
+        "tagOptions"
+      ],
+      "properties": {
+        "orderingID": {
+          "type": "integer"
+        },
+        "questionID": {
+          "type": "integer"
+        },
+        "questionText": {
+          "type": "string"
+        },
+        "requiresQuestion": {
+          "type": "integer"
+        },
+        "tagOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/QuestionTagOptionsItems0"
           }
+        }
+      },
+      "example": {
+        "orderingID": 500,
+        "questionID": 5,
+        "questionText": "What kinds of flowers are present in this picture?",
+        "requiresQuestion": 4,
+        "tagOptions": [
+          {
+            "optionText": "Tulips",
+            "tagID": 5
+          },
+          {
+            "optionText": "Roses",
+            "tagID": 6
+          },
+          {
+            "optionText": "Violets",
+            "tagID": 7
+          },
+          {
+            "optionText": "Daisies",
+            "tagID": 8
+          }
+        ]
+      }
+    },
+    "tag": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "This image contains a Tulip"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string",
+          "example": "flower:type:tulip"
+        },
+        "userFriendlyName": {
+          "type": "string",
+          "example": "Tulip"
         }
       }
     }
@@ -589,9 +1317,9 @@ func init() {
     "excludeTags": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "integer"
       },
-      "description": "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs",
+      "description": "Tags to exclude in this query, referenced by tag ID",
       "name": "excludeTags",
       "in": "query"
     },
@@ -609,9 +1337,9 @@ func init() {
     "includeTags": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "integer"
       },
-      "description": "Tags to include in this query. Can be just the keys, or key-value pairs separated by equal signs",
+      "description": "Tags to include in this query, referenced by tag ID",
       "name": "includeTags",
       "in": "query"
     }

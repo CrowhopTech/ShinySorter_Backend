@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-const tagsFieldPrefix = "tags."
+const tagsField = "tags"
 
 // tagOperationToKey simply converts a tag operation (imagedb.Any or imagedb.All)
 // into the corresponding MongoDB and/or string. Panics if an invalid value is given.
@@ -21,28 +21,24 @@ func tagOperationToKey(operation imagedb.TagOperation) string {
 	panic(fmt.Errorf("unknown tag operation %d", operation))
 }
 
-// getQueryForTagSearch takes in a tag search (list of tag values and an inversion value),
-// as well as whether this is for a Require or Exclude, and generates the proper query.
-// This is what effectively makes the "end leaves" of the query tree
-func getQueryForTagSearch(search *imagedb.TagSearch, exclude bool) bson.M {
-	if search == nil {
-		return bson.M{"$exists": !exclude} //  Normally true, if excluding should be false
-	}
-
-	if exclude != search.Invert { // Effectively XORing the two
-		return bson.M{"$nin": search.TagValues}
-	}
-
-	return bson.M{"$in": search.TagValues}
-}
-
 // getComponentQuery returns the full either Require or Exclude query tree. Root is an and/or, with
 // all the tag queries below it.
-func getComponentQuery(tags map[string]*imagedb.TagSearch, op imagedb.TagOperation, exclude bool) bson.M {
+func getComponentQuery(tags []int64, op imagedb.TagOperation, exclude bool) bson.M {
+
 	comps := []bson.M{}
-	for key, search := range tags {
-		query := bson.M{
-			tagsFieldPrefix + key: getQueryForTagSearch(search, exclude),
+
+	for _, tag := range tags {
+		var query bson.M
+		if exclude {
+			query = bson.M{
+				tagsField: bson.M{
+					"$ne": tag,
+				},
+			}
+		} else {
+			query = bson.M{
+				tagsField: tag,
+			}
 		}
 
 		comps = append(comps, query)

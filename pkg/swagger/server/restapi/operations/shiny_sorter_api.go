@@ -78,17 +78,44 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		CheckHealthHandler: CheckHealthHandlerFunc(func(params CheckHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation CheckHealth has not yet been implemented")
 		}),
+		CreateImageHandler: CreateImageHandlerFunc(func(params CreateImageParams) middleware.Responder {
+			return middleware.NotImplemented("operation CreateImage has not yet been implemented")
+		}),
+		CreateQuestionHandler: CreateQuestionHandlerFunc(func(params CreateQuestionParams) middleware.Responder {
+			return middleware.NotImplemented("operation CreateQuestion has not yet been implemented")
+		}),
+		CreateTagHandler: CreateTagHandlerFunc(func(params CreateTagParams) middleware.Responder {
+			return middleware.NotImplemented("operation CreateTag has not yet been implemented")
+		}),
+		DeleteQuestionHandler: DeleteQuestionHandlerFunc(func(params DeleteQuestionParams) middleware.Responder {
+			return middleware.NotImplemented("operation DeleteQuestion has not yet been implemented")
+		}),
+		DeleteTagHandler: DeleteTagHandlerFunc(func(params DeleteTagParams) middleware.Responder {
+			return middleware.NotImplemented("operation DeleteTag has not yet been implemented")
+		}),
 		GetImageByIDHandler: GetImageByIDHandlerFunc(func(params GetImageByIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetImageByID has not yet been implemented")
 		}),
 		GetImageContentHandler: GetImageContentHandlerFunc(func(params GetImageContentParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetImageContent has not yet been implemented")
 		}),
-		GetImagesHandler: GetImagesHandlerFunc(func(params GetImagesParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetImages has not yet been implemented")
+		ListImagesHandler: ListImagesHandlerFunc(func(params ListImagesParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListImages has not yet been implemented")
+		}),
+		ListQuestionsHandler: ListQuestionsHandlerFunc(func(params ListQuestionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListQuestions has not yet been implemented")
+		}),
+		ListTagsHandler: ListTagsHandlerFunc(func(params ListTagsParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListTags has not yet been implemented")
 		}),
 		PatchImageByIDHandler: PatchImageByIDHandlerFunc(func(params PatchImageByIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation PatchImageByID has not yet been implemented")
+		}),
+		PatchQuestionByIDHandler: PatchQuestionByIDHandlerFunc(func(params PatchQuestionByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation PatchQuestionByID has not yet been implemented")
+		}),
+		PatchTagByIDHandler: PatchTagByIDHandlerFunc(func(params PatchTagByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation PatchTagByID has not yet been implemented")
 		}),
 	}
 }
@@ -168,14 +195,32 @@ type ShinySorterAPI struct {
 
 	// CheckHealthHandler sets the operation handler for the check health operation
 	CheckHealthHandler CheckHealthHandler
+	// CreateImageHandler sets the operation handler for the create image operation
+	CreateImageHandler CreateImageHandler
+	// CreateQuestionHandler sets the operation handler for the create question operation
+	CreateQuestionHandler CreateQuestionHandler
+	// CreateTagHandler sets the operation handler for the create tag operation
+	CreateTagHandler CreateTagHandler
+	// DeleteQuestionHandler sets the operation handler for the delete question operation
+	DeleteQuestionHandler DeleteQuestionHandler
+	// DeleteTagHandler sets the operation handler for the delete tag operation
+	DeleteTagHandler DeleteTagHandler
 	// GetImageByIDHandler sets the operation handler for the get image by Id operation
 	GetImageByIDHandler GetImageByIDHandler
 	// GetImageContentHandler sets the operation handler for the get image content operation
 	GetImageContentHandler GetImageContentHandler
-	// GetImagesHandler sets the operation handler for the get images operation
-	GetImagesHandler GetImagesHandler
+	// ListImagesHandler sets the operation handler for the list images operation
+	ListImagesHandler ListImagesHandler
+	// ListQuestionsHandler sets the operation handler for the list questions operation
+	ListQuestionsHandler ListQuestionsHandler
+	// ListTagsHandler sets the operation handler for the list tags operation
+	ListTagsHandler ListTagsHandler
 	// PatchImageByIDHandler sets the operation handler for the patch image by Id operation
 	PatchImageByIDHandler PatchImageByIDHandler
+	// PatchQuestionByIDHandler sets the operation handler for the patch question by ID operation
+	PatchQuestionByIDHandler PatchQuestionByIDHandler
+	// PatchTagByIDHandler sets the operation handler for the patch tag by ID operation
+	PatchTagByIDHandler PatchTagByIDHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -292,17 +337,44 @@ func (o *ShinySorterAPI) Validate() error {
 	if o.CheckHealthHandler == nil {
 		unregistered = append(unregistered, "CheckHealthHandler")
 	}
+	if o.CreateImageHandler == nil {
+		unregistered = append(unregistered, "CreateImageHandler")
+	}
+	if o.CreateQuestionHandler == nil {
+		unregistered = append(unregistered, "CreateQuestionHandler")
+	}
+	if o.CreateTagHandler == nil {
+		unregistered = append(unregistered, "CreateTagHandler")
+	}
+	if o.DeleteQuestionHandler == nil {
+		unregistered = append(unregistered, "DeleteQuestionHandler")
+	}
+	if o.DeleteTagHandler == nil {
+		unregistered = append(unregistered, "DeleteTagHandler")
+	}
 	if o.GetImageByIDHandler == nil {
 		unregistered = append(unregistered, "GetImageByIDHandler")
 	}
 	if o.GetImageContentHandler == nil {
 		unregistered = append(unregistered, "GetImageContentHandler")
 	}
-	if o.GetImagesHandler == nil {
-		unregistered = append(unregistered, "GetImagesHandler")
+	if o.ListImagesHandler == nil {
+		unregistered = append(unregistered, "ListImagesHandler")
+	}
+	if o.ListQuestionsHandler == nil {
+		unregistered = append(unregistered, "ListQuestionsHandler")
+	}
+	if o.ListTagsHandler == nil {
+		unregistered = append(unregistered, "ListTagsHandler")
 	}
 	if o.PatchImageByIDHandler == nil {
 		unregistered = append(unregistered, "PatchImageByIDHandler")
+	}
+	if o.PatchQuestionByIDHandler == nil {
+		unregistered = append(unregistered, "PatchQuestionByIDHandler")
+	}
+	if o.PatchTagByIDHandler == nil {
+		unregistered = append(unregistered, "PatchTagByIDHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -428,6 +500,26 @@ func (o *ShinySorterAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/healthz"] = NewCheckHealth(o.context, o.CheckHealthHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/images"] = NewCreateImage(o.context, o.CreateImageHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/questions"] = NewCreateQuestion(o.context, o.CreateQuestionHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/tags"] = NewCreateTag(o.context, o.CreateTagHandler)
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/questions/{id}"] = NewDeleteQuestion(o.context, o.DeleteQuestionHandler)
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/tags/{id}"] = NewDeleteTag(o.context, o.DeleteTagHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -439,11 +531,27 @@ func (o *ShinySorterAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/images"] = NewGetImages(o.context, o.GetImagesHandler)
+	o.handlers["GET"]["/images"] = NewListImages(o.context, o.ListImagesHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/questions"] = NewListQuestions(o.context, o.ListQuestionsHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/tags"] = NewListTags(o.context, o.ListTagsHandler)
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/images/{id}"] = NewPatchImageByID(o.context, o.PatchImageByIDHandler)
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/questions/{id}"] = NewPatchQuestionByID(o.context, o.PatchQuestionByIDHandler)
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/tags/{id}"] = NewPatchTagByID(o.context, o.PatchTagByIDHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

@@ -6,10 +6,13 @@ pkgs  = $(shell GOFLAGS=-mod=vendor $(GO) list ./... | grep -vE -e /vendor/ -e /
 bin:
 	mkdir -p bin
 
-bin/dbpopulator: bin cmd/dbpopulator/main.go
+clean:
+	rm bin/*
+
+bin/dbpopulator: bin cmd/dbpopulator/main.go pkg/*
 	$(GOENV) $(GO) build -o bin/dbpopulator cmd/dbpopulator/main.go
 
-bin/restserver: bin cmd/restserver/main.go
+bin/restserver: bin cmd/restserver/main.go pkg/*
 	$(GOENV) $(GO) build -o bin/restserver cmd/restserver/main.go
 
 #-------------------------
@@ -40,7 +43,7 @@ swagger.doc:
 
 swagger-all: swagger.validate generate swagger.doc
 
-all: bin/dbpopulator bin/restserver swagger-all
+all: swagger-all bin/dbpopulator bin/restserver
 
 localrest: bin/restserver
 	./bin/restserver 
