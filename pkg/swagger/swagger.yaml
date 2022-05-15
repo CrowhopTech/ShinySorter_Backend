@@ -55,10 +55,6 @@ definitions:
         optionText: "Violets"
       - tagID: 8
         optionText: "Daisies"
-    required:
-      - questionID
-      - questionText
-      - tagOptions
     properties:
       questionID:
         type: integer

@@ -25,32 +25,21 @@ type Question struct {
 	OrderingID int64 `json:"orderingID,omitempty"`
 
 	// question ID
-	// Required: true
-	QuestionID *int64 `json:"questionID"`
+	QuestionID int64 `json:"questionID,omitempty"`
 
 	// question text
-	// Required: true
-	QuestionText *string `json:"questionText"`
+	QuestionText string `json:"questionText,omitempty"`
 
 	// requires question
 	RequiresQuestion int64 `json:"requiresQuestion,omitempty"`
 
 	// tag options
-	// Required: true
 	TagOptions []*QuestionTagOptionsItems0 `json:"tagOptions"`
 }
 
 // Validate validates this question
 func (m *Question) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateQuestionID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateQuestionText(formats); err != nil {
-		res = append(res, err)
-	}
 
 	if err := m.validateTagOptions(formats); err != nil {
 		res = append(res, err)
@@ -62,28 +51,9 @@ func (m *Question) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Question) validateQuestionID(formats strfmt.Registry) error {
-
-	if err := validate.Required("questionID", "body", m.QuestionID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *Question) validateQuestionText(formats strfmt.Registry) error {
-
-	if err := validate.Required("questionText", "body", m.QuestionText); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *Question) validateTagOptions(formats strfmt.Registry) error {
-
-	if err := validate.Required("tagOptions", "body", m.TagOptions); err != nil {
-		return err
+	if swag.IsZero(m.TagOptions) { // not required
+		return nil
 	}
 
 	for i := 0; i < len(m.TagOptions); i++ {

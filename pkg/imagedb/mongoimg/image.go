@@ -92,7 +92,7 @@ func (mc *mongoConnection) ModifyImageEntry(ctx context.Context, i *imagedb.Imag
 		setParams["md5sum"] = i.Md5Sum
 	}
 
-	if i.Tags != nil && len(i.Tags) > 0 {
+	if i.Tags != nil {
 		setParams["tags"] = i.Tags
 	}
 

@@ -16,7 +16,7 @@ type FileMetadata struct {
 // as any user-added metadata (tags) or any other useful caching info
 type Image struct {
 	FileMetadata `bson:",inline"`
-	Tags         []int64 `bson:"tags,omitempty"`
+	Tags         *[]int64 `bson:"tags,omitempty"`
 }
 
 type Tag struct {
@@ -64,14 +64,14 @@ func (i *Image) ConflictsWith(other *Image) error {
 // Clone returns a copy of the image, but entirely detached from the original
 // object. Modifications to the copied object will not affect the original in any way.
 func (i *Image) Clone() *Image {
-	copiedTags := make([]int64, len(i.Tags))
-	copy(copiedTags, i.Tags)
+	copiedTags := make([]int64, len(*i.Tags))
+	copy(copiedTags, *i.Tags)
 	return &Image{
 		FileMetadata: FileMetadata{
 			Name:   i.Name,
 			Md5Sum: i.Md5Sum,
 		},
-		Tags: copiedTags,
+		Tags: &copiedTags,
 	}
 }
 

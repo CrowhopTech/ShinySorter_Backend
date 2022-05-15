@@ -5,9 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
+
+	"github.com/rs/cors"
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb/mongoimg"
@@ -35,19 +38,66 @@ func CheckHealth(params operations.CheckHealthParams) middleware.Responder {
 }
 
 func translateDBImageToREST(img *imagedb.Image) *models.Image {
+	if img == nil {
+		return nil
+	}
 	return &models.Image{
 		ID:     img.Name,
 		Md5sum: img.Md5Sum,
-		Tags:   img.Tags,
+		Tags:   *img.Tags,
 	}
 }
 
 func translateDBTagToREST(tag *imagedb.Tag) *models.Tag {
+	if tag == nil {
+		return nil
+	}
 	return &models.Tag{
 		Description:      tag.Description,
 		ID:               tag.ID,
 		Name:             tag.Name,
 		UserFriendlyName: tag.UserFriendlyName,
+	}
+}
+
+func tagOptionToImagedb(to *models.QuestionTagOptionsItems0) imagedb.TagOption {
+	// TODO: possible NPE
+	return imagedb.TagOption{
+		TagID:      *to.TagID,
+		OptionText: *to.OptionText,
+	}
+}
+
+func tagOptionArrayToImagedb(input []*models.QuestionTagOptionsItems0) []imagedb.TagOption {
+	toReturn := make([]imagedb.TagOption, len(input))
+	for i, t := range input {
+		toReturn[i] = tagOptionToImagedb(t)
+	}
+	return toReturn
+}
+
+func tagOptionToSwagger(to imagedb.TagOption) *models.QuestionTagOptionsItems0 {
+	return &models.QuestionTagOptionsItems0{
+		OptionText: &to.OptionText,
+		TagID:      &to.TagID,
+	}
+}
+
+func tagOptionArrayToSwagger(input []imagedb.TagOption) []*models.QuestionTagOptionsItems0 {
+	toReturn := make([]*models.QuestionTagOptionsItems0, len(input))
+	for i, t := range input {
+		toReturn[i] = tagOptionToSwagger(t)
+	}
+	return toReturn
+}
+
+func translateDBQuestionToREST(question *imagedb.Question) *models.Question {
+	return &models.Question{
+		OrderingID:       question.OrderingID,
+		QuestionID:       question.ID,
+		QuestionText:     question.QuestionText,
+		RequiresQuestion: *question.RequiresQuestion,
+		TagOptions:       tagOptionArrayToSwagger(question.TagOptions),
 	}
 }
 
@@ -138,7 +188,7 @@ func CreateImage(params operations.CreateImageParams) middleware.Responder {
 			Md5Sum: params.NewImage.Md5sum,
 		},
 		// TODO: validate that tags actually exist
-		Tags: params.NewImage.Tags,
+		Tags: &params.NewImage.Tags,
 	})
 	if err != nil {
 		return operations.NewCreateImageInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))
@@ -157,6 +207,11 @@ func CreateImage(params operations.CreateImageParams) middleware.Responder {
 func PatchImageByID(params operations.PatchImageByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
+	logrus.WithFields(logrus.Fields{
+		"image_id": params.ID,
+		"patch":    params.Patch,
+	}).Info("Patching image")
+
 	img := imagedb.Image{
 		FileMetadata: imagedb.FileMetadata{
 			Name: params.ID,
@@ -168,7 +223,9 @@ func PatchImageByID(params operations.PatchImageByIDParams) middleware.Responder
 	}
 
 	// TODO: validate that tags actually exist
-	img.Tags = params.Patch.Tags
+	if params.Patch.Tags != nil {
+		img.Tags = &params.Patch.Tags
+	}
 
 	newImg, err := imageMetadataConnection.ModifyImageEntry(requestCtx, &img)
 	if err != nil {
@@ -249,6 +306,78 @@ func PatchTagByID(params operations.PatchTagByIDParams) middleware.Responder {
 	return operations.NewPatchTagByIDOK().WithPayload(output)
 }
 
+//ListQuestions lists all registered questions
+func ListQuestions(params operations.ListQuestionsParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	results, err := imageMetadataConnection.ListQuestions(requestCtx)
+	if err != nil {
+		return operations.NewListQuestionsInternalServerError().WithPayload(fmt.Sprintf("failed to list questions: %v", err))
+	}
+
+	output := []*models.Question{}
+
+	for _, question := range results {
+		converted := translateDBQuestionToREST(question)
+		output = append(output, converted)
+	}
+
+	return operations.NewListQuestionsOK().WithPayload(output)
+}
+
+func CreateQuestion(params operations.CreateQuestionParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	createdQuestion, err := imageMetadataConnection.CreateQuestion(requestCtx, &imagedb.Question{
+		ID:               params.NewQuestion.QuestionID,
+		OrderingID:       params.NewQuestion.OrderingID,
+		RequiresQuestion: &params.NewQuestion.RequiresQuestion,
+		QuestionText:     params.NewQuestion.QuestionText,
+		TagOptions:       tagOptionArrayToImagedb(params.NewQuestion.TagOptions),
+	})
+	if err != nil {
+		return operations.NewCreateQuestionInternalServerError().WithPayload(fmt.Sprintf("failed to insert question: %v", err))
+	}
+
+	output := translateDBQuestionToREST(createdQuestion)
+
+	return operations.NewCreateQuestionCreated().WithPayload(output)
+}
+
+func PatchQuestionByID(params operations.PatchQuestionByIDParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	question := imagedb.Question{
+		ID: params.ID,
+	}
+
+	if len(params.Patch.QuestionText) > 0 {
+		question.QuestionText = params.Patch.QuestionText
+	}
+
+	// TODO: handle these three parameters better
+	if len(params.Patch.TagOptions) > 0 {
+		question.TagOptions = tagOptionArrayToImagedb(params.Patch.TagOptions)
+	}
+
+	if params.Patch.RequiresQuestion > 0 {
+		question.RequiresQuestion = &params.Patch.RequiresQuestion
+	}
+
+	if params.Patch.OrderingID > 0 {
+		question.OrderingID = params.Patch.OrderingID
+	}
+
+	newQuestion, err := imageMetadataConnection.ModifyQuestion(requestCtx, &question)
+	if err != nil {
+		return operations.NewPatchQuestionByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify question entry %d: %v", params.ID, err))
+	}
+
+	output := translateDBQuestionToREST(newQuestion)
+
+	return operations.NewPatchQuestionByIDOK().WithPayload(output)
+}
+
 func main() {
 	rootCtx = context.Background()
 
@@ -272,7 +401,6 @@ func main() {
 	}
 
 	api := operations.NewShinySorterAPI(swaggerSpec)
-	server := restapi.NewServer(api)
 
 	api.CheckHealthHandler = operations.CheckHealthHandlerFunc(CheckHealth)
 
@@ -287,13 +415,15 @@ func main() {
 	api.CreateTagHandler = operations.CreateTagHandlerFunc(CreateTag)
 	api.PatchTagByIDHandler = operations.PatchTagByIDHandlerFunc(PatchTagByID)
 
-	defer server.Shutdown()
-
-	server.Port = 10000
+	api.ListQuestionsHandler = operations.ListQuestionsHandlerFunc(ListQuestions)
+	api.CreateQuestionHandler = operations.CreateQuestionHandlerFunc(CreateQuestion)
+	api.PatchQuestionByIDHandler = operations.PatchQuestionByIDHandlerFunc(PatchQuestionByID)
 
 	// Start listening using having the handlers and port
 	// already set up.
-	if err := server.Serve(); err != nil {
+	// Add the CORS AllowAll policy since the web UI is running on a different port
+	// on the same address, so technically cross-origin.
+	if err := http.ListenAndServe(":10000", cors.AllowAll().Handler(api.Serve(nil))); err != nil {
 		log.Fatalln(err)
 	}
 }

@@ -517,11 +517,6 @@ func init() {
       }
     },
     "question": {
-      "required": [
-        "questionID",
-        "questionText",
-        "tagOptions"
-      ],
       "properties": {
         "orderingID": {
           "type": "integer"
@@ -1232,11 +1227,6 @@ func init() {
       }
     },
     "question": {
-      "required": [
-        "questionID",
-        "questionText",
-        "tagOptions"
-      ],
       "properties": {
         "orderingID": {
           "type": "integer"
