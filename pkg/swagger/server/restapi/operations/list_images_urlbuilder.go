@@ -17,6 +17,7 @@ import (
 type ListImagesURL struct {
 	ExcludeOperator *string
 	ExcludeTags     []int64
+	HasBeenTagged   *bool
 	IncludeOperator *string
 	IncludeTags     []int64
 
@@ -74,6 +75,14 @@ func (o *ListImagesURL) Build() (*url.URL, error) {
 		if qsv != "" {
 			qs.Set("excludeTags", qsv)
 		}
+	}
+
+	var hasBeenTaggedQ string
+	if o.HasBeenTagged != nil {
+		hasBeenTaggedQ = swag.FormatBool(*o.HasBeenTagged)
+	}
+	if hasBeenTaggedQ != "" {
+		qs.Set("hasBeenTagged", hasBeenTaggedQ)
 	}
 
 	var includeOperatorQ string

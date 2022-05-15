@@ -79,6 +79,12 @@ func getQueriesForFilter(filter *imagedb.ImageFilter) bson.M {
 		})
 	}
 
+	if filter.Tagged != nil {
+		andComponents = append(andComponents, bson.M{
+			"hasBeenTagged": *filter.Tagged,
+		})
+	}
+
 	requiredQuery := getComponentQuery(filter.RequireTags, filter.RequireTagOperation, false)
 	if len(requiredQuery) > 0 {
 		andComponents = append(andComponents, requiredQuery)

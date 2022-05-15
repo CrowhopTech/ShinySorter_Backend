@@ -17,6 +17,9 @@ import (
 // swagger:model image
 type Image struct {
 
+	// has been tagged
+	HasBeenTagged *bool `json:"hasBeenTagged,omitempty"`
+
 	// id
 	// Example: filename.jpg
 	ID string `json:"id,omitempty"`

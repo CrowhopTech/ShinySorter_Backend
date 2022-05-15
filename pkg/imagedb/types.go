@@ -15,8 +15,9 @@ type FileMetadata struct {
 // Image represents all data about an image: the file metadata, as well
 // as any user-added metadata (tags) or any other useful caching info
 type Image struct {
-	FileMetadata `bson:",inline"`
-	Tags         *[]int64 `bson:"tags,omitempty"`
+	FileMetadata  `bson:",inline"`
+	Tags          *[]int64 `bson:"tags,omitempty"`
+	HasBeenTagged *bool    `bson:"hasBeenTagged,omitempty"`
 }
 
 type Tag struct {
@@ -71,7 +72,8 @@ func (i *Image) Clone() *Image {
 			Name:   i.Name,
 			Md5Sum: i.Md5Sum,
 		},
-		Tags: &copiedTags,
+		Tags:          &copiedTags,
+		HasBeenTagged: i.HasBeenTagged,
 	}
 }
 

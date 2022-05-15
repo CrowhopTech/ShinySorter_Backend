@@ -96,6 +96,10 @@ func (mc *mongoConnection) ModifyImageEntry(ctx context.Context, i *imagedb.Imag
 		setParams["tags"] = i.Tags
 	}
 
+	if i.HasBeenTagged != nil {
+		setParams["hasBeenTagged"] = *i.HasBeenTagged
+	}
+
 	_, err := mc.imagesCollection.UpdateByID(ctx, i.Name, bson.M{
 		"$set": setParams,
 	})

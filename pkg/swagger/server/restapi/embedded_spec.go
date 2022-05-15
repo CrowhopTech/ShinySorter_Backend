@@ -78,6 +78,12 @@ func init() {
           },
           {
             "$ref": "#/parameters/excludeOperator"
+          },
+          {
+            "type": "boolean",
+            "description": "Whether to filter to tags that have or have not been tagged",
+            "name": "hasBeenTagged",
+            "in": "query"
           }
         ],
         "responses": {
@@ -495,6 +501,10 @@ func init() {
   "definitions": {
     "image": {
       "properties": {
+        "hasBeenTagged": {
+          "type": "boolean",
+          "default": true
+        },
         "id": {
           "type": "string",
           "example": "filename.jpg"
@@ -733,6 +743,12 @@ func init() {
             "default": "all",
             "description": "Whether excludeTags requires all tags to match, or just one",
             "name": "excludeOperator",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "description": "Whether to filter to tags that have or have not been tagged",
+            "name": "hasBeenTagged",
             "in": "query"
           }
         ],
@@ -1205,6 +1221,10 @@ func init() {
     },
     "image": {
       "properties": {
+        "hasBeenTagged": {
+          "type": "boolean",
+          "default": true
+        },
         "id": {
           "type": "string",
           "example": "filename.jpg"

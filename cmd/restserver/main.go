@@ -42,9 +42,10 @@ func translateDBImageToREST(img *imagedb.Image) *models.Image {
 		return nil
 	}
 	return &models.Image{
-		ID:     img.Name,
-		Md5sum: img.Md5Sum,
-		Tags:   *img.Tags,
+		ID:            img.Name,
+		Md5sum:        img.Md5Sum,
+		Tags:          *img.Tags,
+		HasBeenTagged: img.HasBeenTagged,
 	}
 }
 
@@ -105,7 +106,9 @@ func translateDBQuestionToREST(question *imagedb.Question) *models.Question {
 func ListImages(params operations.ListImagesParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	filter := imagedb.ImageFilter{}
+	filter := imagedb.ImageFilter{
+		Tagged: params.HasBeenTagged,
+	}
 
 	if len(params.IncludeTags) > 0 {
 		filter.RequireTagOperation = imagedb.All
@@ -225,6 +228,10 @@ func PatchImageByID(params operations.PatchImageByIDParams) middleware.Responder
 	// TODO: validate that tags actually exist
 	if params.Patch.Tags != nil {
 		img.Tags = &params.Patch.Tags
+	}
+
+	if params.Patch.HasBeenTagged != nil {
+		img.HasBeenTagged = params.Patch.HasBeenTagged
 	}
 
 	newImg, err := imageMetadataConnection.ModifyImageEntry(requestCtx, &img)

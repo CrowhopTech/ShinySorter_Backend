@@ -54,6 +54,10 @@ type ListImagesParams struct {
 	  In: query
 	*/
 	ExcludeTags []int64
+	/*Whether to filter to tags that have or have not been tagged
+	  In: query
+	*/
+	HasBeenTagged *bool
 	/*Whether includeTags requires all tags to match, or just one
 	  In: query
 	  Default: "all"
@@ -83,6 +87,11 @@ func (o *ListImagesParams) BindRequest(r *http.Request, route *middleware.Matche
 
 	qExcludeTags, qhkExcludeTags, _ := qs.GetOK("excludeTags")
 	if err := o.bindExcludeTags(qExcludeTags, qhkExcludeTags, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qHasBeenTagged, qhkHasBeenTagged, _ := qs.GetOK("hasBeenTagged")
+	if err := o.bindHasBeenTagged(qHasBeenTagged, qhkHasBeenTagged, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -160,6 +169,29 @@ func (o *ListImagesParams) bindExcludeTags(rawData []string, hasKey bool, format
 	}
 
 	o.ExcludeTags = excludeTagsIR
+
+	return nil
+}
+
+// bindHasBeenTagged binds and validates parameter HasBeenTagged from query.
+func (o *ListImagesParams) bindHasBeenTagged(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	value, err := swag.ConvertBool(raw)
+	if err != nil {
+		return errors.InvalidType("hasBeenTagged", "query", "bool", raw)
+	}
+	o.HasBeenTagged = &value
 
 	return nil
 }

@@ -27,6 +27,9 @@ definitions:
           - 5
           - 7
           - 37
+      hasBeenTagged:
+        type: boolean
+        default: true
   tag:
     properties:
       id:
@@ -136,10 +139,14 @@ paths:
       operationId: listImages
       description: Lists and queries images
       parameters:
-       - $ref: "#/parameters/includeTags"
-       - $ref: "#/parameters/includeOperator"
-       - $ref: "#/parameters/excludeTags"
-       - $ref: "#/parameters/excludeOperator"
+      - $ref: "#/parameters/includeTags"
+      - $ref: "#/parameters/includeOperator"
+      - $ref: "#/parameters/excludeTags"
+      - $ref: "#/parameters/excludeOperator"
+      - name: hasBeenTagged
+        in: query
+        description: "Whether to filter to tags that have or have not been tagged"
+        type: boolean
       responses:
         200:
           description: Images were found matching the given query

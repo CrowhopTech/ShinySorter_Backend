@@ -31,4 +31,10 @@ type ImageFilter struct {
 	// ExcludeTagOperation dictates, if ExcludeTags is set,
 	// how multiple tags will be treated.
 	ExcludeTagOperation TagOperation
+
+	// Tagged dictates, if set, whether to return only
+	// images that have been tagged or have not been tagged.
+	// Note that this is not tied to the actual value of tags, it
+	// is more intended for "A human has looked at this and verified"
+	Tagged *bool
 }
