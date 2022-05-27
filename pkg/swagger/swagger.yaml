@@ -1,0 +1,432 @@
+consumes:
+- application/json
+info:
+  description: Endpoint definitions for the shiny-sorter image sorting project
+  title: shiny-sorter
+  version: alpha-v0.0
+produces:
+- application/json
+schemes:
+- http
+swagger: "2.0"
+
+definitions:
+  image:
+    properties:
+      id:
+        type: string
+        example: "filename.jpg"
+      md5sum:
+        type: string
+        example: "0a8bd0c4863ec1720da0f69d2795d18a"
+      tags:
+        type: array
+        items:
+          type: integer
+        example:
+          - 5
+          - 7
+          - 37
+      hasBeenTagged:
+        type: boolean
+        default: true
+  tag:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+        example: "flower:type:tulip"
+      userFriendlyName:
+        type: string
+        example: "Tulip"
+      description:
+        type: string
+        example: "This image contains a Tulip"
+  question:
+    example:
+      questionID: 5
+      orderingID: 500
+      requiresQuestion: 4
+      questionText: "What kinds of flowers are present in this picture?"
+      tagOptions:
+      - tagID: 5
+        optionText: "Tulips"
+      - tagID: 6
+        optionText: "Roses"
+      - tagID: 7
+        optionText: "Violets"
+      - tagID: 8
+        optionText: "Daisies"
+    properties:
+      questionID:
+        type: integer
+      orderingID:
+        type: integer
+      requiresQuestion:
+        type: integer
+      questionText:
+        type: string
+      tagOptions:
+        type: array
+        items:
+          type: object
+          required:
+            - tagID
+            - optionText
+          properties:
+            tagID:
+              type: integer
+            optionText:
+              type: string
+parameters:
+  includeTags:
+    in: query
+    name: includeTags
+    description: "Tags to include in this query, referenced by tag ID"
+    type: array
+    items:
+      type: integer
+  includeOperator:
+    in: query
+    name: includeOperator
+    description: "Whether includeTags requires all tags to match, or just one"
+    type: string
+    enum: [all, any]
+    default: all
+  excludeTags:
+    in: query
+    name: excludeTags
+    description: "Tags to exclude in this query, referenced by tag ID"
+    type: array
+    items:
+      type: integer
+  excludeOperator:
+    in: query
+    name: excludeOperator
+    description: "Whether excludeTags requires all tags to match, or just one"
+    type: string
+    enum: [all, any]
+    default: all
+responses:
+  genericServerError:
+    description: Something else went wrong during the request
+    schema:
+      type: string
+
+paths:
+  /healthz:
+    get:
+      operationId: checkHealth
+      produces:
+      - text/plain
+      responses:
+        '200':
+          description: OK message
+          schema:
+            type: string
+            enum:
+            - OK
+        '503':
+          description: Server still starting
+          schema:
+            type: string
+            enum:
+            - Service Unavailable
+  
+  /images:
+    get:
+      operationId: listImages
+      description: Lists and queries images
+      parameters:
+      - $ref: "#/parameters/includeTags"
+      - $ref: "#/parameters/includeOperator"
+      - $ref: "#/parameters/excludeTags"
+      - $ref: "#/parameters/excludeOperator"
+      - name: hasBeenTagged
+        in: query
+        description: "Whether to filter to tags that have or have not been tagged"
+        type: boolean
+      responses:
+        200:
+          description: Images were found matching the given query
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/image"
+        400:
+          # This may happen when, for example, includeTags is specified without includeOperator or vice-versa
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+        404:
+          description: No images were found matching the given query. Also returns an empty array for easier parsing
+          schema:
+            type: string
+            enum:
+            - []
+        500:
+          $ref: "#/responses/genericServerError"
+    post:
+      operationId: createImage
+      description: Creates a new image entry
+      parameters:
+        - in: body
+          name: newImage
+          description: "The new image to create"
+          schema:
+            $ref: "#/definitions/image"
+      responses:
+        201:
+          description: Image was created successfully
+          schema:
+            $ref: "#/definitions/image"
+        400:
+          description: Some part of the provided Image was invalid.
+        500:
+          $ref: "#/responses/genericServerError"
+
+  /images/{id}:
+    get:
+      operationId: getImageById
+      description: Gets the image metadata with the specified id
+      parameters:
+        - name: id
+          in: path
+          description: Image ID
+          type: string
+          required: true
+      responses:
+        200:
+          description: Returns the found image.
+          schema:
+            $ref: "#/definitions/image"
+        404:
+          description: The given image was not found.
+        500:
+          $ref: "#/responses/genericServerError"
+    patch:
+      operationId: patchImageById
+      description: Modifies the image metadata with the specified id
+      parameters:
+        - name: id
+          in: path
+          description: Image ID
+          type: string
+          required: true
+        - name: patch
+          in: body
+          description: Patch modifications for the image
+          required: true
+          schema:
+            $ref: "#/definitions/image"
+      responses:
+        200:
+          description: Returns the modified image.
+          schema:
+            $ref: "#/definitions/image"
+        400:
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+        500:
+          $ref: "#/responses/genericServerError"
+  /images/contents/{id}:
+    get:
+      operationId: getImageContent
+      description: Gets the image contents with the specified id
+      produces:
+        - image/png
+        - image/gif
+        - image/jpeg
+        - image/bmp
+        - image/tiff
+        - video/H264
+        - video/H265
+        - video/JPEG
+        - video/mp4
+        - video/MP4
+        - video/mpeg4-generic
+        - video/ogg
+        - video/raw
+        - video/webm
+        - video/webp
+      parameters:
+        - name: id
+          in: path
+          description: Image ID
+          type: string
+          required: true
+      responses:
+        200:
+          description: Returns the image contents
+        404:
+          description: The given image was not found.
+        500:
+          $ref: "#/responses/genericServerError"
+  
+  /tags:
+    get:
+      operationId: listTags
+      description: Lists tags and their metadata
+      responses:
+        200:
+          description: Tags were listed successfully (array may be empty if no tags are registered)
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/tag"
+        500:
+          $ref: "#/responses/genericServerError"
+    post:
+      operationId: createTag
+      description: Creates a new tag
+      parameters:
+        - in: body
+          name: newTag
+          description: "The new tag to create"
+          schema:
+            $ref: "#/definitions/tag"
+      responses:
+        201:
+          description: Tag was created successfully
+          schema:
+            $ref: "#/definitions/tag"
+        400:
+          # This may happen when a tag already exists or some piece of information is missing
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+        500:
+          $ref: "#/responses/genericServerError"
+  /tags/{id}:
+    patch:
+      operationId: patchTagByID
+      description: Modifies tag metadata such as description, icon, etc.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: "ID of the tag to modify"
+          type: integer
+        - name: patch
+          in: body
+          description: Patch modifications for the tag
+          required: true
+          schema:
+            $ref: "#/definitions/tag"
+      responses:
+        200:
+          description: Tag was modified successfully
+          schema:
+            $ref: "#/definitions/tag"
+        400:
+          # This may happen when a tag already exists or some piece of information is missing
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+        500:
+          $ref: "#/responses/genericServerError"
+    delete:
+      operationId: deleteTag
+      description: Deletes a tag. Should also remove it from all images that use it.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: "ID of the tag to delete"
+          type: integer
+      responses:
+        200:
+          description: Tag was deleted successfully
+          schema:
+            $ref: "#/definitions/tag"
+        400:
+          # This may happen when an invalid tag ID is provided
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+        500:
+          $ref: "#/responses/genericServerError"
+
+  /questions:
+    get:
+      operationId: listQuestions
+      description: Lists questions
+      responses:
+        200:
+          description: Questions were listed successfully (array may be empty if no questions are registered)
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/question"
+        500:
+          $ref: "#/responses/genericServerError"
+    post:
+      operationId: createQuestion
+      description: Creates a new question
+      parameters:
+        - in: body
+          name: newQuestion
+          description: "The new question to create"
+          schema:
+            $ref: "#/definitions/question"
+      responses:
+        201:
+          description: Question was created successfully
+          schema:
+            $ref: "#/definitions/question"
+        400:
+          # This may happen when a question already exists or some piece of information is missing
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+        500:
+          $ref: "#/responses/genericServerError"
+  /questions/{id}:
+    patch:
+      operationId: patchQuestionByID
+      description: Modifies question metadata
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: "ID of the question to modify"
+          type: integer
+        - name: patch
+          in: body
+          description: Patch modifications for the question
+          required: true
+          schema:
+            $ref: "#/definitions/question"
+      responses:
+        200:
+          description: Question was modified successfully
+          schema:
+            $ref: "#/definitions/question"
+        400:
+          # This may happen when a question already exists or some piece of information is missing
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+        500:
+          $ref: "#/responses/genericServerError"
+    delete:
+      operationId: deleteQuestion
+      description: Deletes a question.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: "ID of the question to delete"
+          type: integer
+      responses:
+        200:
+          description: Question was deleted successfully
+        400:
+          # This may happen when an invalid question ID is provided
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+        500:
+          $ref: "#/responses/genericServerError"

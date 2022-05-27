@@ -2,19 +2,63 @@ package mongoimg
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
-	databaseName         = "shiny_sorter"
-	imagesCollectionName = "images"
+	databaseName            = "shiny_sorter"
+	imagesCollectionName    = "images"
+	tagsCollectionName      = "tags"
+	questionsCollectionName = "questions"
 )
 
+var _ imagedb.ImageMetadata = new(mongoConnection)
+
 type mongoConnection struct {
-	imagesCollection *mongo.Collection
+	imagesCollection    *mongo.Collection
+	tagsCollection      *mongo.Collection
+	questionsCollection *mongo.Collection
+}
+
+func (mc *mongoConnection) setUpIndices(ctx context.Context) error {
+	unique := true
+	_, err := mc.tagsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{
+			{
+				Key:   "name",
+				Value: 1,
+			},
+		},
+		Options: &options.IndexOptions{
+			Unique: &unique,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = mc.tagsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{
+			{
+				Key:   "userFriendlyName",
+				Value: 1,
+			},
+		},
+		Options: &options.IndexOptions{
+			Unique: &unique,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func New(ctx context.Context, connectionURI string, purge bool) (*mongoConnection, func() error, error) {
@@ -39,9 +83,23 @@ func New(ctx context.Context, connectionURI string, purge bool) (*mongoConnectio
 		}
 	}
 
-	imagesCollection := client.Database(databaseName).Collection(imagesCollectionName)
+	var (
+		imagesCollection    = client.Database(databaseName).Collection(imagesCollectionName)
+		tagsCollection      = client.Database(databaseName).Collection(tagsCollectionName)
+		questionsCollection = client.Database(databaseName).Collection(questionsCollectionName)
+	)
 
-	return &mongoConnection{
-		imagesCollection: imagesCollection,
-	}, cleanupFunc, nil
+	mc := &mongoConnection{
+		imagesCollection:    imagesCollection,
+		tagsCollection:      tagsCollection,
+		questionsCollection: questionsCollection,
+	}
+
+	err = mc.setUpIndices(ctx)
+	if err != nil {
+		cleanupFunc()
+		return nil, nil, fmt.Errorf("failed to set up tag indices: %v", err)
+	}
+
+	return mc, cleanupFunc, nil
 }
