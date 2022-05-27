@@ -13,23 +13,9 @@
 //    - application/json
 //
 //  Produces:
-//    - image/bmp
-//    - image/gif
-//    - image/jpeg
-//    - image/png
-//    - image/tiff
+//    - application/octet-stream
 //    - application/json
 //    - text/plain
-//    - video/H264
-//    - video/H265
-//    - video/JPEG
-//    - video/MP4
-//    - video/mp4
-//    - video/mpeg4-generic
-//    - video/ogg
-//    - video/raw
-//    - video/webm
-//    - video/webp
 //
 // swagger:meta
 package restapi

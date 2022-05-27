@@ -13,7 +13,7 @@ bin/dbpopulator: bin cmd/dbpopulator/main.go pkg/*
 	$(GOENV) $(GO) build -o bin/dbpopulator cmd/dbpopulator/main.go
 
 bin/restserver: bin cmd/restserver/main.go pkg/*
-	$(GOENV) $(GO) build -o bin/restserver cmd/restserver/main.go
+	$(GOENV) $(GO) build -o bin/restserver cmd/restserver/*.go
 
 #-------------------------
 # Code generation

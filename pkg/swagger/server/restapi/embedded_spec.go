@@ -149,21 +149,7 @@ func init() {
       "get": {
         "description": "Gets the image contents with the specified id",
         "produces": [
-          "image/png",
-          "image/gif",
-          "image/jpeg",
-          "image/bmp",
-          "image/tiff",
-          "video/H264",
-          "video/H265",
-          "video/JPEG",
-          "video/mp4",
-          "video/MP4",
-          "video/mpeg4-generic",
-          "video/ogg",
-          "video/raw",
-          "video/webm",
-          "video/webp"
+          "application/octet-stream"
         ],
         "operationId": "getImageContent",
         "parameters": [
@@ -177,7 +163,16 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Returns the image contents"
+            "description": "Returns the image contents",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Content-Type": {
+                "type": "string"
+              }
+            }
           },
           "404": {
             "description": "The given image was not found."
@@ -821,21 +816,7 @@ func init() {
       "get": {
         "description": "Gets the image contents with the specified id",
         "produces": [
-          "image/bmp",
-          "image/gif",
-          "image/jpeg",
-          "image/png",
-          "image/tiff",
-          "video/H264",
-          "video/H265",
-          "video/JPEG",
-          "video/MP4",
-          "video/mp4",
-          "video/mpeg4-generic",
-          "video/ogg",
-          "video/raw",
-          "video/webm",
-          "video/webp"
+          "application/octet-stream"
         ],
         "operationId": "getImageContent",
         "parameters": [
@@ -849,7 +830,16 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Returns the image contents"
+            "description": "Returns the image contents",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Content-Type": {
+                "type": "string"
+              }
+            }
           },
           "404": {
             "description": "The given image was not found."

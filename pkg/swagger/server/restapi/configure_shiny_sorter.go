@@ -4,7 +4,6 @@ package restapi
 
 import (
 	"crypto/tls"
-	"io"
 	"net/http"
 
 	"github.com/go-openapi/errors"
@@ -39,36 +38,6 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 	api.BinProducer = runtime.ByteStreamProducer()
 	api.JSONProducer = runtime.JSONProducer()
 	api.TxtProducer = runtime.TextProducer()
-	api.VideoH264Producer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoH264 producer has not yet been implemented")
-	})
-	api.VideoH265Producer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoH265 producer has not yet been implemented")
-	})
-	api.VideoJPEGProducer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoJPEG producer has not yet been implemented")
-	})
-	api.VideoMP4Producer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoMP4 producer has not yet been implemented")
-	})
-	api.VideoMp4Producer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoMp4 producer has not yet been implemented")
-	})
-	api.VideoMpeg4GenericProducer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoMpeg4Generic producer has not yet been implemented")
-	})
-	api.VideoOggProducer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoOgg producer has not yet been implemented")
-	})
-	api.VideoRawProducer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoRaw producer has not yet been implemented")
-	})
-	api.VideoWebmProducer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoWebm producer has not yet been implemented")
-	})
-	api.VideoWebpProducer = runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-		return errors.NotImplemented("videoWebp producer has not yet been implemented")
-	})
 
 	if api.CheckHealthHandler == nil {
 		api.CheckHealthHandler = operations.CheckHealthHandlerFunc(func(params operations.CheckHealthParams) middleware.Responder {

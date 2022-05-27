@@ -7,7 +7,6 @@ package operations
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 
@@ -44,36 +43,6 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		BinProducer:  runtime.ByteStreamProducer(),
 		JSONProducer: runtime.JSONProducer(),
 		TxtProducer:  runtime.TextProducer(),
-		VideoH264Producer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoH264 producer has not yet been implemented")
-		}),
-		VideoH265Producer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoH265 producer has not yet been implemented")
-		}),
-		VideoJPEGProducer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoJPEG producer has not yet been implemented")
-		}),
-		VideoMP4Producer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoMP4 producer has not yet been implemented")
-		}),
-		VideoMp4Producer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoMp4 producer has not yet been implemented")
-		}),
-		VideoMpeg4GenericProducer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoMpeg4Generic producer has not yet been implemented")
-		}),
-		VideoOggProducer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoOgg producer has not yet been implemented")
-		}),
-		VideoRawProducer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoRaw producer has not yet been implemented")
-		}),
-		VideoWebmProducer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoWebm producer has not yet been implemented")
-		}),
-		VideoWebpProducer: runtime.ProducerFunc(func(w io.Writer, data interface{}) error {
-			return errors.NotImplemented("videoWebp producer has not yet been implemented")
-		}),
 
 		CheckHealthHandler: CheckHealthHandlerFunc(func(params CheckHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation CheckHealth has not yet been implemented")
@@ -150,11 +119,7 @@ type ShinySorterAPI struct {
 	JSONConsumer runtime.Consumer
 
 	// BinProducer registers a producer for the following mime types:
-	//   - image/bmp
-	//   - image/gif
-	//   - image/jpeg
-	//   - image/png
-	//   - image/tiff
+	//   - application/octet-stream
 	BinProducer runtime.Producer
 	// JSONProducer registers a producer for the following mime types:
 	//   - application/json
@@ -162,36 +127,6 @@ type ShinySorterAPI struct {
 	// TxtProducer registers a producer for the following mime types:
 	//   - text/plain
 	TxtProducer runtime.Producer
-	// VideoH264Producer registers a producer for the following mime types:
-	//   - video/H264
-	VideoH264Producer runtime.Producer
-	// VideoH265Producer registers a producer for the following mime types:
-	//   - video/H265
-	VideoH265Producer runtime.Producer
-	// VideoJPEGProducer registers a producer for the following mime types:
-	//   - video/JPEG
-	VideoJPEGProducer runtime.Producer
-	// VideoMP4Producer registers a producer for the following mime types:
-	//   - video/MP4
-	VideoMP4Producer runtime.Producer
-	// VideoMp4Producer registers a producer for the following mime types:
-	//   - video/mp4
-	VideoMp4Producer runtime.Producer
-	// VideoMpeg4GenericProducer registers a producer for the following mime types:
-	//   - video/mpeg4-generic
-	VideoMpeg4GenericProducer runtime.Producer
-	// VideoOggProducer registers a producer for the following mime types:
-	//   - video/ogg
-	VideoOggProducer runtime.Producer
-	// VideoRawProducer registers a producer for the following mime types:
-	//   - video/raw
-	VideoRawProducer runtime.Producer
-	// VideoWebmProducer registers a producer for the following mime types:
-	//   - video/webm
-	VideoWebmProducer runtime.Producer
-	// VideoWebpProducer registers a producer for the following mime types:
-	//   - video/webp
-	VideoWebpProducer runtime.Producer
 
 	// CheckHealthHandler sets the operation handler for the check health operation
 	CheckHealthHandler CheckHealthHandler
@@ -303,36 +238,6 @@ func (o *ShinySorterAPI) Validate() error {
 	if o.TxtProducer == nil {
 		unregistered = append(unregistered, "TxtProducer")
 	}
-	if o.VideoH264Producer == nil {
-		unregistered = append(unregistered, "VideoH264Producer")
-	}
-	if o.VideoH265Producer == nil {
-		unregistered = append(unregistered, "VideoH265Producer")
-	}
-	if o.VideoJPEGProducer == nil {
-		unregistered = append(unregistered, "VideoJPEGProducer")
-	}
-	if o.VideoMP4Producer == nil {
-		unregistered = append(unregistered, "VideoMP4Producer")
-	}
-	if o.VideoMp4Producer == nil {
-		unregistered = append(unregistered, "VideoMp4Producer")
-	}
-	if o.VideoMpeg4GenericProducer == nil {
-		unregistered = append(unregistered, "VideoMpeg4GenericProducer")
-	}
-	if o.VideoOggProducer == nil {
-		unregistered = append(unregistered, "VideoOggProducer")
-	}
-	if o.VideoRawProducer == nil {
-		unregistered = append(unregistered, "VideoRawProducer")
-	}
-	if o.VideoWebmProducer == nil {
-		unregistered = append(unregistered, "VideoWebmProducer")
-	}
-	if o.VideoWebpProducer == nil {
-		unregistered = append(unregistered, "VideoWebpProducer")
-	}
 
 	if o.CheckHealthHandler == nil {
 		unregistered = append(unregistered, "CheckHealthHandler")
@@ -422,40 +327,12 @@ func (o *ShinySorterAPI) ProducersFor(mediaTypes []string) map[string]runtime.Pr
 	result := make(map[string]runtime.Producer, len(mediaTypes))
 	for _, mt := range mediaTypes {
 		switch mt {
-		case "image/bmp":
-			result["image/bmp"] = o.BinProducer
-		case "image/gif":
-			result["image/gif"] = o.BinProducer
-		case "image/jpeg":
-			result["image/jpeg"] = o.BinProducer
-		case "image/png":
-			result["image/png"] = o.BinProducer
-		case "image/tiff":
-			result["image/tiff"] = o.BinProducer
+		case "application/octet-stream":
+			result["application/octet-stream"] = o.BinProducer
 		case "application/json":
 			result["application/json"] = o.JSONProducer
 		case "text/plain":
 			result["text/plain"] = o.TxtProducer
-		case "video/H264":
-			result["video/H264"] = o.VideoH264Producer
-		case "video/H265":
-			result["video/H265"] = o.VideoH265Producer
-		case "video/JPEG":
-			result["video/JPEG"] = o.VideoJPEGProducer
-		case "video/MP4":
-			result["video/MP4"] = o.VideoMP4Producer
-		case "video/mp4":
-			result["video/mp4"] = o.VideoMp4Producer
-		case "video/mpeg4-generic":
-			result["video/mpeg4-generic"] = o.VideoMpeg4GenericProducer
-		case "video/ogg":
-			result["video/ogg"] = o.VideoOggProducer
-		case "video/raw":
-			result["video/raw"] = o.VideoRawProducer
-		case "video/webm":
-			result["video/webm"] = o.VideoWebmProducer
-		case "video/webp":
-			result["video/webp"] = o.VideoWebpProducer
 		}
 
 		if p, ok := o.customProducers[mt]; ok {
