@@ -18,6 +18,7 @@ type Image struct {
 	FileMetadata  `bson:",inline"`
 	Tags          *[]int64 `bson:"tags,omitempty"`
 	HasBeenTagged *bool    `bson:"hasBeenTagged,omitempty"`
+	HasContent    bool     `bson:"hasContent"`
 }
 
 type Tag struct {
@@ -74,6 +75,7 @@ func (i *Image) Clone() *Image {
 		},
 		Tags:          &copiedTags,
 		HasBeenTagged: i.HasBeenTagged,
+		HasContent:    i.HasContent,
 	}
 }
 

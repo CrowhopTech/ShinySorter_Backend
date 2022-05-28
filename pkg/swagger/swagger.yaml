@@ -1,5 +1,6 @@
 consumes:
 - application/json
+- multipart/form-data
 info:
   description: Endpoint definitions for the shiny-sorter image sorting project
   title: shiny-sorter
@@ -252,6 +253,33 @@ paths:
           schema:
             type: string
             format: binary
+        404:
+          description: The given image was not found.
+        500:
+          $ref: "#/responses/genericServerError"
+    patch:
+      operationId: setImageContent
+      description: Sets the image contents for the specified id
+      consumes:
+        - "multipart/form-data"
+      parameters:
+        - in: formData
+          name: fileContents
+          description: The file contents to upload.
+          type: file
+          format: binary
+        - name: id
+          in: path
+          description: Image ID
+          type: string
+          required: true
+      responses:
+        200:
+          description: The image contents were modified successfully
+        400:
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
         404:
           description: The given image was not found.
         500:

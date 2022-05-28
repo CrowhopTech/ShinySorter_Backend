@@ -79,6 +79,7 @@ func main() {
 	api.PatchImageByIDHandler = operations.PatchImageByIDHandlerFunc(PatchImageByID)
 
 	api.GetImageContentHandler = operations.GetImageContentHandlerFunc(GetImageContent)
+	api.SetImageContentHandler = operations.SetImageContentHandlerFunc(SetImageContent)
 
 	api.ListTagsHandler = operations.ListTagsHandlerFunc(ListTags)
 	api.CreateTagHandler = operations.CreateTagHandlerFunc(CreateTag)

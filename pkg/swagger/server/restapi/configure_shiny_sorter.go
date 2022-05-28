@@ -34,10 +34,14 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 	// api.UseRedoc()
 
 	api.JSONConsumer = runtime.JSONConsumer()
+	api.MultipartformConsumer = runtime.DiscardConsumer
 
 	api.BinProducer = runtime.ByteStreamProducer()
 	api.JSONProducer = runtime.JSONProducer()
 	api.TxtProducer = runtime.TextProducer()
+
+	// You may change here the memory limit for this multipart form parser. Below is the default (32 MB).
+	// operations.SetImageContentMaxParseMemory = 32 << 20
 
 	if api.CheckHealthHandler == nil {
 		api.CheckHealthHandler = operations.CheckHealthHandlerFunc(func(params operations.CheckHealthParams) middleware.Responder {
@@ -107,6 +111,11 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 	if api.PatchTagByIDHandler == nil {
 		api.PatchTagByIDHandler = operations.PatchTagByIDHandlerFunc(func(params operations.PatchTagByIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation operations.PatchTagByID has not yet been implemented")
+		})
+	}
+	if api.SetImageContentHandler == nil {
+		api.SetImageContentHandler = operations.SetImageContentHandlerFunc(func(params operations.SetImageContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.SetImageContent has not yet been implemented")
 		})
 	}
 

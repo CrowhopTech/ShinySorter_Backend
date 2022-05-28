@@ -14,10 +14,14 @@ func translateDBImageToREST(img *imagedb.Image) *models.Image {
 	if img == nil {
 		return nil
 	}
+	tags := []int64{}
+	if img.Tags != nil {
+		tags = *img.Tags
+	}
 	return &models.Image{
 		ID:            img.Name,
 		Md5sum:        img.Md5Sum,
-		Tags:          *img.Tags,
+		Tags:          tags,
 		HasBeenTagged: img.HasBeenTagged,
 	}
 }

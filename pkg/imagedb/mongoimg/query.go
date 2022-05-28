@@ -65,7 +65,9 @@ func getQueriesForFilter(filter *imagedb.ImageFilter) bson.M {
 		return bson.M{}
 	}
 
-	andComponents := []bson.M{}
+	andComponents := []bson.M{
+		{"hasContent": !filter.MissingContent}, // By default only includes images with content, but can be inverted
+	}
 
 	if filter.Name != "" {
 		andComponents = append(andComponents, bson.M{

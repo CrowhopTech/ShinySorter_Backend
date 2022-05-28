@@ -37,4 +37,9 @@ type ImageFilter struct {
 	// Note that this is not tied to the actual value of tags, it
 	// is more intended for "A human has looked at this and verified"
 	Tagged *bool
+
+	// MissingContent can be used to filter for images that only have
+	// metadata but no content (indicating a failed or in progress upload)
+	// Defaults to false
+	MissingContent bool
 }

@@ -38,7 +38,8 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		APIKeyAuthenticator: security.APIKeyAuth,
 		BearerAuthenticator: security.BearerAuth,
 
-		JSONConsumer: runtime.JSONConsumer(),
+		JSONConsumer:          runtime.JSONConsumer(),
+		MultipartformConsumer: runtime.DiscardConsumer,
 
 		BinProducer:  runtime.ByteStreamProducer(),
 		JSONProducer: runtime.JSONProducer(),
@@ -86,6 +87,9 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		PatchTagByIDHandler: PatchTagByIDHandlerFunc(func(params PatchTagByIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation PatchTagByID has not yet been implemented")
 		}),
+		SetImageContentHandler: SetImageContentHandlerFunc(func(params SetImageContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation SetImageContent has not yet been implemented")
+		}),
 	}
 }
 
@@ -117,6 +121,9 @@ type ShinySorterAPI struct {
 	// JSONConsumer registers a consumer for the following mime types:
 	//   - application/json
 	JSONConsumer runtime.Consumer
+	// MultipartformConsumer registers a consumer for the following mime types:
+	//   - multipart/form-data
+	MultipartformConsumer runtime.Consumer
 
 	// BinProducer registers a producer for the following mime types:
 	//   - application/octet-stream
@@ -156,6 +163,8 @@ type ShinySorterAPI struct {
 	PatchQuestionByIDHandler PatchQuestionByIDHandler
 	// PatchTagByIDHandler sets the operation handler for the patch tag by ID operation
 	PatchTagByIDHandler PatchTagByIDHandler
+	// SetImageContentHandler sets the operation handler for the set image content operation
+	SetImageContentHandler SetImageContentHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -228,6 +237,9 @@ func (o *ShinySorterAPI) Validate() error {
 	if o.JSONConsumer == nil {
 		unregistered = append(unregistered, "JSONConsumer")
 	}
+	if o.MultipartformConsumer == nil {
+		unregistered = append(unregistered, "MultipartformConsumer")
+	}
 
 	if o.BinProducer == nil {
 		unregistered = append(unregistered, "BinProducer")
@@ -281,6 +293,9 @@ func (o *ShinySorterAPI) Validate() error {
 	if o.PatchTagByIDHandler == nil {
 		unregistered = append(unregistered, "PatchTagByIDHandler")
 	}
+	if o.SetImageContentHandler == nil {
+		unregistered = append(unregistered, "SetImageContentHandler")
+	}
 
 	if len(unregistered) > 0 {
 		return fmt.Errorf("missing registration: %s", strings.Join(unregistered, ", "))
@@ -312,6 +327,8 @@ func (o *ShinySorterAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Co
 		switch mt {
 		case "application/json":
 			result["application/json"] = o.JSONConsumer
+		case "multipart/form-data":
+			result["multipart/form-data"] = o.MultipartformConsumer
 		}
 
 		if c, ok := o.customConsumers[mt]; ok {
@@ -429,6 +446,10 @@ func (o *ShinySorterAPI) initHandlerCache() {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/tags/{id}"] = NewPatchTagByID(o.context, o.PatchTagByIDHandler)
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/images/contents/{id}"] = NewSetImageContent(o.context, o.SetImageContentHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

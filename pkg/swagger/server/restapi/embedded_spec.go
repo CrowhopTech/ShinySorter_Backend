@@ -19,7 +19,8 @@ var (
 func init() {
 	SwaggerJSON = json.RawMessage([]byte(`{
   "consumes": [
-    "application/json"
+    "application/json",
+    "multipart/form-data"
   ],
   "produces": [
     "application/json"
@@ -172,6 +173,46 @@ func init() {
               "Content-Type": {
                 "type": "string"
               }
+            }
+          },
+          "404": {
+            "description": "The given image was not found."
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "patch": {
+        "description": "Sets the image contents for the specified id",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "operationId": "setImageContent",
+        "parameters": [
+          {
+            "type": "file",
+            "format": "binary",
+            "description": "The file contents to upload.",
+            "name": "fileContents",
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "description": "Image ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The image contents were modified successfully"
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
             }
           },
           "404": {
@@ -652,7 +693,8 @@ func init() {
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
   "consumes": [
-    "application/json"
+    "application/json",
+    "multipart/form-data"
   ],
   "produces": [
     "application/json"
@@ -839,6 +881,49 @@ func init() {
               "Content-Type": {
                 "type": "string"
               }
+            }
+          },
+          "404": {
+            "description": "The given image was not found."
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "patch": {
+        "description": "Sets the image contents for the specified id",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "operationId": "setImageContent",
+        "parameters": [
+          {
+            "type": "file",
+            "format": "binary",
+            "description": "The file contents to upload.",
+            "name": "fileContents",
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "description": "Image ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The image contents were modified successfully"
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
             }
           },
           "404": {
