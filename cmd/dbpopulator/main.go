@@ -231,12 +231,14 @@ func newImageEntry(ctx context.Context, storageDir string, fileName string) (ima
 	if err != nil {
 		return imagedb.Image{}, err
 	}
-
+	f := false
 	imageEntry := imagedb.Image{
 		FileMetadata: imagedb.FileMetadata{
 			Name:   fileName,
 			Md5Sum: md5Sum,
 		},
+		HasBeenTagged: &f,
+		HasContent:    true,
 	}
 	return imageEntry, nil
 }
