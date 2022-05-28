@@ -109,13 +109,15 @@ func GetImageByID(params operations.GetImageByIDParams) middleware.Responder {
 func CreateImage(params operations.CreateImageParams) middleware.Responder {
 	requestCtx := rootCtx
 
+	f := false
 	err := imageMetadataConnection.CreateImageEntry(requestCtx, &imagedb.Image{
 		FileMetadata: imagedb.FileMetadata{
 			Name:   params.NewImage.ID,
 			Md5Sum: params.NewImage.Md5sum,
 		},
 		// TODO: validate that tags actually exist
-		Tags: &params.NewImage.Tags,
+		Tags:       &params.NewImage.Tags,
+		HasContent: &f,
 	})
 	if err != nil {
 		return operations.NewCreateImageInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))

@@ -14,22 +14,25 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
-	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb/mongoimg"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/tickexecutor"
+	"github.com/go-openapi/strfmt"
 	"github.com/sirupsen/logrus"
+
+	apiclient "github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client/operations"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/models"
+	httptransport "github.com/go-openapi/runtime/client"
 )
 
 var (
-	imageMetadataConnection imagedb.ImageMetadata
+	swaggerClient *apiclient.ShinySorter
 )
 
 var (
-	importDirFlag       = flag.String("import-dir", "./import", "The directory to import files from")
-	storageDirFlag      = flag.String("storage-dir", "./storage", "The directory to store files in")
-	rescanIntervalFlag  = flag.Duration("rescan-interval", time.Second*5, "How often to rescan the import dir for new files")
-	mongodbConectionURI = flag.String("mongodb-connection-uri", "mongodb://localhost:27017", "The connection URI for the MongoDB metadata database")
-	purgeFlag           = flag.Bool("purge", false, "WARNING: If set to true, will empty the storage directory and reset the database")
+	importDirFlag      = flag.String("import-dir", "./import", "The directory to import files from")
+	storageDirFlag     = flag.String("storage-dir", "./storage", "The directory to store files in")
+	rescanIntervalFlag = flag.Duration("rescan-interval", time.Second*5, "How often to rescan the import dir for new files")
+	restAddressFlag    = flag.String("rest-address", "localhost:10000", "The address (and port, no protocol) to reach the REST server")
 )
 
 func parseFlags() {
@@ -63,14 +66,10 @@ func main() {
 
 	parseFlags()
 
-	// Initialize database connection
-	mongoConn, cleanupFunc, err := mongoimg.New(rootCtx, *mongodbConectionURI, *purgeFlag)
-	if err != nil {
-		logrus.WithError(err).Fatal("Failed to initialize database connection")
-	}
-	defer cleanupFunc()
-
-	imageMetadataConnection = mongoConn
+	swaggerClient = apiclient.New(
+		httptransport.New(*restAddressFlag, "/", []string{"http"}),
+		strfmt.Default,
+	)
 
 	// Set ourselves up to receive system interrupts
 	interruptSignals := make(chan os.Signal, 1)
@@ -102,7 +101,7 @@ func scanForNewFiles(ctx context.Context, importDir string, storageDir string) e
 		}
 
 		go func() {
-			processErr := processImportFile(ctx, wg, path, d, storageDir)
+			processErr := processImportFile(ctx, wg, path, d)
 			if processErr != nil {
 				logrus.WithError(processErr).WithField("file", path).Error("Failed to process file, leaving it behind to retry")
 			}
@@ -121,51 +120,17 @@ func scanForNewFiles(ctx context.Context, importDir string, storageDir string) e
 	return nil
 }
 
-func processImportFile(ctx context.Context, wg *sync.WaitGroup, path string, d fs.DirEntry, storageDir string) error {
+func processImportFile(ctx context.Context, wg *sync.WaitGroup, path string, d fs.DirEntry) error {
 	wg.Add(1)
 	defer wg.Done()
 
-	//   Check for conflicts by name. If exists, check hash. If match, continue. If not, warn and skip
-
-	//   Copy to storage dir
-	//   Add database entry
-	//   Delete original entry
-
-	finalTargetPath := filepath.Join(storageDir, d.Name())
+	// Create image entry with file hash set (will fail if doesn't match)
+	// Set image contents
+	// Delete original file
 
 	logrus.Infof("Processing file %s", path)
 
-	inputFileMd5Sum, err := getFileMd5Sum(path)
-	if err != nil {
-		return err
-	}
-
-	exists, err := doesImageExist(finalTargetPath)
-	if err != nil {
-		return err
-	}
-	if exists {
-		logrus.WithField("target_path", finalTargetPath).Debug("Target file already exists, checking file hash")
-		existingFileMd5Sum, err := getFileMd5Sum(finalTargetPath)
-		if err != nil {
-			return err
-		}
-		if inputFileMd5Sum != existingFileMd5Sum {
-			return fmt.Errorf("file already exists with name '%s' and hashes differ, skipping", d.Name())
-		}
-		logrus.WithField("target_path", finalTargetPath).Debug("Hashes match, skipping copy")
-		// Continue since identical, just skip the copy. Try to create the entry: it'll fail if it already exists,
-		// and will create if not.
-	}
-
-	if !exists {
-		err = copyImageToStorageDir(path, finalTargetPath)
-		if err != nil {
-			return fmt.Errorf("failed to copy image '%s' to storage dir at '%s': %v", path, finalTargetPath, err)
-		}
-	}
-
-	err = createOrCheckEntryForFile(ctx, storageDir, d.Name())
+	err := createOrCheckEntryForFile(ctx, path)
 	if err != nil {
 		return fmt.Errorf("failed to create entry for file '%s': %v", d.Name(), err)
 	}
@@ -180,67 +145,48 @@ func processImportFile(ctx context.Context, wg *sync.WaitGroup, path string, d f
 	return nil
 }
 
-// Filenames
-func doesImageExist(destFilePath string) (bool, error) {
-	_, err := os.Stat(destFilePath)
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-// Takes in an absolute path to src file and absolute path to dest file
-func copyImageToStorageDir(srcFilePath string, destFilePath string) error {
-	srcFileReader, err := os.Open(srcFilePath)
+// Filename
+func createOrCheckEntryForFile(ctx context.Context, importFile string) error {
+	img, err := newImageEntry(ctx, importFile)
 	if err != nil {
 		return err
 	}
-	defer srcFileReader.Close()
 
-	destFileWriter, err := os.Create(destFilePath)
+	// Will also fail if the md5sum deosn't match (how we check for conflicts)
+	_, err = swaggerClient.Operations.CreateImage(operations.NewCreateImageParams().WithNewImage(&img))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create image through REST: %v", err)
 	}
-	defer destFileWriter.Close()
 
-	bytesCopied, err := io.Copy(destFileWriter, srcFileReader)
+	file, err := os.Open(importFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file: %v", err)
 	}
-	if bytesCopied == 0 {
-		return fmt.Errorf("zero bytes copied")
+
+	_, err = swaggerClient.Operations.SetImageContent(operations.NewSetImageContentParams().
+		WithContext(ctx).
+		WithID(img.ID).
+		WithFileContents(file),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to set image contents through REST: %v", err)
 	}
+	logrus.Infof("finished sending")
+
 	return nil
 }
 
-// Filename
-func createOrCheckEntryForFile(ctx context.Context, storageDir string, fileName string) error {
-	img, err := newImageEntry(ctx, storageDir, fileName)
+func newImageEntry(ctx context.Context, filePath string) (models.Image, error) {
+	md5Sum, err := getFileMd5Sum(filePath)
 	if err != nil {
-		return err
-	}
-
-	return imageMetadataConnection.CreateImageEntry(ctx, &img)
-}
-
-func newImageEntry(ctx context.Context, storageDir string, fileName string) (imagedb.Image, error) {
-	md5Sum, err := getFileMd5Sum(filepath.Join(storageDir, fileName))
-	if err != nil {
-		return imagedb.Image{}, err
+		return models.Image{}, err
 	}
 	f := false
-	imageEntry := imagedb.Image{
-		FileMetadata: imagedb.FileMetadata{
-			Name:   fileName,
-			Md5Sum: md5Sum,
-		},
+	return models.Image{
+		ID:            filepath.Base(filePath),
+		Md5sum:        md5Sum,
 		HasBeenTagged: &f,
-		HasContent:    true,
-	}
-	return imageEntry, nil
+	}, nil
 }
 
 // OS path

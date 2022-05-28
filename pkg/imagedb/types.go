@@ -18,7 +18,7 @@ type Image struct {
 	FileMetadata  `bson:",inline"`
 	Tags          *[]int64 `bson:"tags,omitempty"`
 	HasBeenTagged *bool    `bson:"hasBeenTagged,omitempty"`
-	HasContent    bool     `bson:"hasContent"`
+	HasContent    *bool    `bson:"hasContent,omitempty"`
 }
 
 type Tag struct {
@@ -57,7 +57,7 @@ func (i *Image) ConflictsWith(other *Image) error {
 	}
 
 	if i.Md5Sum != other.Md5Sum {
-		return fmt.Errorf("images have conflicting md5sums")
+		return fmt.Errorf("images have conflicting md5sums '%s' and '%s'", i.Md5Sum, other.Md5Sum)
 	}
 
 	return nil

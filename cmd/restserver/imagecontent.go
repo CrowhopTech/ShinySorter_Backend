@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
 	"io"
 	"os"
@@ -63,19 +64,12 @@ func SetImageContent(params operations.SetImageContentParams) middleware.Respond
 	}
 
 	// Verify that the image exists
-	results, err := imageMetadataConnection.ListImages(requestCtx, &imagedb.ImageFilter{
-		Name: params.ID,
-	})
+	img, err := imageMetadataConnection.GetImage(requestCtx, params.ID)
 	if err != nil {
 		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
 	}
-
-	if len(results) == 0 {
+	if img == nil {
 		return operations.NewSetImageContentNotFound()
-	}
-
-	if len(results) > 1 {
-		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("image list for ID %s returned %d results, expected exactly 1", params.ID, len(results)))
 	}
 
 	// Now that we know the image exists in the DB, let's set the contents (also prevents against file traversal!)
@@ -101,5 +95,43 @@ func SetImageContent(params operations.SetImageContentParams) middleware.Respond
 		"file_path":     filePath,
 	}).Debug("Wrote file contents")
 
+	md5Sum, err := getFileMd5Sum(filePath)
+	if err != nil {
+		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to get md5sum for file '%s': %v", filePath, err))
+	}
+
+	// Patch to set file as having contents and set the md5sum
+	t := true
+	_, err = imageMetadataConnection.ModifyImageEntry(requestCtx, &imagedb.Image{
+		FileMetadata: imagedb.FileMetadata{
+			Name:   params.ID,
+			Md5Sum: md5Sum,
+		},
+		HasContent: &t,
+	})
+	if err != nil {
+		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to mark file '%s' as having content: %v", filePath, err))
+	}
+
 	return operations.NewSetImageContentOK()
+}
+
+// OS path
+func getFileMd5Sum(path string) (string, error) {
+	md5Summer := md5.New()
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+
+	writtenBytes, err := io.Copy(md5Summer, file)
+	if err != nil {
+		return "", err
+	}
+
+	if writtenBytes == 0 {
+		return "", fmt.Errorf("zero bytes copied while summing file")
+	}
+
+	return fmt.Sprintf("%x", md5Summer.Sum(nil)), nil
 }
