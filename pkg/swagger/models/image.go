@@ -28,6 +28,9 @@ type Image struct {
 	// Example: 0a8bd0c4863ec1720da0f69d2795d18a
 	Md5sum string `json:"md5sum,omitempty"`
 
+	// mime type
+	MimeType string `json:"mimeType,omitempty"`
+
 	// tags
 	// Example: [5,7,37]
 	Tags []int64 `json:"tags"`

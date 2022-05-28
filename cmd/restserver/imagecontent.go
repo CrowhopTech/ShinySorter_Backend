@@ -86,7 +86,6 @@ func SetImageContent(params operations.SetImageContentParams) middleware.Respond
 		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to set image content for file '%s': %v", filePath, err))
 	}
 
-	// TODO: take md5sum of now written file
 	// TODO: compare md5sum of original to written?
 	// TODO: allow passing md5sum of image as parameter to ensure it gets written correctly?
 
@@ -100,12 +99,18 @@ func SetImageContent(params operations.SetImageContentParams) middleware.Respond
 		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to get md5sum for file '%s': %v", filePath, err))
 	}
 
+	fileType, err := filetype.MatchFile(filePath)
+	if err != nil {
+		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to determine MIME type for file '%s': %v", filePath, err))
+	}
+
 	// Patch to set file as having contents and set the md5sum
 	t := true
 	_, err = imageMetadataConnection.ModifyImageEntry(requestCtx, &imagedb.Image{
 		FileMetadata: imagedb.FileMetadata{
-			Name:   params.ID,
-			Md5Sum: md5Sum,
+			Name:     params.ID,
+			Md5Sum:   md5Sum,
+			MIMEType: fileType.MIME.Value,
 		},
 		HasContent: &t,
 	})

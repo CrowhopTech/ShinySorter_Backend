@@ -31,6 +31,9 @@ definitions:
       hasBeenTagged:
         type: boolean
         default: true
+      mimeType:
+        type: string
+        example: "image/png"
   tag:
     properties:
       id:

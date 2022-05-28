@@ -104,6 +104,10 @@ func (mc *mongoConnection) ModifyImageEntry(ctx context.Context, i *imagedb.Imag
 		setParams["hasContent"] = *i.HasContent
 	}
 
+	if i.MIMEType != "" {
+		setParams["mimeType"] = i.MIMEType
+	}
+
 	_, err := mc.imagesCollection.UpdateByID(ctx, i.Name, bson.M{
 		"$set": setParams,
 	})

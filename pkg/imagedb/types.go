@@ -8,8 +8,9 @@ import (
 // FileMetadata contains information that comes from the file itself:
 // the name of the file, its checksum, etc.
 type FileMetadata struct {
-	Name   string `bson:"_id"`
-	Md5Sum string `bson:"md5sum"`
+	Name     string `bson:"_id"`
+	Md5Sum   string `bson:"md5sum"`
+	MIMEType string `bson:"mimeType"`
 }
 
 // Image represents all data about an image: the file metadata, as well
@@ -70,8 +71,9 @@ func (i *Image) Clone() *Image {
 	copy(copiedTags, *i.Tags)
 	return &Image{
 		FileMetadata: FileMetadata{
-			Name:   i.Name,
-			Md5Sum: i.Md5Sum,
+			Name:     i.Name,
+			Md5Sum:   i.Md5Sum,
+			MIMEType: i.MIMEType,
 		},
 		Tags:          &copiedTags,
 		HasBeenTagged: i.HasBeenTagged,

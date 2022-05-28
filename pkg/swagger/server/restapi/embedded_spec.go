@@ -549,6 +549,9 @@ func init() {
           "type": "string",
           "example": "0a8bd0c4863ec1720da0f69d2795d18a"
         },
+        "mimeType": {
+          "type": "string"
+        },
         "tags": {
           "type": "array",
           "items": {
@@ -1307,6 +1310,9 @@ func init() {
         "md5sum": {
           "type": "string",
           "example": "0a8bd0c4863ec1720da0f69d2795d18a"
+        },
+        "mimeType": {
+          "type": "string"
         },
         "tags": {
           "type": "array",

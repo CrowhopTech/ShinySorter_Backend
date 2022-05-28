@@ -23,6 +23,7 @@ func translateDBImageToREST(img *imagedb.Image) *models.Image {
 		Md5sum:        img.Md5Sum,
 		Tags:          tags,
 		HasBeenTagged: img.HasBeenTagged,
+		MimeType:      img.MIMEType,
 	}
 }
 
@@ -116,8 +117,9 @@ func CreateImage(params operations.CreateImageParams) middleware.Responder {
 			Md5Sum: params.NewImage.Md5sum,
 		},
 		// TODO: validate that tags actually exist
-		Tags:       &params.NewImage.Tags,
-		HasContent: &f,
+		Tags:          &params.NewImage.Tags,
+		HasContent:    &f,
+		HasBeenTagged: &f,
 	})
 	if err != nil {
 		return operations.NewCreateImageInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))
