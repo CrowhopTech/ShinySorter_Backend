@@ -106,10 +106,10 @@ func init() {
           "404": {
             "description": "No images were found matching the given query. Also returns an empty array for easier parsing",
             "schema": {
-              "type": "string",
-              "enum": [
-                null
-              ]
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/image"
+              }
             }
           },
           "500": {
@@ -550,7 +550,8 @@ func init() {
           "example": "0a8bd0c4863ec1720da0f69d2795d18a"
         },
         "mimeType": {
-          "type": "string"
+          "type": "string",
+          "example": "image/png"
         },
         "tags": {
           "type": "array",
@@ -811,10 +812,10 @@ func init() {
           "404": {
             "description": "No images were found matching the given query. Also returns an empty array for easier parsing",
             "schema": {
-              "type": "string",
-              "enum": [
-                []
-              ]
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/image"
+              }
             }
           },
           "500": {
@@ -1312,7 +1313,8 @@ func init() {
           "example": "0a8bd0c4863ec1720da0f69d2795d18a"
         },
         "mimeType": {
-          "type": "string"
+          "type": "string",
+          "example": "image/png"
         },
         "tags": {
           "type": "array",

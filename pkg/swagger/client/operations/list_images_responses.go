@@ -122,13 +122,13 @@ func NewListImagesNotFound() *ListImagesNotFound {
 No images were found matching the given query. Also returns an empty array for easier parsing
 */
 type ListImagesNotFound struct {
-	Payload string
+	Payload []*models.Image
 }
 
 func (o *ListImagesNotFound) Error() string {
 	return fmt.Sprintf("[GET /images][%d] listImagesNotFound  %+v", 404, o.Payload)
 }
-func (o *ListImagesNotFound) GetPayload() string {
+func (o *ListImagesNotFound) GetPayload() []*models.Image {
 	return o.Payload
 }
 

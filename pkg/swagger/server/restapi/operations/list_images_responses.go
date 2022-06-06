@@ -114,7 +114,7 @@ type ListImagesNotFound struct {
 	/*
 	  In: Body
 	*/
-	Payload string `json:"body,omitempty"`
+	Payload []*models.Image `json:"body,omitempty"`
 }
 
 // NewListImagesNotFound creates ListImagesNotFound with default headers values
@@ -124,13 +124,13 @@ func NewListImagesNotFound() *ListImagesNotFound {
 }
 
 // WithPayload adds the payload to the list images not found response
-func (o *ListImagesNotFound) WithPayload(payload string) *ListImagesNotFound {
+func (o *ListImagesNotFound) WithPayload(payload []*models.Image) *ListImagesNotFound {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the list images not found response
-func (o *ListImagesNotFound) SetPayload(payload string) {
+func (o *ListImagesNotFound) SetPayload(payload []*models.Image) {
 	o.Payload = payload
 }
 
@@ -139,6 +139,11 @@ func (o *ListImagesNotFound) WriteResponse(rw http.ResponseWriter, producer runt
 
 	rw.WriteHeader(404)
 	payload := o.Payload
+	if payload == nil {
+		// return empty array
+		payload = make([]*models.Image, 0, 50)
+	}
+
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this
 	}

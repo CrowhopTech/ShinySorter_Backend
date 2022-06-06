@@ -29,6 +29,7 @@ type Image struct {
 	Md5sum string `json:"md5sum,omitempty"`
 
 	// mime type
+	// Example: image/png
 	MimeType string `json:"mimeType,omitempty"`
 
 	// tags

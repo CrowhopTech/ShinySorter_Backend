@@ -71,7 +71,7 @@ func ListImages(params operations.ListImagesParams) middleware.Responder {
 	}
 
 	if len(results) == 0 {
-		return operations.NewListImagesNotFound().WithPayload("[]")
+		return operations.NewListImagesNotFound().WithPayload([]*models.Image{})
 	}
 
 	output := []*models.Image{}
