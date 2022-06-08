@@ -10,11 +10,15 @@ import (
 	"net/url"
 	golangswaggerpaths "path"
 	"strings"
+
+	"github.com/go-openapi/swag"
 )
 
 // GetImageContentURL generates an URL for the get image content operation
 type GetImageContentURL struct {
 	ID string
+
+	Thumb bool
 
 	_basePath string
 	// avoid unkeyed usage
@@ -51,6 +55,15 @@ func (o *GetImageContentURL) Build() (*url.URL, error) {
 
 	_basePath := o._basePath
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	thumbQ := swag.FormatBool(o.Thumb)
+	if thumbQ != "" {
+		qs.Set("thumb", thumbQ)
+	}
+
+	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }

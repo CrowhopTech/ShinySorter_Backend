@@ -9,8 +9,10 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewGetImageContentParams creates a new GetImageContentParams object
@@ -35,6 +37,10 @@ type GetImageContentParams struct {
 	  In: path
 	*/
 	ID string
+	/*Whether to return the actual contents or a thumbnail
+	  In: query
+	*/
+	Thumb bool
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -46,8 +52,15 @@ func (o *GetImageContentParams) BindRequest(r *http.Request, route *middleware.M
 
 	o.HTTPRequest = r
 
+	qs := runtime.Values(r.URL.Query())
+
 	rID, rhkID, _ := route.Params.GetOK("id")
 	if err := o.bindID(rID, rhkID, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qThumb, qhkThumb, _ := qs.GetOK("thumb")
+	if err := o.bindThumb(qThumb, qhkThumb, route.Formats); err != nil {
 		res = append(res, err)
 	}
 	if len(res) > 0 {
@@ -66,6 +79,29 @@ func (o *GetImageContentParams) bindID(rawData []string, hasKey bool, formats st
 	// Required: true
 	// Parameter is provided by construction from the route
 	o.ID = raw
+
+	return nil
+}
+
+// bindThumb binds and validates parameter Thumb from query.
+func (o *GetImageContentParams) bindThumb(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: true
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+
+	value, err := swag.ConvertBool(raw)
+	if err != nil {
+		return errors.InvalidType("thumb", "query", "bool", raw)
+	}
+	o.Thumb = value
 
 	return nil
 }

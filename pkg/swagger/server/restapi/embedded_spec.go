@@ -160,11 +160,18 @@ func init() {
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "type": "boolean",
+            "description": "Whether to return the actual contents or a thumbnail",
+            "name": "thumb",
+            "in": "query",
+            "allowEmptyValue": true
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns the image contents",
+            "description": "Returns the image or thumbnail contents",
             "schema": {
               "type": "string",
               "format": "binary"
@@ -872,11 +879,18 @@ func init() {
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "type": "boolean",
+            "description": "Whether to return the actual contents or a thumbnail",
+            "name": "thumb",
+            "in": "query",
+            "allowEmptyValue": true
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns the image contents",
+            "description": "Returns the image or thumbnail contents",
             "schema": {
               "type": "string",
               "format": "binary"

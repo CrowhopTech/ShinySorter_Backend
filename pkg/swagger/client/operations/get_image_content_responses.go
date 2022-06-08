@@ -55,7 +55,7 @@ func NewGetImageContentOK(writer io.Writer) *GetImageContentOK {
 
 /* GetImageContentOK describes a response with status code 200, with default header values.
 
-Returns the image contents
+Returns the image or thumbnail contents
 */
 type GetImageContentOK struct {
 	ContentType string

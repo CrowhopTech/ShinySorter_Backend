@@ -15,7 +15,7 @@ import (
 // GetImageContentOKCode is the HTTP code returned for type GetImageContentOK
 const GetImageContentOKCode int = 200
 
-/*GetImageContentOK Returns the image contents
+/*GetImageContentOK Returns the image or thumbnail contents
 
 swagger:response getImageContentOK
 */

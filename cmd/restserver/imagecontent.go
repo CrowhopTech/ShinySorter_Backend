@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/md5"
 	"fmt"
 	"io"
 	"os"
@@ -10,10 +9,20 @@ import (
 	"github.com/h2non/filetype"
 	"github.com/sirupsen/logrus"
 
+	"github.com/CrowhopTech/shinysorter/backend/pkg/image"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
 	"github.com/go-openapi/runtime/middleware"
 )
+
+const (
+	thumbnailSubdirName = "thumbs"
+	thumbnailExtension  = ".png"
+)
+
+func getThumbnailPath(imageID string) string {
+	return path.Join(*storageDirFlag, thumbnailSubdirName, imageID+thumbnailExtension)
+}
 
 func GetImageContent(params operations.GetImageContentParams) middleware.Responder {
 	requestCtx := rootCtx
@@ -35,7 +44,13 @@ func GetImageContent(params operations.GetImageContentParams) middleware.Respond
 	}
 
 	// Now that we know the image exists in the DB, let's read the contents (also prevents against file traversal!)
-	filePath := path.Join(*storageDirFlag, params.ID)
+	// If the file is a thumbnail, we'll return the thumbnail instead
+	var filePath string
+	if params.Thumb {
+		filePath = getThumbnailPath(params.ID)
+	} else {
+		filePath = path.Join(*storageDirFlag, params.ID)
+	}
 
 	// TODO: do this whenever we set the content and save it in the DB!
 	fileType, err := filetype.MatchFile(filePath)
@@ -74,6 +89,7 @@ func SetImageContent(params operations.SetImageContentParams) middleware.Respond
 
 	// Now that we know the image exists in the DB, let's set the contents (also prevents against file traversal!)
 	filePath := path.Join(*storageDirFlag, params.ID)
+	thumbPath := getThumbnailPath(params.ID)
 
 	// TODO: expose the file permissions as a parameter
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0644)
@@ -92,9 +108,9 @@ func SetImageContent(params operations.SetImageContentParams) middleware.Respond
 	logrus.WithFields(logrus.Fields{
 		"bytes_written": writtenBytes,
 		"file_path":     filePath,
-	}).Debug("Wrote file contents")
+	}).Debug("Wrote file contents, calculating file md5sum and MIME type")
 
-	md5Sum, err := getFileMd5Sum(filePath)
+	md5Sum, err := image.GetFileMd5Sum(filePath)
 	if err != nil {
 		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to get md5sum for file '%s': %v", filePath, err))
 	}
@@ -102,6 +118,24 @@ func SetImageContent(params operations.SetImageContentParams) middleware.Respond
 	fileType, err := filetype.MatchFile(filePath)
 	if err != nil {
 		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to determine MIME type for file '%s': %v", filePath, err))
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"mime_type": fileType,
+		"md5sum":    md5Sum,
+	}).Debug("Calculated md5sum and MIME type, writing thumbnail")
+
+	// Create the thumbnails directory if it doesn't exist
+	if err := os.MkdirAll(path.Join(*storageDirFlag, "thumbs"), 0755); err != nil {
+		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to create thumbnail directory '%s': %v", thumbPath, err))
+	}
+
+	// This will end up resulting in ".mp4.png" or ".png.png" or ".jpg.png"
+	// TODO: rewrite this to have just the png file extension
+	// TODO: store this in the DB so if we change the name format later we can still find things?
+	err = image.WriteFileThumbnail(filePath, fileType, thumbPath)
+	if err != nil {
+		return operations.NewSetImageContentInternalServerError().WithPayload(fmt.Sprintf("failed to write thumbnail for file '%s': %v", thumbPath, err))
 	}
 
 	// Patch to set file as having contents and set the md5sum
@@ -119,24 +153,4 @@ func SetImageContent(params operations.SetImageContentParams) middleware.Respond
 	}
 
 	return operations.NewSetImageContentOK()
-}
-
-// OS path
-func getFileMd5Sum(path string) (string, error) {
-	md5Summer := md5.New()
-	file, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-
-	writtenBytes, err := io.Copy(md5Summer, file)
-	if err != nil {
-		return "", err
-	}
-
-	if writtenBytes == 0 {
-		return "", fmt.Errorf("zero bytes copied while summing file")
-	}
-
-	return fmt.Sprintf("%x", md5Summer.Sum(nil)), nil
 }

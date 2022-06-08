@@ -247,9 +247,14 @@ paths:
           description: Image ID
           type: string
           required: true
+        - name: thumb
+          in: query
+          description: Whether to return the actual contents or a thumbnail
+          type: boolean
+          allowEmptyValue: true
       responses:
         200:
-          description: Returns the image contents
+          description: Returns the image or thumbnail contents
           headers:
             Content-Type:
               type: string

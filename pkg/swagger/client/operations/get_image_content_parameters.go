@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewGetImageContentParams creates a new GetImageContentParams object,
@@ -64,6 +65,12 @@ type GetImageContentParams struct {
 	   Image ID
 	*/
 	ID string
+
+	/* Thumb.
+
+	   Whether to return the actual contents or a thumbnail
+	*/
+	Thumb bool
 
 	timeout    time.Duration
 	Context    context.Context
@@ -129,6 +136,17 @@ func (o *GetImageContentParams) SetID(id string) {
 	o.ID = id
 }
 
+// WithThumb adds the thumb to the get image content params
+func (o *GetImageContentParams) WithThumb(thumb bool) *GetImageContentParams {
+	o.SetThumb(thumb)
+	return o
+}
+
+// SetThumb adds the thumb to the get image content params
+func (o *GetImageContentParams) SetThumb(thumb bool) {
+	o.Thumb = thumb
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *GetImageContentParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -139,6 +157,14 @@ func (o *GetImageContentParams) WriteToRequest(r runtime.ClientRequest, reg strf
 
 	// path param id
 	if err := r.SetPathParam("id", o.ID); err != nil {
+		return err
+	}
+
+	// query param thumb
+	qrThumb := o.Thumb
+	qThumb := swag.FormatBool(qrThumb)
+
+	if err := r.SetQueryParam("thumb", qThumb); err != nil {
 		return err
 	}
 
