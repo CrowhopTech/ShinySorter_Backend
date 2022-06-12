@@ -9,6 +9,11 @@ import (
 )
 
 func Test_getQueriesForFilter(t *testing.T) {
+	var (
+		testSum = "testsum"
+		trueRef = true
+	)
+
 	type args struct {
 		filter *imagedb.ImageFilter
 	}
@@ -18,85 +23,52 @@ func Test_getQueriesForFilter(t *testing.T) {
 		want bson.M
 	}{
 		{
-			name: "empty",
+			// Nil filter
+			name: "nil filter",
 			args: args{
 				filter: nil,
 			},
-			want: bson.M{},
+			want: bson.M{"hasContent": true},
 		},
 		{
-			name: "empty",
+			// Empty filter
+			name: "Empty filter",
 			args: args{
 				filter: &imagedb.ImageFilter{},
 			},
-			want: bson.M{},
+			want: bson.M{"hasContent": true},
 		},
 		{
-			name: "tag exists",
+			// Complex filter
+			name: "Complex filter",
 			args: args{
 				filter: &imagedb.ImageFilter{
-					RequireTags: []int64{1},
-				},
-			},
-			want: bson.M{
-				"tags": int64(1),
-			},
-		},
-		{
-			name: "multiple tags exist",
-			args: args{
-				filter: &imagedb.ImageFilter{
-					RequireTags:         []int64{1, 2},
-					RequireTagOperation: imagedb.All,
-				},
-			},
-			want: bson.M{
-				"$and": []bson.M{
-					{"tags": int64(1)},
-					{"tags": int64(2)},
-				},
-			},
-		},
-		{
-			name: "any of tags exist",
-			args: args{
-				filter: &imagedb.ImageFilter{
-					RequireTags:         []int64{1, 2},
-					RequireTagOperation: imagedb.Any,
-				},
-			},
-			want: bson.M{
-				"$or": []bson.M{
-					{"tags": int64(1)},
-					{"tags": int64(2)},
-				},
-			},
-		},
-		{
-			name: "really fkkin complicated query",
-			args: args{
-				filter: &imagedb.ImageFilter{
+					Name:                "test",
+					Md5Sum:              &testSum,
+					MissingContent:      true,
+					Tagged:              &trueRef,
 					RequireTags:         []int64{1, 2, 3},
-					RequireTagOperation: imagedb.Any,
-					ExcludeTags:         []int64{4, 5},
-					ExcludeTagOperation: imagedb.All,
+					RequireTagOperation: imagedb.All,
+					ExcludeTags:         []int64{4, 5, 6},
+					ExcludeTagOperation: imagedb.Any,
 				},
 			},
 			want: bson.M{
 				"$and": []bson.M{
-					{
-						"$or": []bson.M{
-							{"tags": int64(1)},
-							{"tags": int64(2)},
-							{"tags": int64(3)},
-						},
-					},
-					{
-						"$and": []bson.M{
-							{"$not": bson.M{"tags": int64(4)}},
-							{"$not": bson.M{"tags": int64(5)}},
-						},
-					},
+					{"hasContent": false},
+					{"_id": "test"},
+					{"md5sum": "testsum"},
+					{"hasBeenTagged": true},
+					{"$and": []bson.M{
+						{"tags": int64(1)},
+						{"tags": int64(2)},
+						{"tags": int64(3)},
+					}},
+					{"$or": []bson.M{
+						{"tags": bson.M{"$ne": int64(4)}},
+						{"tags": bson.M{"$ne": int64(5)}},
+						{"tags": bson.M{"$ne": int64(6)}},
+					}},
 				},
 			},
 		},

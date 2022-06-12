@@ -61,12 +61,16 @@ func getComponentQuery(tags []int64, op imagedb.TagOperation, exclude bool) bson
 // all the various filter components, joining them together with
 // an "and" at the end if there are multiple.
 func getQueriesForFilter(filter *imagedb.ImageFilter) bson.M {
+	hasContentQuery := bson.M{"hasContent": true}
+
 	if filter == nil {
-		return bson.M{}
+		return hasContentQuery
 	}
 
+	// By default only includes images with content, but can be inverted
+	hasContentQuery["hasContent"] = !filter.MissingContent
 	andComponents := []bson.M{
-		{"hasContent": !filter.MissingContent}, // By default only includes images with content, but can be inverted
+		hasContentQuery,
 	}
 
 	if filter.Name != "" {

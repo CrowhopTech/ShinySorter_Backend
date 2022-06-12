@@ -79,13 +79,14 @@ func (mc *mongoConnection) CreateImageEntry(ctx context.Context, i *imagedb.Imag
 	return i.ConflictsWith(existingImg)
 }
 
-func (mc *mongoConnection) ModifyImageEntry(ctx context.Context, i *imagedb.Image) (*imagedb.Image, error) {
-	// Check name length
-	if len(i.Name) == 0 {
-		return nil, fmt.Errorf("name empty in provided image")
-	}
-
+// getUpdateParameter will return the update parameter for the given image.
+// It's extracted here for easier unit testing.
+func (mc *mongoConnection) getUpdateParameter(i *imagedb.Image) (bson.M, error) {
 	setParams := bson.M{}
+
+	if i == nil {
+		return bson.M{}, nil
+	}
 
 	if len(i.Md5Sum) > 0 {
 		// TODO: validate length and characters of md5sum, and enforce case
@@ -108,9 +109,21 @@ func (mc *mongoConnection) ModifyImageEntry(ctx context.Context, i *imagedb.Imag
 		setParams["mimeType"] = i.MIMEType
 	}
 
-	_, err := mc.imagesCollection.UpdateByID(ctx, i.Name, bson.M{
-		"$set": setParams,
-	})
+	return bson.M{"$set": setParams}, nil
+}
+
+func (mc *mongoConnection) ModifyImageEntry(ctx context.Context, i *imagedb.Image) (*imagedb.Image, error) {
+	// Check name length
+	if len(i.Name) == 0 {
+		return nil, fmt.Errorf("name empty in provided image")
+	}
+
+	update, err := mc.getUpdateParameter(i)
+	if err != nil {
+		return nil, fmt.Errorf("invalid image update provided (%v): %v", i, err)
+	}
+
+	_, err = mc.imagesCollection.UpdateByID(ctx, i.Name, update)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update image %s: %v", i.Name, err)
 	}
