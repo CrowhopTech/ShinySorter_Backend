@@ -51,7 +51,6 @@ definitions:
     example:
       questionID: 5
       orderingID: 500
-      requiresQuestion: 4
       questionText: "What kinds of flowers are present in this picture?"
       tagOptions:
       - tagID: 5
@@ -66,8 +65,6 @@ definitions:
       questionID:
         type: integer
       orderingID:
-        type: integer
-      requiresQuestion:
         type: integer
       questionText:
         type: string

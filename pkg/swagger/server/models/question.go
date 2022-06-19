@@ -16,7 +16,7 @@ import (
 )
 
 // Question question
-// Example: {"orderingID":500,"questionID":5,"questionText":"What kinds of flowers are present in this picture?","requiresQuestion":4,"tagOptions":[{"optionText":"Tulips","tagID":5},{"optionText":"Roses","tagID":6},{"optionText":"Violets","tagID":7},{"optionText":"Daisies","tagID":8}]}
+// Example: {"orderingID":500,"questionID":5,"questionText":"What kinds of flowers are present in this picture?","tagOptions":[{"optionText":"Tulips","tagID":5},{"optionText":"Roses","tagID":6},{"optionText":"Violets","tagID":7},{"optionText":"Daisies","tagID":8}]}
 //
 // swagger:model question
 type Question struct {
@@ -29,9 +29,6 @@ type Question struct {
 
 	// question text
 	QuestionText string `json:"questionText,omitempty"`
-
-	// requires question
-	RequiresQuestion int64 `json:"requiresQuestion,omitempty"`
 
 	// tag options
 	TagOptions []*QuestionTagOptionsItems0 `json:"tagOptions"`

@@ -584,9 +584,6 @@ func init() {
         "questionText": {
           "type": "string"
         },
-        "requiresQuestion": {
-          "type": "integer"
-        },
         "tagOptions": {
           "type": "array",
           "items": {
@@ -610,7 +607,6 @@ func init() {
         "orderingID": 500,
         "questionID": 5,
         "questionText": "What kinds of flowers are present in this picture?",
-        "requiresQuestion": 4,
         "tagOptions": [
           {
             "optionText": "Tulips",
@@ -1354,9 +1350,6 @@ func init() {
         "questionText": {
           "type": "string"
         },
-        "requiresQuestion": {
-          "type": "integer"
-        },
         "tagOptions": {
           "type": "array",
           "items": {
@@ -1368,7 +1361,6 @@ func init() {
         "orderingID": 500,
         "questionID": 5,
         "questionText": "What kinds of flowers are present in this picture?",
-        "requiresQuestion": 4,
         "tagOptions": [
           {
             "optionText": "Tulips",

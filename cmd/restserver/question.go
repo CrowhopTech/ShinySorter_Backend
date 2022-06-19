@@ -11,11 +11,10 @@ import (
 
 func translateDBQuestionToREST(question *imagedb.Question) *models.Question {
 	return &models.Question{
-		OrderingID:       question.OrderingID,
-		QuestionID:       question.ID,
-		QuestionText:     question.QuestionText,
-		RequiresQuestion: *question.RequiresQuestion,
-		TagOptions:       tagOptionArrayToSwagger(question.TagOptions),
+		OrderingID:   question.OrderingID,
+		QuestionID:   question.ID,
+		QuestionText: question.QuestionText,
+		TagOptions:   tagOptionArrayToSwagger(question.TagOptions),
 	}
 }
 
@@ -42,11 +41,10 @@ func CreateQuestion(params operations.CreateQuestionParams) middleware.Responder
 	requestCtx := rootCtx
 
 	createdQuestion, err := imageMetadataConnection.CreateQuestion(requestCtx, &imagedb.Question{
-		ID:               params.NewQuestion.QuestionID,
-		OrderingID:       params.NewQuestion.OrderingID,
-		RequiresQuestion: &params.NewQuestion.RequiresQuestion,
-		QuestionText:     params.NewQuestion.QuestionText,
-		TagOptions:       tagOptionArrayToImagedb(params.NewQuestion.TagOptions),
+		ID:           params.NewQuestion.QuestionID,
+		OrderingID:   params.NewQuestion.OrderingID,
+		QuestionText: params.NewQuestion.QuestionText,
+		TagOptions:   tagOptionArrayToImagedb(params.NewQuestion.TagOptions),
 	})
 	if err != nil {
 		return operations.NewCreateQuestionInternalServerError().WithPayload(fmt.Sprintf("failed to insert question: %v", err))
@@ -71,10 +69,6 @@ func PatchQuestionByID(params operations.PatchQuestionByIDParams) middleware.Res
 	// TODO: handle these three parameters better
 	if len(params.Patch.TagOptions) > 0 {
 		question.TagOptions = tagOptionArrayToImagedb(params.Patch.TagOptions)
-	}
-
-	if params.Patch.RequiresQuestion > 0 {
-		question.RequiresQuestion = &params.Patch.RequiresQuestion
 	}
 
 	if params.Patch.OrderingID > 0 {
