@@ -2,7 +2,7 @@
 
 // Package restapi shiny-sorter
 //
-//  Endpoint definitions for the shiny-sorter image sorting project
+//  Endpoint definitions for the shiny-sorter file sorting project
 //  Schemes:
 //    http
 //  Host: localhost

@@ -2,7 +2,7 @@ consumes:
 - application/json
 - multipart/form-data
 info:
-  description: Endpoint definitions for the shiny-sorter image sorting project
+  description: Endpoint definitions for the shiny-sorter file sorting project
   title: shiny-sorter
   version: alpha-v0.0
 produces:
@@ -12,7 +12,7 @@ schemes:
 swagger: "2.0"
 
 definitions:
-  image:
+  file:
     properties:
       id:
         type: string
@@ -135,10 +135,10 @@ paths:
             enum:
             - Service Unavailable
   
-  /images:
+  /files:
     get:
-      operationId: listImages
-      description: Lists and queries images
+      operationId: listFiles
+      description: Lists and queries files
       parameters:
       - $ref: "#/parameters/includeTags"
       - $ref: "#/parameters/includeOperator"
@@ -150,98 +150,98 @@ paths:
         type: boolean
       responses:
         200:
-          description: Images were found matching the given query
+          description: Files were found matching the given query
           schema:
             type: array
             items:
-              $ref: "#/definitions/image"
+              $ref: "#/definitions/file"
         400:
           # This may happen when, for example, includeTags is specified without includeOperator or vice-versa
           description: Some part of the request was invalid. More information will be included in the error string
           schema:
             type: string
         404:
-          description: No images were found matching the given query. Also returns an empty array for easier parsing
+          description: No files were found matching the given query. Also returns an empty array for easier parsing
           schema:
             type: array
             items:
-              $ref: "#/definitions/image"
+              $ref: "#/definitions/file"
         500:
           $ref: "#/responses/genericServerError"
     post:
-      operationId: createImage
-      description: Creates a new image entry
+      operationId: createFile
+      description: Creates a new file entry
       parameters:
         - in: body
-          name: newImage
-          description: "The new image to create"
+          name: newFile
+          description: "The new file to create"
           schema:
-            $ref: "#/definitions/image"
+            $ref: "#/definitions/file"
       responses:
         201:
-          description: Image was created successfully
+          description: File was created successfully
           schema:
-            $ref: "#/definitions/image"
+            $ref: "#/definitions/file"
         400:
-          description: Some part of the provided Image was invalid.
+          description: Some part of the provided File was invalid.
         500:
           $ref: "#/responses/genericServerError"
 
-  /images/{id}:
+  /files/{id}:
     get:
-      operationId: getImageById
-      description: Gets the image metadata with the specified id
+      operationId: getFileById
+      description: Gets the file metadata with the specified id
       parameters:
         - name: id
           in: path
-          description: Image ID
+          description: File ID
           type: string
           required: true
       responses:
         200:
-          description: Returns the found image.
+          description: Returns the found file.
           schema:
-            $ref: "#/definitions/image"
+            $ref: "#/definitions/file"
         404:
-          description: The given image was not found.
+          description: The given file was not found.
         500:
           $ref: "#/responses/genericServerError"
     patch:
-      operationId: patchImageById
-      description: Modifies the image metadata with the specified id
+      operationId: patchFileById
+      description: Modifies the file metadata with the specified id
       parameters:
         - name: id
           in: path
-          description: Image ID
+          description: File ID
           type: string
           required: true
         - name: patch
           in: body
-          description: Patch modifications for the image
+          description: Patch modifications for the file
           required: true
           schema:
-            $ref: "#/definitions/image"
+            $ref: "#/definitions/file"
       responses:
         200:
-          description: Returns the modified image.
+          description: Returns the modified file.
           schema:
-            $ref: "#/definitions/image"
+            $ref: "#/definitions/file"
         400:
           description: Some part of the request was invalid. More information will be included in the error string
           schema:
             type: string
         500:
           $ref: "#/responses/genericServerError"
-  /images/contents/{id}:
+  /files/contents/{id}:
     get:
-      operationId: getImageContent
-      description: Gets the image contents with the specified id
+      operationId: getFileContent
+      description: Gets the file contents with the specified id
       produces:
         - application/octet-stream
       parameters:
         - name: id
           in: path
-          description: Image ID
+          description: File ID
           type: string
           required: true
         - name: thumb
@@ -251,7 +251,7 @@ paths:
           allowEmptyValue: true
       responses:
         200:
-          description: Returns the image or thumbnail contents
+          description: Returns the file or thumbnail contents
           headers:
             Content-Type:
               type: string
@@ -259,12 +259,12 @@ paths:
             type: string
             format: binary
         404:
-          description: The given image was not found.
+          description: The given file was not found.
         500:
           $ref: "#/responses/genericServerError"
     patch:
-      operationId: setImageContent
-      description: Sets the image contents for the specified id
+      operationId: setFileContent
+      description: Sets the file contents for the specified id
       consumes:
         - "multipart/form-data"
       parameters:
@@ -275,18 +275,18 @@ paths:
           format: binary
         - name: id
           in: path
-          description: Image ID
+          description: File ID
           type: string
           required: true
       responses:
         200:
-          description: The image contents were modified successfully
+          description: The file contents were modified successfully
         400:
           description: Some part of the request was invalid. More information will be included in the error string
           schema:
             type: string
         404:
-          description: The given image was not found.
+          description: The given file was not found.
         500:
           $ref: "#/responses/genericServerError"
   
@@ -354,7 +354,7 @@ paths:
           $ref: "#/responses/genericServerError"
     delete:
       operationId: deleteTag
-      description: Deletes a tag. Should also remove it from all images that use it.
+      description: Deletes a tag. Should also remove it from all files that use it.
       parameters:
         - in: path
           name: id

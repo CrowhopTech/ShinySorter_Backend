@@ -124,8 +124,8 @@ func processImportFile(ctx context.Context, wg *sync.WaitGroup, path string, d f
 	wg.Add(1)
 	defer wg.Done()
 
-	// Create image entry with file hash set (will fail if doesn't match)
-	// Set image contents
+	// Create file entry with file hash set (will fail if doesn't match)
+	// Set file contents
 	// Delete original file
 
 	logrus.Infof("Processing file %s", path)
@@ -147,15 +147,15 @@ func processImportFile(ctx context.Context, wg *sync.WaitGroup, path string, d f
 
 // Filename
 func createOrCheckEntryForFile(ctx context.Context, importFile string) error {
-	img, err := newImageEntry(ctx, importFile)
+	img, err := newFileEntry(ctx, importFile)
 	if err != nil {
 		return err
 	}
 
 	// Will also fail if the md5sum deosn't match (how we check for conflicts)
-	_, err = swaggerClient.Operations.CreateImage(operations.NewCreateImageParams().WithNewImage(&img))
+	_, err = swaggerClient.Operations.CreateFile(operations.NewCreateFileParams().WithNewFile(&img))
 	if err != nil {
-		return fmt.Errorf("failed to create image through REST: %v", err)
+		return fmt.Errorf("failed to create file through REST: %v", err)
 	}
 
 	file, err := os.Open(importFile)
@@ -163,26 +163,26 @@ func createOrCheckEntryForFile(ctx context.Context, importFile string) error {
 		return fmt.Errorf("failed to open file: %v", err)
 	}
 
-	_, err = swaggerClient.Operations.SetImageContent(operations.NewSetImageContentParams().
+	_, err = swaggerClient.Operations.SetFileContent(operations.NewSetFileContentParams().
 		WithContext(ctx).
 		WithID(img.ID).
 		WithFileContents(file),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to set image contents through REST: %v", err)
+		return fmt.Errorf("failed to set file contents through REST: %v", err)
 	}
 	logrus.Infof("finished sending")
 
 	return nil
 }
 
-func newImageEntry(ctx context.Context, filePath string) (models.Image, error) {
+func newFileEntry(ctx context.Context, filePath string) (models.File, error) {
 	md5Sum, err := getFileMd5Sum(filePath)
 	if err != nil {
-		return models.Image{}, err
+		return models.File{}, err
 	}
 	f := false
-	return models.Image{
+	return models.File{
 		ID:            filepath.Base(filePath),
 		Md5sum:        md5Sum,
 		HasBeenTagged: &f,

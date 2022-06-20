@@ -12,8 +12,8 @@ import (
 
 	"github.com/rs/cors"
 
-	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
-	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb/mongoimg"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb/mongofile"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
 	"github.com/sirupsen/logrus"
@@ -22,7 +22,7 @@ import (
 var rootCtx context.Context
 
 var (
-	imageMetadataConnection imagedb.ImageMetadata
+	imageMetadataConnection filedb.FileMetadataService
 
 	mongodbConectionURI = flag.String("mongodb-connection-uri", "mongodb://localhost:27017", "The connection URI for the MongoDB metadata database")
 	storageDirFlag      = flag.String("storage-dir", "./storage", "The directory to store files in")
@@ -55,7 +55,7 @@ func main() {
 	parseFlags()
 
 	// Initialize database connection
-	mongoConn, cleanupFunc, err := mongoimg.New(rootCtx, *mongodbConectionURI, false)
+	mongoConn, cleanupFunc, err := mongofile.New(rootCtx, *mongodbConectionURI, false)
 	if err != nil {
 		logrus.WithError(err).Fatal("Failed to initialize database connection")
 	}
@@ -73,13 +73,13 @@ func main() {
 
 	api.CheckHealthHandler = operations.CheckHealthHandlerFunc(CheckHealth)
 
-	api.ListImagesHandler = operations.ListImagesHandlerFunc(ListImages)
-	api.GetImageByIDHandler = operations.GetImageByIDHandlerFunc(GetImageByID)
-	api.CreateImageHandler = operations.CreateImageHandlerFunc(CreateImage)
-	api.PatchImageByIDHandler = operations.PatchImageByIDHandlerFunc(PatchImageByID)
+	api.ListFilesHandler = operations.ListFilesHandlerFunc(ListFiles)
+	api.GetFileByIDHandler = operations.GetFileByIDHandlerFunc(GetFileByID)
+	api.CreateFileHandler = operations.CreateFileHandlerFunc(CreateFile)
+	api.PatchFileByIDHandler = operations.PatchFileByIDHandlerFunc(PatchFileByID)
 
-	api.GetImageContentHandler = operations.GetImageContentHandlerFunc(GetImageContent)
-	api.SetImageContentHandler = operations.SetImageContentHandlerFunc(SetImageContent)
+	api.GetFileContentHandler = operations.GetFileContentHandlerFunc(GetFileContent)
+	api.SetFileContentHandler = operations.SetFileContentHandlerFunc(SetFileContent)
 
 	api.ListTagsHandler = operations.ListTagsHandlerFunc(ListTags)
 	api.CreateTagHandler = operations.CreateTagHandlerFunc(CreateTag)
