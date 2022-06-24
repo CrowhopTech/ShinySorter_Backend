@@ -80,6 +80,10 @@ definitions:
               type: integer
             optionText:
               type: string
+      mutuallyExclusive:
+        type: boolean
+        default: false
+        description: Whether this functions as an "and" (true, only one option selected) or an "or" question false, default, can select multiple)
 parameters:
   includeTags:
     in: query

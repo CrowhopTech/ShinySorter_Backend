@@ -575,6 +575,11 @@ func init() {
     },
     "question": {
       "properties": {
+        "mutuallyExclusive": {
+          "description": "Whether this functions as an \"and\" (true, only one option selected) or an \"or\" question false, default, can select multiple)",
+          "type": "boolean",
+          "default": false
+        },
         "orderingID": {
           "type": "integer"
         },
@@ -1341,6 +1346,11 @@ func init() {
     },
     "question": {
       "properties": {
+        "mutuallyExclusive": {
+          "description": "Whether this functions as an \"and\" (true, only one option selected) or an \"or\" question false, default, can select multiple)",
+          "type": "boolean",
+          "default": false
+        },
         "orderingID": {
           "type": "integer"
         },

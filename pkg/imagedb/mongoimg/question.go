@@ -99,12 +99,12 @@ func (mc *mongoConnection) ModifyQuestion(ctx context.Context, q *imagedb.Questi
 		setParams["tagOptions"] = q.TagOptions
 	}
 
-	if q.RequiresQuestion != nil {
-		setParams["requiresQuestion"] = *q.RequiresQuestion
-	}
-
 	if q.OrderingID > 0 {
 		setParams["orderingID"] = q.OrderingID
+	}
+
+	if q.MutuallyExclusive != nil {
+		setParams["mutuallyExclusive"] = *q.MutuallyExclusive
 	}
 
 	res, err := mc.questionsCollection.UpdateOne(ctx, bson.M{"_id": q.ID}, bson.M{"$set": setParams}, &options.UpdateOptions{

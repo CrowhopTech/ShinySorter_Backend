@@ -21,6 +21,9 @@ import (
 // swagger:model question
 type Question struct {
 
+	// Whether this functions as an "and" (true, only one option selected) or an "or" question false, default, can select multiple)
+	MutuallyExclusive *bool `json:"mutuallyExclusive,omitempty"`
+
 	// ordering ID
 	OrderingID int64 `json:"orderingID,omitempty"`
 

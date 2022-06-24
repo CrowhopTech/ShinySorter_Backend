@@ -35,11 +35,11 @@ type TagOption struct {
 }
 
 type Question struct {
-	ID               int64       `bson:"_id"`
-	OrderingID       int64       `bson:"orderingID"`
-	RequiresQuestion *int64      `bson:"requiresQuestion"`
-	QuestionText     string      `bson:"questionText"`
-	TagOptions       []TagOption `bson:"tagOptions"`
+	ID                int64       `bson:"_id"`
+	OrderingID        int64       `bson:"orderingID"`
+	QuestionText      string      `bson:"questionText"`
+	TagOptions        []TagOption `bson:"tagOptions"`
+	MutuallyExclusive *bool       `bson:"mutuallyExclusive"`
 }
 
 // ConflictsWith returns if the provided image has unresolvable conflicts

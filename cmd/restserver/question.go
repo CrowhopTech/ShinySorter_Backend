@@ -11,10 +11,11 @@ import (
 
 func translateDBQuestionToREST(question *imagedb.Question) *models.Question {
 	return &models.Question{
-		OrderingID:   question.OrderingID,
-		QuestionID:   question.ID,
-		QuestionText: question.QuestionText,
-		TagOptions:   tagOptionArrayToSwagger(question.TagOptions),
+		OrderingID:        question.OrderingID,
+		QuestionID:        question.ID,
+		QuestionText:      question.QuestionText,
+		TagOptions:        tagOptionArrayToSwagger(question.TagOptions),
+		MutuallyExclusive: question.MutuallyExclusive,
 	}
 }
 
@@ -73,6 +74,10 @@ func PatchQuestionByID(params operations.PatchQuestionByIDParams) middleware.Res
 
 	if params.Patch.OrderingID > 0 {
 		question.OrderingID = params.Patch.OrderingID
+	}
+
+	if params.Patch.MutuallyExclusive != nil {
+		question.MutuallyExclusive = params.Patch.MutuallyExclusive
 	}
 
 	newQuestion, err := imageMetadataConnection.ModifyQuestion(requestCtx, &question)
