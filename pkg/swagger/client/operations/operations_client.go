@@ -33,7 +33,7 @@ type ClientOption func(*runtime.ClientOperation)
 type ClientService interface {
 	CheckHealth(params *CheckHealthParams, opts ...ClientOption) (*CheckHealthOK, error)
 
-	CreateImage(params *CreateImageParams, opts ...ClientOption) (*CreateImageCreated, error)
+	CreateFile(params *CreateFileParams, opts ...ClientOption) (*CreateFileCreated, error)
 
 	CreateQuestion(params *CreateQuestionParams, opts ...ClientOption) (*CreateQuestionCreated, error)
 
@@ -43,23 +43,23 @@ type ClientService interface {
 
 	DeleteTag(params *DeleteTagParams, opts ...ClientOption) (*DeleteTagOK, error)
 
-	GetImageByID(params *GetImageByIDParams, opts ...ClientOption) (*GetImageByIDOK, error)
+	GetFileByID(params *GetFileByIDParams, opts ...ClientOption) (*GetFileByIDOK, error)
 
-	GetImageContent(params *GetImageContentParams, writer io.Writer, opts ...ClientOption) (*GetImageContentOK, error)
+	GetFileContent(params *GetFileContentParams, writer io.Writer, opts ...ClientOption) (*GetFileContentOK, error)
 
-	ListImages(params *ListImagesParams, opts ...ClientOption) (*ListImagesOK, error)
+	ListFiles(params *ListFilesParams, opts ...ClientOption) (*ListFilesOK, error)
 
 	ListQuestions(params *ListQuestionsParams, opts ...ClientOption) (*ListQuestionsOK, error)
 
 	ListTags(params *ListTagsParams, opts ...ClientOption) (*ListTagsOK, error)
 
-	PatchImageByID(params *PatchImageByIDParams, opts ...ClientOption) (*PatchImageByIDOK, error)
+	PatchFileByID(params *PatchFileByIDParams, opts ...ClientOption) (*PatchFileByIDOK, error)
 
 	PatchQuestionByID(params *PatchQuestionByIDParams, opts ...ClientOption) (*PatchQuestionByIDOK, error)
 
 	PatchTagByID(params *PatchTagByIDParams, opts ...ClientOption) (*PatchTagByIDOK, error)
 
-	SetImageContent(params *SetImageContentParams, opts ...ClientOption) (*SetImageContentOK, error)
+	SetFileContent(params *SetFileContentParams, opts ...ClientOption) (*SetFileContentOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -103,22 +103,22 @@ func (a *Client) CheckHealth(params *CheckHealthParams, opts ...ClientOption) (*
 }
 
 /*
-  CreateImage Creates a new image entry
+  CreateFile Creates a new file entry
 */
-func (a *Client) CreateImage(params *CreateImageParams, opts ...ClientOption) (*CreateImageCreated, error) {
+func (a *Client) CreateFile(params *CreateFileParams, opts ...ClientOption) (*CreateFileCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewCreateImageParams()
+		params = NewCreateFileParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "createImage",
+		ID:                 "createFile",
 		Method:             "POST",
-		PathPattern:        "/images",
+		PathPattern:        "/files",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json", "multipart/form-data"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &CreateImageReader{formats: a.formats},
+		Reader:             &CreateFileReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}
@@ -130,13 +130,13 @@ func (a *Client) CreateImage(params *CreateImageParams, opts ...ClientOption) (*
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*CreateImageCreated)
+	success, ok := result.(*CreateFileCreated)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for createImage: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for createFile: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 
@@ -255,7 +255,7 @@ func (a *Client) DeleteQuestion(params *DeleteQuestionParams, opts ...ClientOpti
 }
 
 /*
-  DeleteTag Deletes a tag. Should also remove it from all images that use it.
+  DeleteTag Deletes a tag. Should also remove it from all files that use it.
 */
 func (a *Client) DeleteTag(params *DeleteTagParams, opts ...ClientOption) (*DeleteTagOK, error) {
 	// TODO: Validate the params before sending
@@ -293,22 +293,22 @@ func (a *Client) DeleteTag(params *DeleteTagParams, opts ...ClientOption) (*Dele
 }
 
 /*
-  GetImageByID Gets the image metadata with the specified id
+  GetFileByID Gets the file metadata with the specified id
 */
-func (a *Client) GetImageByID(params *GetImageByIDParams, opts ...ClientOption) (*GetImageByIDOK, error) {
+func (a *Client) GetFileByID(params *GetFileByIDParams, opts ...ClientOption) (*GetFileByIDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetImageByIDParams()
+		params = NewGetFileByIDParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "getImageById",
+		ID:                 "getFileById",
 		Method:             "GET",
-		PathPattern:        "/images/{id}",
+		PathPattern:        "/files/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json", "multipart/form-data"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetImageByIDReader{formats: a.formats},
+		Reader:             &GetFileByIDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}
@@ -320,33 +320,33 @@ func (a *Client) GetImageByID(params *GetImageByIDParams, opts ...ClientOption) 
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*GetImageByIDOK)
+	success, ok := result.(*GetFileByIDOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for getImageById: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for getFileById: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 
 /*
-  GetImageContent Gets the image contents with the specified id
+  GetFileContent Gets the file contents with the specified id
 */
-func (a *Client) GetImageContent(params *GetImageContentParams, writer io.Writer, opts ...ClientOption) (*GetImageContentOK, error) {
+func (a *Client) GetFileContent(params *GetFileContentParams, writer io.Writer, opts ...ClientOption) (*GetFileContentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetImageContentParams()
+		params = NewGetFileContentParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "getImageContent",
+		ID:                 "getFileContent",
 		Method:             "GET",
-		PathPattern:        "/images/contents/{id}",
+		PathPattern:        "/files/contents/{id}",
 		ProducesMediaTypes: []string{"application/octet-stream"},
 		ConsumesMediaTypes: []string{"application/json", "multipart/form-data"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &GetImageContentReader{formats: a.formats, writer: writer},
+		Reader:             &GetFileContentReader{formats: a.formats, writer: writer},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}
@@ -358,33 +358,33 @@ func (a *Client) GetImageContent(params *GetImageContentParams, writer io.Writer
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*GetImageContentOK)
+	success, ok := result.(*GetFileContentOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for getImageContent: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for getFileContent: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 
 /*
-  ListImages Lists and queries images
+  ListFiles Lists and queries files
 */
-func (a *Client) ListImages(params *ListImagesParams, opts ...ClientOption) (*ListImagesOK, error) {
+func (a *Client) ListFiles(params *ListFilesParams, opts ...ClientOption) (*ListFilesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewListImagesParams()
+		params = NewListFilesParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "listImages",
+		ID:                 "listFiles",
 		Method:             "GET",
-		PathPattern:        "/images",
+		PathPattern:        "/files",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json", "multipart/form-data"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &ListImagesReader{formats: a.formats},
+		Reader:             &ListFilesReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}
@@ -396,13 +396,13 @@ func (a *Client) ListImages(params *ListImagesParams, opts ...ClientOption) (*Li
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*ListImagesOK)
+	success, ok := result.(*ListFilesOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for listImages: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for listFiles: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 
@@ -483,22 +483,22 @@ func (a *Client) ListTags(params *ListTagsParams, opts ...ClientOption) (*ListTa
 }
 
 /*
-  PatchImageByID Modifies the image metadata with the specified id
+  PatchFileByID Modifies the file metadata with the specified id
 */
-func (a *Client) PatchImageByID(params *PatchImageByIDParams, opts ...ClientOption) (*PatchImageByIDOK, error) {
+func (a *Client) PatchFileByID(params *PatchFileByIDParams, opts ...ClientOption) (*PatchFileByIDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPatchImageByIDParams()
+		params = NewPatchFileByIDParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "patchImageById",
+		ID:                 "patchFileById",
 		Method:             "PATCH",
-		PathPattern:        "/images/{id}",
+		PathPattern:        "/files/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json", "multipart/form-data"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &PatchImageByIDReader{formats: a.formats},
+		Reader:             &PatchFileByIDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}
@@ -510,13 +510,13 @@ func (a *Client) PatchImageByID(params *PatchImageByIDParams, opts ...ClientOpti
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*PatchImageByIDOK)
+	success, ok := result.(*PatchFileByIDOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for patchImageById: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for patchFileById: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 
@@ -597,22 +597,22 @@ func (a *Client) PatchTagByID(params *PatchTagByIDParams, opts ...ClientOption) 
 }
 
 /*
-  SetImageContent Sets the image contents for the specified id
+  SetFileContent Sets the file contents for the specified id
 */
-func (a *Client) SetImageContent(params *SetImageContentParams, opts ...ClientOption) (*SetImageContentOK, error) {
+func (a *Client) SetFileContent(params *SetFileContentParams, opts ...ClientOption) (*SetFileContentOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewSetImageContentParams()
+		params = NewSetFileContentParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "setImageContent",
+		ID:                 "setFileContent",
 		Method:             "PATCH",
-		PathPattern:        "/images/contents/{id}",
+		PathPattern:        "/files/contents/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"multipart/form-data"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &SetImageContentReader{formats: a.formats},
+		Reader:             &SetFileContentReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}
@@ -624,13 +624,13 @@ func (a *Client) SetImageContent(params *SetImageContentParams, opts ...ClientOp
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*SetImageContentOK)
+	success, ok := result.(*SetFileContentOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for setImageContent: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for setFileContent: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

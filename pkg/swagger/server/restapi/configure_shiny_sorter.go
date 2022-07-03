@@ -41,16 +41,16 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 	api.TxtProducer = runtime.TextProducer()
 
 	// You may change here the memory limit for this multipart form parser. Below is the default (32 MB).
-	// operations.SetImageContentMaxParseMemory = 32 << 20
+	// operations.SetFileContentMaxParseMemory = 32 << 20
 
 	if api.CheckHealthHandler == nil {
 		api.CheckHealthHandler = operations.CheckHealthHandlerFunc(func(params operations.CheckHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation operations.CheckHealth has not yet been implemented")
 		})
 	}
-	if api.CreateImageHandler == nil {
-		api.CreateImageHandler = operations.CreateImageHandlerFunc(func(params operations.CreateImageParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.CreateImage has not yet been implemented")
+	if api.CreateFileHandler == nil {
+		api.CreateFileHandler = operations.CreateFileHandlerFunc(func(params operations.CreateFileParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.CreateFile has not yet been implemented")
 		})
 	}
 	if api.CreateQuestionHandler == nil {
@@ -73,19 +73,19 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.DeleteTag has not yet been implemented")
 		})
 	}
-	if api.GetImageByIDHandler == nil {
-		api.GetImageByIDHandler = operations.GetImageByIDHandlerFunc(func(params operations.GetImageByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetImageByID has not yet been implemented")
+	if api.GetFileByIDHandler == nil {
+		api.GetFileByIDHandler = operations.GetFileByIDHandlerFunc(func(params operations.GetFileByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.GetFileByID has not yet been implemented")
 		})
 	}
-	if api.GetImageContentHandler == nil {
-		api.GetImageContentHandler = operations.GetImageContentHandlerFunc(func(params operations.GetImageContentParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetImageContent has not yet been implemented")
+	if api.GetFileContentHandler == nil {
+		api.GetFileContentHandler = operations.GetFileContentHandlerFunc(func(params operations.GetFileContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.GetFileContent has not yet been implemented")
 		})
 	}
-	if api.ListImagesHandler == nil {
-		api.ListImagesHandler = operations.ListImagesHandlerFunc(func(params operations.ListImagesParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.ListImages has not yet been implemented")
+	if api.ListFilesHandler == nil {
+		api.ListFilesHandler = operations.ListFilesHandlerFunc(func(params operations.ListFilesParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.ListFiles has not yet been implemented")
 		})
 	}
 	if api.ListQuestionsHandler == nil {
@@ -98,9 +98,9 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.ListTags has not yet been implemented")
 		})
 	}
-	if api.PatchImageByIDHandler == nil {
-		api.PatchImageByIDHandler = operations.PatchImageByIDHandlerFunc(func(params operations.PatchImageByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.PatchImageByID has not yet been implemented")
+	if api.PatchFileByIDHandler == nil {
+		api.PatchFileByIDHandler = operations.PatchFileByIDHandlerFunc(func(params operations.PatchFileByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.PatchFileByID has not yet been implemented")
 		})
 	}
 	if api.PatchQuestionByIDHandler == nil {
@@ -113,9 +113,9 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.PatchTagByID has not yet been implemented")
 		})
 	}
-	if api.SetImageContentHandler == nil {
-		api.SetImageContentHandler = operations.SetImageContentHandlerFunc(func(params operations.SetImageContentParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.SetImageContent has not yet been implemented")
+	if api.SetFileContentHandler == nil {
+		api.SetFileContentHandler = operations.SetFileContentHandlerFunc(func(params operations.SetFileContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.SetFileContent has not yet been implemented")
 		})
 	}
 

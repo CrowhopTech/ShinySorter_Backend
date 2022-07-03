@@ -30,11 +30,247 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "Endpoint definitions for the shiny-sorter image sorting project",
+    "description": "Endpoint definitions for the shiny-sorter file sorting project",
     "title": "shiny-sorter",
     "version": "alpha-v0.0"
   },
   "paths": {
+    "/files": {
+      "get": {
+        "description": "Lists and queries files",
+        "operationId": "listFiles",
+        "parameters": [
+          {
+            "$ref": "#/parameters/includeTags"
+          },
+          {
+            "$ref": "#/parameters/includeOperator"
+          },
+          {
+            "$ref": "#/parameters/excludeTags"
+          },
+          {
+            "$ref": "#/parameters/excludeOperator"
+          },
+          {
+            "type": "boolean",
+            "description": "Whether to filter to tags that have or have not been tagged",
+            "name": "hasBeenTagged",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Files were found matching the given query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/file"
+              }
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "description": "No files were found matching the given query. Also returns an empty array for easier parsing",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/file"
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new file entry",
+        "operationId": "createFile",
+        "parameters": [
+          {
+            "description": "The new file to create",
+            "name": "newFile",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/file"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "File was created successfully",
+            "schema": {
+              "$ref": "#/definitions/file"
+            }
+          },
+          "400": {
+            "description": "Some part of the provided File was invalid."
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      }
+    },
+    "/files/contents/{id}": {
+      "get": {
+        "description": "Gets the file contents with the specified id",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "operationId": "getFileContent",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "File ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "description": "Whether to return the actual contents or a thumbnail",
+            "name": "thumb",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the file or thumbnail contents",
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            },
+            "headers": {
+              "Content-Type": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "The given file was not found."
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "patch": {
+        "description": "Sets the file contents for the specified id",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "operationId": "setFileContent",
+        "parameters": [
+          {
+            "type": "file",
+            "format": "binary",
+            "description": "The file contents to upload.",
+            "name": "fileContents",
+            "in": "formData"
+          },
+          {
+            "type": "string",
+            "description": "File ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file contents were modified successfully"
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "description": "The given file was not found."
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      }
+    },
+    "/files/{id}": {
+      "get": {
+        "description": "Gets the file metadata with the specified id",
+        "operationId": "getFileById",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "File ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the found file.",
+            "schema": {
+              "$ref": "#/definitions/file"
+            }
+          },
+          "404": {
+            "description": "The given file was not found."
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "patch": {
+        "description": "Modifies the file metadata with the specified id",
+        "operationId": "patchFileById",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "File ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Patch modifications for the file",
+            "name": "patch",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/file"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the modified file.",
+            "schema": {
+              "$ref": "#/definitions/file"
+            }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "produces": [
@@ -59,242 +295,6 @@ func init() {
                 "Service Unavailable"
               ]
             }
-          }
-        }
-      }
-    },
-    "/images": {
-      "get": {
-        "description": "Lists and queries images",
-        "operationId": "listImages",
-        "parameters": [
-          {
-            "$ref": "#/parameters/includeTags"
-          },
-          {
-            "$ref": "#/parameters/includeOperator"
-          },
-          {
-            "$ref": "#/parameters/excludeTags"
-          },
-          {
-            "$ref": "#/parameters/excludeOperator"
-          },
-          {
-            "type": "boolean",
-            "description": "Whether to filter to tags that have or have not been tagged",
-            "name": "hasBeenTagged",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Images were found matching the given query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/image"
-              }
-            }
-          },
-          "400": {
-            "description": "Some part of the request was invalid. More information will be included in the error string",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "404": {
-            "description": "No images were found matching the given query. Also returns an empty array for easier parsing",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/image"
-              }
-            }
-          },
-          "500": {
-            "$ref": "#/responses/genericServerError"
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new image entry",
-        "operationId": "createImage",
-        "parameters": [
-          {
-            "description": "The new image to create",
-            "name": "newImage",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/image"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Image was created successfully",
-            "schema": {
-              "$ref": "#/definitions/image"
-            }
-          },
-          "400": {
-            "description": "Some part of the provided Image was invalid."
-          },
-          "500": {
-            "$ref": "#/responses/genericServerError"
-          }
-        }
-      }
-    },
-    "/images/contents/{id}": {
-      "get": {
-        "description": "Gets the image contents with the specified id",
-        "produces": [
-          "application/octet-stream"
-        ],
-        "operationId": "getImageContent",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Image ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "boolean",
-            "description": "Whether to return the actual contents or a thumbnail",
-            "name": "thumb",
-            "in": "query",
-            "allowEmptyValue": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns the image or thumbnail contents",
-            "schema": {
-              "type": "string",
-              "format": "binary"
-            },
-            "headers": {
-              "Content-Type": {
-                "type": "string"
-              }
-            }
-          },
-          "404": {
-            "description": "The given image was not found."
-          },
-          "500": {
-            "$ref": "#/responses/genericServerError"
-          }
-        }
-      },
-      "patch": {
-        "description": "Sets the image contents for the specified id",
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "operationId": "setImageContent",
-        "parameters": [
-          {
-            "type": "file",
-            "format": "binary",
-            "description": "The file contents to upload.",
-            "name": "fileContents",
-            "in": "formData"
-          },
-          {
-            "type": "string",
-            "description": "Image ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The image contents were modified successfully"
-          },
-          "400": {
-            "description": "Some part of the request was invalid. More information will be included in the error string",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "404": {
-            "description": "The given image was not found."
-          },
-          "500": {
-            "$ref": "#/responses/genericServerError"
-          }
-        }
-      }
-    },
-    "/images/{id}": {
-      "get": {
-        "description": "Gets the image metadata with the specified id",
-        "operationId": "getImageById",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Image ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns the found image.",
-            "schema": {
-              "$ref": "#/definitions/image"
-            }
-          },
-          "404": {
-            "description": "The given image was not found."
-          },
-          "500": {
-            "$ref": "#/responses/genericServerError"
-          }
-        }
-      },
-      "patch": {
-        "description": "Modifies the image metadata with the specified id",
-        "operationId": "patchImageById",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "Image ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "Patch modifications for the image",
-            "name": "patch",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/image"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns the modified image.",
-            "schema": {
-              "$ref": "#/definitions/image"
-            }
-          },
-          "400": {
-            "description": "Some part of the request was invalid. More information will be included in the error string",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "500": {
-            "$ref": "#/responses/genericServerError"
           }
         }
       }
@@ -471,7 +471,7 @@ func init() {
     },
     "/tags/{id}": {
       "delete": {
-        "description": "Deletes a tag. Should also remove it from all images that use it.",
+        "description": "Deletes a tag. Should also remove it from all files that use it.",
         "operationId": "deleteTag",
         "parameters": [
           {
@@ -542,7 +542,7 @@ func init() {
     }
   },
   "definitions": {
-    "image": {
+    "file": {
       "properties": {
         "hasBeenTagged": {
           "type": "boolean",
@@ -716,43 +716,15 @@ func init() {
   ],
   "swagger": "2.0",
   "info": {
-    "description": "Endpoint definitions for the shiny-sorter image sorting project",
+    "description": "Endpoint definitions for the shiny-sorter file sorting project",
     "title": "shiny-sorter",
     "version": "alpha-v0.0"
   },
   "paths": {
-    "/healthz": {
+    "/files": {
       "get": {
-        "produces": [
-          "text/plain"
-        ],
-        "operationId": "checkHealth",
-        "responses": {
-          "200": {
-            "description": "OK message",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "OK"
-              ]
-            }
-          },
-          "503": {
-            "description": "Server still starting",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "Service Unavailable"
-              ]
-            }
-          }
-        }
-      }
-    },
-    "/images": {
-      "get": {
-        "description": "Lists and queries images",
-        "operationId": "listImages",
+        "description": "Lists and queries files",
+        "operationId": "listFiles",
         "parameters": [
           {
             "type": "array",
@@ -803,11 +775,11 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Images were found matching the given query",
+            "description": "Files were found matching the given query",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/image"
+                "$ref": "#/definitions/file"
               }
             }
           },
@@ -818,11 +790,11 @@ func init() {
             }
           },
           "404": {
-            "description": "No images were found matching the given query. Also returns an empty array for easier parsing",
+            "description": "No files were found matching the given query. Also returns an empty array for easier parsing",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/image"
+                "$ref": "#/definitions/file"
               }
             }
           },
@@ -835,27 +807,27 @@ func init() {
         }
       },
       "post": {
-        "description": "Creates a new image entry",
-        "operationId": "createImage",
+        "description": "Creates a new file entry",
+        "operationId": "createFile",
         "parameters": [
           {
-            "description": "The new image to create",
-            "name": "newImage",
+            "description": "The new file to create",
+            "name": "newFile",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/image"
+              "$ref": "#/definitions/file"
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Image was created successfully",
+            "description": "File was created successfully",
             "schema": {
-              "$ref": "#/definitions/image"
+              "$ref": "#/definitions/file"
             }
           },
           "400": {
-            "description": "Some part of the provided Image was invalid."
+            "description": "Some part of the provided File was invalid."
           },
           "500": {
             "description": "Something else went wrong during the request",
@@ -866,17 +838,17 @@ func init() {
         }
       }
     },
-    "/images/contents/{id}": {
+    "/files/contents/{id}": {
       "get": {
-        "description": "Gets the image contents with the specified id",
+        "description": "Gets the file contents with the specified id",
         "produces": [
           "application/octet-stream"
         ],
-        "operationId": "getImageContent",
+        "operationId": "getFileContent",
         "parameters": [
           {
             "type": "string",
-            "description": "Image ID",
+            "description": "File ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -891,7 +863,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Returns the image or thumbnail contents",
+            "description": "Returns the file or thumbnail contents",
             "schema": {
               "type": "string",
               "format": "binary"
@@ -903,7 +875,7 @@ func init() {
             }
           },
           "404": {
-            "description": "The given image was not found."
+            "description": "The given file was not found."
           },
           "500": {
             "description": "Something else went wrong during the request",
@@ -914,11 +886,11 @@ func init() {
         }
       },
       "patch": {
-        "description": "Sets the image contents for the specified id",
+        "description": "Sets the file contents for the specified id",
         "consumes": [
           "multipart/form-data"
         ],
-        "operationId": "setImageContent",
+        "operationId": "setFileContent",
         "parameters": [
           {
             "type": "file",
@@ -929,7 +901,7 @@ func init() {
           },
           {
             "type": "string",
-            "description": "Image ID",
+            "description": "File ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -937,7 +909,7 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "The image contents were modified successfully"
+            "description": "The file contents were modified successfully"
           },
           "400": {
             "description": "Some part of the request was invalid. More information will be included in the error string",
@@ -946,7 +918,7 @@ func init() {
             }
           },
           "404": {
-            "description": "The given image was not found."
+            "description": "The given file was not found."
           },
           "500": {
             "description": "Something else went wrong during the request",
@@ -957,14 +929,14 @@ func init() {
         }
       }
     },
-    "/images/{id}": {
+    "/files/{id}": {
       "get": {
-        "description": "Gets the image metadata with the specified id",
-        "operationId": "getImageById",
+        "description": "Gets the file metadata with the specified id",
+        "operationId": "getFileById",
         "parameters": [
           {
             "type": "string",
-            "description": "Image ID",
+            "description": "File ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -972,13 +944,13 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Returns the found image.",
+            "description": "Returns the found file.",
             "schema": {
-              "$ref": "#/definitions/image"
+              "$ref": "#/definitions/file"
             }
           },
           "404": {
-            "description": "The given image was not found."
+            "description": "The given file was not found."
           },
           "500": {
             "description": "Something else went wrong during the request",
@@ -989,31 +961,31 @@ func init() {
         }
       },
       "patch": {
-        "description": "Modifies the image metadata with the specified id",
-        "operationId": "patchImageById",
+        "description": "Modifies the file metadata with the specified id",
+        "operationId": "patchFileById",
         "parameters": [
           {
             "type": "string",
-            "description": "Image ID",
+            "description": "File ID",
             "name": "id",
             "in": "path",
             "required": true
           },
           {
-            "description": "Patch modifications for the image",
+            "description": "Patch modifications for the file",
             "name": "patch",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/image"
+              "$ref": "#/definitions/file"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns the modified image.",
+            "description": "Returns the modified file.",
             "schema": {
-              "$ref": "#/definitions/image"
+              "$ref": "#/definitions/file"
             }
           },
           "400": {
@@ -1026,6 +998,34 @@ func init() {
             "description": "Something else went wrong during the request",
             "schema": {
               "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "produces": [
+          "text/plain"
+        ],
+        "operationId": "checkHealth",
+        "responses": {
+          "200": {
+            "description": "OK message",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OK"
+              ]
+            }
+          },
+          "503": {
+            "description": "Server still starting",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Service Unavailable"
+              ]
             }
           }
         }
@@ -1221,7 +1221,7 @@ func init() {
     },
     "/tags/{id}": {
       "delete": {
-        "description": "Deletes a tag. Should also remove it from all images that use it.",
+        "description": "Deletes a tag. Should also remove it from all files that use it.",
         "operationId": "deleteTag",
         "parameters": [
           {
@@ -1313,7 +1313,7 @@ func init() {
         }
       }
     },
-    "image": {
+    "file": {
       "properties": {
         "hasBeenTagged": {
           "type": "boolean",

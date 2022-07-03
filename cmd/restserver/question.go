@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/models"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
 	"github.com/go-openapi/runtime/middleware"
 )
 
-func translateDBQuestionToREST(question *imagedb.Question) *models.Question {
+func translateDBQuestionToREST(question *filedb.Question) *models.Question {
 	return &models.Question{
 		OrderingID:        question.OrderingID,
 		QuestionID:        question.ID,
@@ -41,11 +41,11 @@ func ListQuestions(params operations.ListQuestionsParams) middleware.Responder {
 func CreateQuestion(params operations.CreateQuestionParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	createdQuestion, err := imageMetadataConnection.CreateQuestion(requestCtx, &imagedb.Question{
+	createdQuestion, err := imageMetadataConnection.CreateQuestion(requestCtx, &filedb.Question{
 		ID:           params.NewQuestion.QuestionID,
 		OrderingID:   params.NewQuestion.OrderingID,
 		QuestionText: params.NewQuestion.QuestionText,
-		TagOptions:   tagOptionArrayToImagedb(params.NewQuestion.TagOptions),
+		TagOptions:   tagOptionArrayTofiledb(params.NewQuestion.TagOptions),
 	})
 	if err != nil {
 		return operations.NewCreateQuestionInternalServerError().WithPayload(fmt.Sprintf("failed to insert question: %v", err))
@@ -59,7 +59,7 @@ func CreateQuestion(params operations.CreateQuestionParams) middleware.Responder
 func PatchQuestionByID(params operations.PatchQuestionByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	question := imagedb.Question{
+	question := filedb.Question{
 		ID: params.ID,
 	}
 
@@ -69,7 +69,7 @@ func PatchQuestionByID(params operations.PatchQuestionByIDParams) middleware.Res
 
 	// TODO: handle these three parameters better
 	if len(params.Patch.TagOptions) > 0 {
-		question.TagOptions = tagOptionArrayToImagedb(params.Patch.TagOptions)
+		question.TagOptions = tagOptionArrayTofiledb(params.Patch.TagOptions)
 	}
 
 	if params.Patch.OrderingID > 0 {

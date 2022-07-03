@@ -31,7 +31,7 @@ func NewDeleteTag(ctx *middleware.Context, handler DeleteTagHandler) *DeleteTag 
 
 /* DeleteTag swagger:route DELETE /tags/{id} deleteTag
 
-Deletes a tag. Should also remove it from all images that use it.
+Deletes a tag. Should also remove it from all files that use it.
 
 */
 type DeleteTag struct {

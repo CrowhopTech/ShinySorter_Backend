@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/models"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
 	"github.com/go-openapi/runtime/middleware"
 )
 
-func translateDBTagToREST(tag *imagedb.Tag) *models.Tag {
+func translateDBTagToREST(tag *filedb.Tag) *models.Tag {
 	if tag == nil {
 		return nil
 	}
@@ -21,30 +21,30 @@ func translateDBTagToREST(tag *imagedb.Tag) *models.Tag {
 	}
 }
 
-func tagOptionToImagedb(to *models.QuestionTagOptionsItems0) imagedb.TagOption {
+func tagOptionToFiledb(to *models.QuestionTagOptionsItems0) filedb.TagOption {
 	// TODO: possible NPE
-	return imagedb.TagOption{
+	return filedb.TagOption{
 		TagID:      *to.TagID,
 		OptionText: *to.OptionText,
 	}
 }
 
-func tagOptionArrayToImagedb(input []*models.QuestionTagOptionsItems0) []imagedb.TagOption {
-	toReturn := make([]imagedb.TagOption, len(input))
+func tagOptionArrayTofiledb(input []*models.QuestionTagOptionsItems0) []filedb.TagOption {
+	toReturn := make([]filedb.TagOption, len(input))
 	for i, t := range input {
-		toReturn[i] = tagOptionToImagedb(t)
+		toReturn[i] = tagOptionToFiledb(t)
 	}
 	return toReturn
 }
 
-func tagOptionToSwagger(to imagedb.TagOption) *models.QuestionTagOptionsItems0 {
+func tagOptionToSwagger(to filedb.TagOption) *models.QuestionTagOptionsItems0 {
 	return &models.QuestionTagOptionsItems0{
 		OptionText: &to.OptionText,
 		TagID:      &to.TagID,
 	}
 }
 
-func tagOptionArrayToSwagger(input []imagedb.TagOption) []*models.QuestionTagOptionsItems0 {
+func tagOptionArrayToSwagger(input []filedb.TagOption) []*models.QuestionTagOptionsItems0 {
 	toReturn := make([]*models.QuestionTagOptionsItems0, len(input))
 	for i, t := range input {
 		toReturn[i] = tagOptionToSwagger(t)
@@ -74,7 +74,7 @@ func ListTags(params operations.ListTagsParams) middleware.Responder {
 func CreateTag(params operations.CreateTagParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	createdTag, err := imageMetadataConnection.CreateTag(requestCtx, &imagedb.Tag{
+	createdTag, err := imageMetadataConnection.CreateTag(requestCtx, &filedb.Tag{
 		Name:             params.NewTag.Name,
 		UserFriendlyName: params.NewTag.UserFriendlyName,
 		Description:      params.NewTag.Description,
@@ -91,7 +91,7 @@ func CreateTag(params operations.CreateTagParams) middleware.Responder {
 func PatchTagByID(params operations.PatchTagByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	tag := imagedb.Tag{
+	tag := filedb.Tag{
 		ID: params.ID,
 	}
 

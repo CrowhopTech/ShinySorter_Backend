@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	"github.com/CrowhopTech/shinysorter/backend/pkg/imagedb"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/models"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/sirupsen/logrus"
 )
 
-func translateDBImageToREST(img *imagedb.Image) *models.Image {
+func translateDBFileToREST(img *filedb.File) *models.File {
 	if img == nil {
 		return nil
 	}
@@ -18,7 +18,7 @@ func translateDBImageToREST(img *imagedb.Image) *models.Image {
 	if img.Tags != nil {
 		tags = *img.Tags
 	}
-	return &models.Image{
+	return &models.File{
 		ID:            img.Name,
 		Md5sum:        img.Md5Sum,
 		Tags:          tags,
@@ -27,115 +27,115 @@ func translateDBImageToREST(img *imagedb.Image) *models.Image {
 	}
 }
 
-//ListImages gets images matching the given query parameters
-func ListImages(params operations.ListImagesParams) middleware.Responder {
+//ListFiles gets images matching the given query parameters
+func ListFiles(params operations.ListFilesParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	filter := imagedb.ImageFilter{
+	filter := filedb.FileFilter{
 		Tagged: params.HasBeenTagged,
 	}
 
 	if len(params.IncludeTags) > 0 {
-		filter.RequireTagOperation = imagedb.All
+		filter.RequireTagOperation = filedb.All
 		if params.IncludeOperator != nil {
 			switch *params.IncludeOperator {
 			case "any":
-				filter.RequireTagOperation = imagedb.Any
+				filter.RequireTagOperation = filedb.Any
 			case "all":
-				filter.RequireTagOperation = imagedb.All
+				filter.RequireTagOperation = filedb.All
 			default:
-				return operations.NewListImagesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.IncludeOperator))
+				return operations.NewListFilesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.IncludeOperator))
 			}
 		}
 		filter.RequireTags = params.IncludeTags
 	}
 
 	if len(params.ExcludeTags) > 0 {
-		filter.ExcludeTagOperation = imagedb.All
+		filter.ExcludeTagOperation = filedb.All
 		if params.ExcludeOperator != nil {
 			switch *params.ExcludeOperator {
 			case "any":
-				filter.ExcludeTagOperation = imagedb.Any
+				filter.ExcludeTagOperation = filedb.Any
 			case "all":
-				filter.ExcludeTagOperation = imagedb.All
+				filter.ExcludeTagOperation = filedb.All
 			default:
-				return operations.NewListImagesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.ExcludeOperator))
+				return operations.NewListFilesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.ExcludeOperator))
 			}
 		}
 		filter.ExcludeTags = params.ExcludeTags
 	}
 
-	results, err := imageMetadataConnection.ListImages(requestCtx, &filter)
+	results, err := imageMetadataConnection.ListFiles(requestCtx, &filter)
 	if err != nil {
-		return operations.NewListImagesInternalServerError().WithPayload(fmt.Sprintf("failed to list images: %v", err))
+		return operations.NewListFilesInternalServerError().WithPayload(fmt.Sprintf("failed to list images: %v", err))
 	}
 
 	if len(results) == 0 {
-		return operations.NewListImagesNotFound().WithPayload([]*models.Image{})
+		return operations.NewListFilesNotFound().WithPayload([]*models.File{})
 	}
 
-	output := []*models.Image{}
+	output := []*models.File{}
 
 	for _, img := range results {
-		converted := translateDBImageToREST(img)
+		converted := translateDBFileToREST(img)
 		output = append(output, converted)
 	}
 
-	return operations.NewListImagesOK().WithPayload(output)
+	return operations.NewListFilesOK().WithPayload(output)
 }
 
-func GetImageByID(params operations.GetImageByIDParams) middleware.Responder {
+func GetFileByID(params operations.GetFileByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	results, err := imageMetadataConnection.ListImages(requestCtx, &imagedb.ImageFilter{
+	results, err := imageMetadataConnection.ListFiles(requestCtx, &filedb.FileFilter{
 		Name: params.ID,
 	})
 	if err != nil {
-		return operations.NewGetImageByIDInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
+		return operations.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
 	}
 
 	if len(results) == 0 {
-		return operations.NewGetImageByIDNotFound()
+		return operations.NewGetFileByIDNotFound()
 	}
 
 	if len(results) > 1 {
-		return operations.NewGetImageByIDInternalServerError().WithPayload(fmt.Sprintf("image list for ID %s returned %d results, expected exactly 1", params.ID, len(results)))
+		return operations.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("image list for ID %s returned %d results, expected exactly 1", params.ID, len(results)))
 	}
 
-	output := translateDBImageToREST(results[0])
+	output := translateDBFileToREST(results[0])
 
-	return operations.NewGetImageByIDOK().WithPayload(output)
+	return operations.NewGetFileByIDOK().WithPayload(output)
 }
 
-func CreateImage(params operations.CreateImageParams) middleware.Responder {
+func CreateFile(params operations.CreateFileParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	f := false
-	err := imageMetadataConnection.CreateImageEntry(requestCtx, &imagedb.Image{
-		FileMetadata: imagedb.FileMetadata{
-			Name:   params.NewImage.ID,
-			Md5Sum: params.NewImage.Md5sum,
+	err := imageMetadataConnection.CreateFileEntry(requestCtx, &filedb.File{
+		FileMetadata: filedb.FileMetadata{
+			Name:   params.NewFile.ID,
+			Md5Sum: params.NewFile.Md5sum,
 		},
 		// TODO: validate that tags actually exist
-		Tags:          &params.NewImage.Tags,
+		Tags:          &params.NewFile.Tags,
 		HasContent:    &f,
 		HasBeenTagged: &f,
 	})
 	if err != nil {
-		return operations.NewCreateImageInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))
+		return operations.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))
 	}
 
-	createdImage, err := imageMetadataConnection.GetImage(requestCtx, params.NewImage.ID)
+	createdFile, err := imageMetadataConnection.GetFile(requestCtx, params.NewFile.ID)
 	if err != nil {
-		return operations.NewCreateImageInternalServerError().WithPayload(fmt.Sprintf("failed to get created image: %v", err))
+		return operations.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to get created image: %v", err))
 	}
 
-	output := translateDBImageToREST(createdImage)
+	output := translateDBFileToREST(createdFile)
 
-	return operations.NewCreateImageCreated().WithPayload(output)
+	return operations.NewCreateFileCreated().WithPayload(output)
 }
 
-func PatchImageByID(params operations.PatchImageByIDParams) middleware.Responder {
+func PatchFileByID(params operations.PatchFileByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	logrus.WithFields(logrus.Fields{
@@ -143,8 +143,8 @@ func PatchImageByID(params operations.PatchImageByIDParams) middleware.Responder
 		"patch":    params.Patch,
 	}).Info("Patching image")
 
-	img := imagedb.Image{
-		FileMetadata: imagedb.FileMetadata{
+	img := filedb.File{
+		FileMetadata: filedb.FileMetadata{
 			Name: params.ID,
 		},
 	}
@@ -162,12 +162,12 @@ func PatchImageByID(params operations.PatchImageByIDParams) middleware.Responder
 		img.HasBeenTagged = params.Patch.HasBeenTagged
 	}
 
-	newImg, err := imageMetadataConnection.ModifyImageEntry(requestCtx, &img)
+	newImg, err := imageMetadataConnection.ModifyFileEntry(requestCtx, &img)
 	if err != nil {
-		return operations.NewPatchImageByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify image entry %s: %v", params.ID, err))
+		return operations.NewPatchFileByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify image entry %s: %v", params.ID, err))
 	}
 
-	output := translateDBImageToREST(newImg)
+	output := translateDBFileToREST(newImg)
 
-	return operations.NewPatchImageByIDOK().WithPayload(output)
+	return operations.NewPatchFileByIDOK().WithPayload(output)
 }

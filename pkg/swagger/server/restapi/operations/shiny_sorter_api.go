@@ -48,8 +48,8 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		CheckHealthHandler: CheckHealthHandlerFunc(func(params CheckHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation CheckHealth has not yet been implemented")
 		}),
-		CreateImageHandler: CreateImageHandlerFunc(func(params CreateImageParams) middleware.Responder {
-			return middleware.NotImplemented("operation CreateImage has not yet been implemented")
+		CreateFileHandler: CreateFileHandlerFunc(func(params CreateFileParams) middleware.Responder {
+			return middleware.NotImplemented("operation CreateFile has not yet been implemented")
 		}),
 		CreateQuestionHandler: CreateQuestionHandlerFunc(func(params CreateQuestionParams) middleware.Responder {
 			return middleware.NotImplemented("operation CreateQuestion has not yet been implemented")
@@ -63,14 +63,14 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		DeleteTagHandler: DeleteTagHandlerFunc(func(params DeleteTagParams) middleware.Responder {
 			return middleware.NotImplemented("operation DeleteTag has not yet been implemented")
 		}),
-		GetImageByIDHandler: GetImageByIDHandlerFunc(func(params GetImageByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetImageByID has not yet been implemented")
+		GetFileByIDHandler: GetFileByIDHandlerFunc(func(params GetFileByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetFileByID has not yet been implemented")
 		}),
-		GetImageContentHandler: GetImageContentHandlerFunc(func(params GetImageContentParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetImageContent has not yet been implemented")
+		GetFileContentHandler: GetFileContentHandlerFunc(func(params GetFileContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetFileContent has not yet been implemented")
 		}),
-		ListImagesHandler: ListImagesHandlerFunc(func(params ListImagesParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListImages has not yet been implemented")
+		ListFilesHandler: ListFilesHandlerFunc(func(params ListFilesParams) middleware.Responder {
+			return middleware.NotImplemented("operation ListFiles has not yet been implemented")
 		}),
 		ListQuestionsHandler: ListQuestionsHandlerFunc(func(params ListQuestionsParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListQuestions has not yet been implemented")
@@ -78,8 +78,8 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		ListTagsHandler: ListTagsHandlerFunc(func(params ListTagsParams) middleware.Responder {
 			return middleware.NotImplemented("operation ListTags has not yet been implemented")
 		}),
-		PatchImageByIDHandler: PatchImageByIDHandlerFunc(func(params PatchImageByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation PatchImageByID has not yet been implemented")
+		PatchFileByIDHandler: PatchFileByIDHandlerFunc(func(params PatchFileByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation PatchFileByID has not yet been implemented")
 		}),
 		PatchQuestionByIDHandler: PatchQuestionByIDHandlerFunc(func(params PatchQuestionByIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation PatchQuestionByID has not yet been implemented")
@@ -87,13 +87,13 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		PatchTagByIDHandler: PatchTagByIDHandlerFunc(func(params PatchTagByIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation PatchTagByID has not yet been implemented")
 		}),
-		SetImageContentHandler: SetImageContentHandlerFunc(func(params SetImageContentParams) middleware.Responder {
-			return middleware.NotImplemented("operation SetImageContent has not yet been implemented")
+		SetFileContentHandler: SetFileContentHandlerFunc(func(params SetFileContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation SetFileContent has not yet been implemented")
 		}),
 	}
 }
 
-/*ShinySorterAPI Endpoint definitions for the shiny-sorter image sorting project */
+/*ShinySorterAPI Endpoint definitions for the shiny-sorter file sorting project */
 type ShinySorterAPI struct {
 	spec            *loads.Document
 	context         *middleware.Context
@@ -137,8 +137,8 @@ type ShinySorterAPI struct {
 
 	// CheckHealthHandler sets the operation handler for the check health operation
 	CheckHealthHandler CheckHealthHandler
-	// CreateImageHandler sets the operation handler for the create image operation
-	CreateImageHandler CreateImageHandler
+	// CreateFileHandler sets the operation handler for the create file operation
+	CreateFileHandler CreateFileHandler
 	// CreateQuestionHandler sets the operation handler for the create question operation
 	CreateQuestionHandler CreateQuestionHandler
 	// CreateTagHandler sets the operation handler for the create tag operation
@@ -147,24 +147,24 @@ type ShinySorterAPI struct {
 	DeleteQuestionHandler DeleteQuestionHandler
 	// DeleteTagHandler sets the operation handler for the delete tag operation
 	DeleteTagHandler DeleteTagHandler
-	// GetImageByIDHandler sets the operation handler for the get image by Id operation
-	GetImageByIDHandler GetImageByIDHandler
-	// GetImageContentHandler sets the operation handler for the get image content operation
-	GetImageContentHandler GetImageContentHandler
-	// ListImagesHandler sets the operation handler for the list images operation
-	ListImagesHandler ListImagesHandler
+	// GetFileByIDHandler sets the operation handler for the get file by Id operation
+	GetFileByIDHandler GetFileByIDHandler
+	// GetFileContentHandler sets the operation handler for the get file content operation
+	GetFileContentHandler GetFileContentHandler
+	// ListFilesHandler sets the operation handler for the list files operation
+	ListFilesHandler ListFilesHandler
 	// ListQuestionsHandler sets the operation handler for the list questions operation
 	ListQuestionsHandler ListQuestionsHandler
 	// ListTagsHandler sets the operation handler for the list tags operation
 	ListTagsHandler ListTagsHandler
-	// PatchImageByIDHandler sets the operation handler for the patch image by Id operation
-	PatchImageByIDHandler PatchImageByIDHandler
+	// PatchFileByIDHandler sets the operation handler for the patch file by Id operation
+	PatchFileByIDHandler PatchFileByIDHandler
 	// PatchQuestionByIDHandler sets the operation handler for the patch question by ID operation
 	PatchQuestionByIDHandler PatchQuestionByIDHandler
 	// PatchTagByIDHandler sets the operation handler for the patch tag by ID operation
 	PatchTagByIDHandler PatchTagByIDHandler
-	// SetImageContentHandler sets the operation handler for the set image content operation
-	SetImageContentHandler SetImageContentHandler
+	// SetFileContentHandler sets the operation handler for the set file content operation
+	SetFileContentHandler SetFileContentHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -254,8 +254,8 @@ func (o *ShinySorterAPI) Validate() error {
 	if o.CheckHealthHandler == nil {
 		unregistered = append(unregistered, "CheckHealthHandler")
 	}
-	if o.CreateImageHandler == nil {
-		unregistered = append(unregistered, "CreateImageHandler")
+	if o.CreateFileHandler == nil {
+		unregistered = append(unregistered, "CreateFileHandler")
 	}
 	if o.CreateQuestionHandler == nil {
 		unregistered = append(unregistered, "CreateQuestionHandler")
@@ -269,14 +269,14 @@ func (o *ShinySorterAPI) Validate() error {
 	if o.DeleteTagHandler == nil {
 		unregistered = append(unregistered, "DeleteTagHandler")
 	}
-	if o.GetImageByIDHandler == nil {
-		unregistered = append(unregistered, "GetImageByIDHandler")
+	if o.GetFileByIDHandler == nil {
+		unregistered = append(unregistered, "GetFileByIDHandler")
 	}
-	if o.GetImageContentHandler == nil {
-		unregistered = append(unregistered, "GetImageContentHandler")
+	if o.GetFileContentHandler == nil {
+		unregistered = append(unregistered, "GetFileContentHandler")
 	}
-	if o.ListImagesHandler == nil {
-		unregistered = append(unregistered, "ListImagesHandler")
+	if o.ListFilesHandler == nil {
+		unregistered = append(unregistered, "ListFilesHandler")
 	}
 	if o.ListQuestionsHandler == nil {
 		unregistered = append(unregistered, "ListQuestionsHandler")
@@ -284,8 +284,8 @@ func (o *ShinySorterAPI) Validate() error {
 	if o.ListTagsHandler == nil {
 		unregistered = append(unregistered, "ListTagsHandler")
 	}
-	if o.PatchImageByIDHandler == nil {
-		unregistered = append(unregistered, "PatchImageByIDHandler")
+	if o.PatchFileByIDHandler == nil {
+		unregistered = append(unregistered, "PatchFileByIDHandler")
 	}
 	if o.PatchQuestionByIDHandler == nil {
 		unregistered = append(unregistered, "PatchQuestionByIDHandler")
@@ -293,8 +293,8 @@ func (o *ShinySorterAPI) Validate() error {
 	if o.PatchTagByIDHandler == nil {
 		unregistered = append(unregistered, "PatchTagByIDHandler")
 	}
-	if o.SetImageContentHandler == nil {
-		unregistered = append(unregistered, "SetImageContentHandler")
+	if o.SetFileContentHandler == nil {
+		unregistered = append(unregistered, "SetFileContentHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -397,7 +397,7 @@ func (o *ShinySorterAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/images"] = NewCreateImage(o.context, o.CreateImageHandler)
+	o.handlers["POST"]["/files"] = NewCreateFile(o.context, o.CreateFileHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
@@ -417,15 +417,15 @@ func (o *ShinySorterAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/images/{id}"] = NewGetImageByID(o.context, o.GetImageByIDHandler)
+	o.handlers["GET"]["/files/{id}"] = NewGetFileByID(o.context, o.GetFileByIDHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/images/contents/{id}"] = NewGetImageContent(o.context, o.GetImageContentHandler)
+	o.handlers["GET"]["/files/contents/{id}"] = NewGetFileContent(o.context, o.GetFileContentHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/images"] = NewListImages(o.context, o.ListImagesHandler)
+	o.handlers["GET"]["/files"] = NewListFiles(o.context, o.ListFilesHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -437,7 +437,7 @@ func (o *ShinySorterAPI) initHandlerCache() {
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/images/{id}"] = NewPatchImageByID(o.context, o.PatchImageByIDHandler)
+	o.handlers["PATCH"]["/files/{id}"] = NewPatchFileByID(o.context, o.PatchFileByIDHandler)
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
@@ -449,7 +449,7 @@ func (o *ShinySorterAPI) initHandlerCache() {
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/images/contents/{id}"] = NewSetImageContent(o.context, o.SetImageContentHandler)
+	o.handlers["PATCH"]["/files/contents/{id}"] = NewSetFileContent(o.context, o.SetFileContentHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP
