@@ -30,7 +30,6 @@ var (
 
 var (
 	importDirFlag      = flag.String("import-dir", "./import", "The directory to import files from")
-	storageDirFlag     = flag.String("storage-dir", "./storage", "The directory to store files in")
 	rescanIntervalFlag = flag.Duration("rescan-interval", time.Second*5, "How often to rescan the import dir for new files")
 	restAddressFlag    = flag.String("rest-address", "localhost:10000", "The address (and port, no protocol) to reach the REST server")
 )
@@ -47,24 +46,16 @@ func parseFlags() {
 	} else if !result.IsDir() {
 		logrus.Fatalf("Import path '%s' exists but is not a directory", *importDirFlag)
 	}
-
-	if result, err := os.Stat(*storageDirFlag); err != nil {
-		if os.IsNotExist(err) {
-			logrus.Fatalf("Storage directory '%s' does not exist: please create it and try again", *storageDirFlag)
-		} else {
-			logrus.Fatalf("Error while checking info for storage directory '%s'", *storageDirFlag)
-		}
-	} else if !result.IsDir() {
-		logrus.Fatalf("Storage path '%s' exists but is not a directory", *storageDirFlag)
-	}
 }
 
 func main() {
 	rootCtx := context.Background()
 
-	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetLevel(logrus.InfoLevel)
 
 	parseFlags()
+
+	logrus.Info("Constructing Swagger client...")
 
 	swaggerClient = apiclient.New(
 		httptransport.New(*restAddressFlag, "/", []string{"http"}),
@@ -76,8 +67,9 @@ func main() {
 	signal.Notify(interruptSignals, syscall.SIGINT, syscall.SIGTERM)
 
 	cancelCtx, cancel := context.WithCancel(rootCtx)
+	logrus.Infof("Starting interval scanner with interval %v", *rescanIntervalFlag)
 	tickexecutor.New(cancelCtx, *rescanIntervalFlag, func(ctx context.Context) error {
-		return scanForNewFiles(ctx, *importDirFlag, *storageDirFlag)
+		return scanForNewFiles(ctx, *importDirFlag)
 	}, nil)
 
 	sig := <-interruptSignals
@@ -85,12 +77,21 @@ func main() {
 	logrus.Infof("Received interrupt '%s'", sig)
 }
 
-func scanForNewFiles(ctx context.Context, importDir string, storageDir string) error {
-	logrus.Info("Doing scan!")
+func scanForNewFiles(ctx context.Context, importDir string) error {
+	logrus.Debug("Doing scan!")
+
+	// TODO: issue #13 (locking around files)
+
+	logrus.Debug("Testing if API server is reachable...")
+	_, err := swaggerClient.Operations.CheckHealth(operations.NewCheckHealthParams())
+	if err != nil {
+		return fmt.Errorf("API server is not accessible, skipping scan: %v", err)
+	}
+	logrus.Debug("API server accessible")
 
 	wg := &sync.WaitGroup{}
 
-	err := filepath.WalkDir(importDir, func(path string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(importDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return filepath.SkipDir
 		}

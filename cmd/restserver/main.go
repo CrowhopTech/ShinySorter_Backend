@@ -44,7 +44,9 @@ func parseFlags() {
 
 func CheckHealth(params operations.CheckHealthParams) middleware.Responder {
 	// TODO: implement a "startup routine" for liveness vs. readiness
-	return operations.NewCheckHealthServiceUnavailable()
+	// TODO: flip the order of initialization so that we set up the REST server first, and then add a proper
+	//       health check here to validate the DB connection
+	return operations.NewCheckHealthOK() // If we got here, the server is clearly up so let's just return OK
 }
 
 func main() {
@@ -54,6 +56,8 @@ func main() {
 
 	parseFlags()
 
+	logrus.Info("Initializing database connection...")
+
 	// Initialize database connection
 	mongoConn, cleanupFunc, err := mongofile.New(rootCtx, *mongodbConectionURI, false)
 	if err != nil {
@@ -61,12 +65,16 @@ func main() {
 	}
 	defer cleanupFunc()
 
+	logrus.Info("Successfully connected to database")
+
 	imageMetadataConnection = mongoConn
+
+	logrus.Info("Initializing Swagger spec...")
 
 	// Initialize Swagger
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
-		log.Fatalln(err)
+		logrus.WithError(err).Fatal("Failed to load Swagger spec")
 	}
 
 	api := operations.NewShinySorterAPI(swaggerSpec)
@@ -89,11 +97,12 @@ func main() {
 	api.CreateQuestionHandler = operations.CreateQuestionHandlerFunc(CreateQuestion)
 	api.PatchQuestionByIDHandler = operations.PatchQuestionByIDHandlerFunc(PatchQuestionByID)
 
-	// Start listening using having the handlers and port
-	// already set up.
+	logrus.Info("Swagger spec and handlers initialized, starting to listen for requests")
+
+	// Start listening using having the handlers and port already set up.
 	// Add the CORS AllowAll policy since the web UI is running on a different port
 	// on the same address, so technically cross-origin.
-	if err := http.ListenAndServe(":10000", cors.AllowAll().Handler(api.Serve(nil))); err != nil {
+	if err := http.ListenAndServe("0.0.0.0:10000", cors.AllowAll().Handler(api.Serve(nil))); err != nil {
 		log.Fatalln(err)
 	}
 }

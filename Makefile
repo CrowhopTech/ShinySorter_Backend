@@ -36,7 +36,7 @@ swagger.validate:
 #-------------------------
 # Target: swagger.doc
 #-------------------------
-.PHONY: swagger.doc
+.PHONY: swagger.doc docker
 
 swagger.doc:
 	mkdir -p doc && docker run --rm -i yousan/swagger-yaml-to-html < pkg/swagger/swagger.yaml > doc/index.html
@@ -46,4 +46,10 @@ swagger-all: swagger.validate generate swagger.doc
 all: swagger-all bin/dbpopulator bin/restserver
 
 localrest: bin/restserver
-	./bin/restserver 
+	./bin/restserver --mongodb-connection-uri=mongodb://shinysorter:shiny_sorter@192.168.1.5:30260/shiny_sorter
+
+docker:
+	docker build . -t adamukaapan/shinysorter-backend:latest
+
+docker-push: docker
+	docker push adamukaapan/shinysorter-backend:latest

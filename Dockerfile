@@ -8,4 +8,8 @@ RUN make bin/dbpopulator bin/restserver
 
 # Using debian-slim instead of alpine as alpine has gcc issues
 FROM debian:stable-slim
+RUN apt update
+RUN apt install -y curl ffmpeg
+# Clean up after ourselves to make a smaller image
+RUN apt-get clean
 COPY --from=0 /app/bin/* /
