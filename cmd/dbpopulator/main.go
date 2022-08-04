@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -100,11 +101,25 @@ func scanForNewFiles(ctx context.Context, importDir string) error {
 			// We don't process directories, just files
 			return nil
 		}
+		if d.Name() == errorsFileName {
+			// Don't process the file holding the error messages, since it's auto-generated
+			return nil
+		}
 
 		go func() {
+			trimmedPath := strings.TrimPrefix(path, importDir)
 			processErr := processImportFile(ctx, wg, path, d)
 			if processErr != nil {
 				logrus.WithError(processErr).WithField("file", path).Error("Failed to process file, leaving it behind to retry")
+				writeErr := setErrorForFileAndWrite(importDir, trimmedPath, processErr)
+				if writeErr != nil {
+					logrus.WithError(writeErr).WithField("file", trimmedPath).Error("Failed to write errors to file")
+				}
+			} else {
+				writeErr := clearErrorForFileAndWrite(importDir, trimmedPath)
+				if writeErr != nil {
+					logrus.WithError(writeErr).WithField("file", trimmedPath).Error("Failed to write errors to file")
+				}
 			}
 		}()
 
