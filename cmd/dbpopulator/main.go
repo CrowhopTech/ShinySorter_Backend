@@ -26,13 +26,11 @@ import (
 )
 
 var (
-	swaggerClient *apiclient.ShinySorter
-)
-
-var (
 	importDirFlag      = flag.String("import-dir", "./import", "The directory to import files from")
 	rescanIntervalFlag = flag.Duration("rescan-interval", time.Second*5, "How often to rescan the import dir for new files")
 	restAddressFlag    = flag.String("rest-address", "localhost:10000", "The address (and port, no protocol) to reach the REST server")
+
+	swaggerClient *apiclient.ShinySorter
 )
 
 func parseFlags() {
@@ -79,20 +77,16 @@ func main() {
 }
 
 func scanForNewFiles(ctx context.Context, importDir string) error {
-	logrus.Debug("Doing scan!")
-
-	// TODO: issue #13 (locking around files)
-
-	logrus.Debug("Testing if API server is reachable...")
-	_, err := swaggerClient.Operations.CheckHealth(operations.NewCheckHealthParams())
-	if err != nil {
-		return fmt.Errorf("API server is not accessible, skipping scan: %v", err)
-	}
-	logrus.Debug("API server accessible")
+	// logrus.Debug("Testing if API server is reachable...")
+	// _, err := swaggerClient.Operations.CheckHealth(operations.NewCheckHealthParams())
+	// if err != nil {
+	// 	return fmt.Errorf("API server is not accessible, skipping scan: %v", err)
+	// }
+	// logrus.Debug("API server accessible, doing scan!")
 
 	wg := &sync.WaitGroup{}
 
-	err = filepath.WalkDir(importDir, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(importDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return filepath.SkipDir
 		}
@@ -106,8 +100,16 @@ func scanForNewFiles(ctx context.Context, importDir string) error {
 			return nil
 		}
 
+		trimmedPath := strings.TrimPrefix(path, importDir)
+
+		if checkIfFileLocked(trimmedPath) {
+			logrus.Debugf("A scan routine is already running for file '%s', not starting a new one", trimmedPath)
+			return nil
+		}
+
 		go func() {
-			trimmedPath := strings.TrimPrefix(path, importDir)
+			lockFile(trimmedPath)
+			defer unlockFile(trimmedPath)
 			processErr := processImportFile(ctx, wg, path, d)
 			if processErr != nil {
 				logrus.WithError(processErr).WithField("file", path).Error("Failed to process file, leaving it behind to retry")
