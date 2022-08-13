@@ -71,6 +71,13 @@ func (mc *mongoConnection) CreateFileEntry(ctx context.Context, i *filedb.File) 
 
 	if existingImg == nil {
 		// Doesn't exist, let's just create it
+		count, err := mc.filesCollection.CountDocuments(ctx, bson.M{})
+		if err != nil {
+			return fmt.Errorf("failed to get document count: %v", err)
+		}
+		if count >= mc.maxFiles {
+			return fmt.Errorf("the maximum number of files (%d) have been inserted", mc.maxFiles)
+		}
 		_, err = mc.filesCollection.InsertOne(ctx, i)
 		return err
 	}

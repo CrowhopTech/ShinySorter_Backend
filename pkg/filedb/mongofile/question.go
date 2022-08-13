@@ -58,6 +58,14 @@ func (mc *mongoConnection) getNewQuestionID(ctx context.Context) (int64, error) 
 func (mc *mongoConnection) CreateQuestion(ctx context.Context, q *filedb.Question) (*filedb.Question, error) {
 	// TODO: validate question values
 
+	count, err := mc.questionsCollection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get document count: %v", err)
+	}
+	if count >= mc.maxQuestions {
+		return nil, fmt.Errorf("the maximum number of questions (%d) have been inserted", mc.maxQuestions)
+	}
+
 	newQuestionID, err := mc.getNewQuestionID(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting new question ID: %v", err)

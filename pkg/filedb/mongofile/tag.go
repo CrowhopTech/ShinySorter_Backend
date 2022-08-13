@@ -60,6 +60,14 @@ func (mc *mongoConnection) getNewTagID(ctx context.Context) (int64, error) {
 func (mc *mongoConnection) CreateTag(ctx context.Context, t *filedb.Tag) (*filedb.Tag, error) {
 	// TODO: validate tag values
 
+	count, err := mc.tagsCollection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get document count: %v", err)
+	}
+	if count >= mc.maxTags {
+		return nil, fmt.Errorf("the maximum number of tags (%d) have been inserted", mc.maxTags)
+	}
+
 	newTagID, err := mc.getNewTagID(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting new tag ID: %v", err)

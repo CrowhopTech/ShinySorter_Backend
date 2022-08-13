@@ -3,6 +3,8 @@ package mongofile
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"github.com/sirupsen/logrus"
@@ -16,14 +18,61 @@ const (
 	filesCollectionName     = "files"
 	tagsCollectionName      = "tags"
 	questionsCollectionName = "questions"
+
+	maxFilesEnv     = "MAX_FILE_COUNT"
+	maxTagsEnv      = "MAX_TAG_COUNT"
+	maxQuestionsEnv = "MAX_QUESTION_COUNT"
+
+	defaultMaxFilesCount     = 5
+	defaultMaxTagsCount      = 5
+	defaultMaxQuestionsCount = 5
 )
 
 var _ filedb.FileMetadataService = new(mongoConnection)
 
 type mongoConnection struct {
+	client              *mongo.Client
 	filesCollection     *mongo.Collection
 	tagsCollection      *mongo.Collection
 	questionsCollection *mongo.Collection
+
+	maxFiles     int64
+	maxTags      int64
+	maxQuestions int64
+}
+
+func getCollectionLimits() (int64, int64, int64) {
+	filesVar, _ := os.LookupEnv(maxFilesEnv)
+	tagsVar, _ := os.LookupEnv(maxTagsEnv)
+	questionsVar, _ := os.LookupEnv(maxQuestionsEnv)
+
+	var (
+		maxFiles     = int64(defaultMaxFilesCount)
+		maxTags      = int64(defaultMaxTagsCount)
+		maxQuestions = int64(defaultMaxQuestionsCount)
+		err          error
+	)
+
+	if filesVar != "" {
+		maxFiles, err = strconv.ParseInt(filesVar, 10, 64)
+		if err != nil {
+			logrus.Panicf("Unable to parse max files count '%s' as an int", filesVar)
+		}
+	}
+	if tagsVar != "" {
+		maxTags, err = strconv.ParseInt(tagsVar, 10, 64)
+		if err != nil {
+			logrus.Panicf("Unable to parse max tags count '%s' as an int", tagsVar)
+		}
+	}
+	if questionsVar != "" {
+		maxQuestions, err = strconv.ParseInt(questionsVar, 10, 64)
+		if err != nil {
+			logrus.Panicf("Unable to parse max questions count '%s' as an int", questionsVar)
+		}
+	}
+
+	return maxFiles, maxTags, maxQuestions
 }
 
 func (mc *mongoConnection) setUpIndices(ctx context.Context) error {
@@ -75,24 +124,34 @@ func New(ctx context.Context, connectionURI string, purge bool) (*mongoConnectio
 		return err
 	}
 
+	maxFiles, maxTags, maxQuestions := getCollectionLimits()
+
+	mc := &mongoConnection{
+		client:              client,
+		filesCollection:     client.Database(databaseName).Collection(filesCollectionName),
+		tagsCollection:      client.Database(databaseName).Collection(tagsCollectionName),
+		questionsCollection: client.Database(databaseName).Collection(questionsCollectionName),
+		maxFiles:            maxFiles,
+		maxTags:             maxTags,
+		maxQuestions:        maxQuestions,
+	}
+
 	if purge {
-		err = client.Database(databaseName).Drop(ctx)
+		err = mc.filesCollection.Drop(ctx)
 		if err != nil {
 			cleanupFunc()
 			return nil, nil, err
 		}
-	}
-
-	var (
-		filesCollection     = client.Database(databaseName).Collection(filesCollectionName)
-		tagsCollection      = client.Database(databaseName).Collection(tagsCollectionName)
-		questionsCollection = client.Database(databaseName).Collection(questionsCollectionName)
-	)
-
-	mc := &mongoConnection{
-		filesCollection:     filesCollection,
-		tagsCollection:      tagsCollection,
-		questionsCollection: questionsCollection,
+		err = mc.tagsCollection.Drop(ctx)
+		if err != nil {
+			cleanupFunc()
+			return nil, nil, err
+		}
+		err = mc.questionsCollection.Drop(ctx)
+		if err != nil {
+			cleanupFunc()
+			return nil, nil, err
+		}
 	}
 
 	err = mc.setUpIndices(ctx)

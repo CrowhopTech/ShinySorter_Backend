@@ -63,7 +63,9 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatal("Failed to initialize database connection")
 	}
-	defer cleanupFunc()
+	if cleanupFunc != nil {
+		defer cleanupFunc()
+	}
 
 	logrus.Info("Successfully connected to database")
 
