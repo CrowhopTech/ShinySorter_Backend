@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
+	"time"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
@@ -24,8 +26,10 @@ var rootCtx context.Context
 var (
 	imageMetadataConnection filedb.FileMetadataService
 
-	mongodbConectionURI = flag.String("mongodb-connection-uri", "mongodb://localhost:27017", "The connection URI for the MongoDB metadata database")
-	storageDirFlag      = flag.String("storage-dir", "./storage", "The directory to store files in")
+	mongodbConectionURI   = flag.String("mongodb-connection-uri", "mongodb://localhost:27017", "The connection URI for the MongoDB metadata database")
+	storageDirFlag        = flag.String("storage-dir", "./storage", "The directory to store files in")
+	databaseDumpFrequency = flag.Duration("dump-frequency", time.Hour*24, "How often to dump a JSON copy of the database into the storage dir")
+	// TODO: implement a database retention policy (short-term clear out after x days, but keep one from every y up to z)
 )
 
 func parseFlags() {
@@ -100,6 +104,8 @@ func main() {
 	api.PatchQuestionByIDHandler = operations.PatchQuestionByIDHandlerFunc(PatchQuestionByID)
 
 	logrus.Info("Swagger spec and handlers initialized, starting to listen for requests")
+
+	go databaseDumpLoop(*databaseDumpFrequency, path.Join(*storageDirFlag, "dumps"))
 
 	// Start listening using having the handlers and port already set up.
 	// Add the CORS AllowAll policy since the web UI is running on a different port
