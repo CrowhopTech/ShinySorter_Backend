@@ -9,10 +9,10 @@ bin:
 clean:
 	rm bin/*
 
-bin/dbpopulator: bin cmd/dbpopulator/main.go pkg/*
+bin/dbpopulator: bin cmd/dbpopulator/*.go pkg/*
 	$(GOENV) $(GO) build -o bin/dbpopulator cmd/dbpopulator/*.go
 
-bin/restserver: bin cmd/restserver/main.go pkg/*
+bin/restserver: bin cmd/restserver/*.go pkg/*
 	$(GOENV) $(GO) build -o bin/restserver cmd/restserver/*.go
 
 #-------------------------

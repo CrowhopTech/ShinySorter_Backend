@@ -87,6 +87,8 @@ func scanForNewFiles(ctx context.Context, importDir string) error {
 	wg := &sync.WaitGroup{}
 
 	err := filepath.WalkDir(importDir, func(path string, d fs.DirEntry, err error) error {
+		logFields := logrus.WithField("file", path)
+
 		if err != nil {
 			return filepath.SkipDir
 		}
@@ -103,7 +105,7 @@ func scanForNewFiles(ctx context.Context, importDir string) error {
 		trimmedPath := strings.TrimPrefix(path, importDir)
 
 		if checkIfFileLocked(trimmedPath) {
-			logrus.Debugf("A scan routine is already running for file '%s', not starting a new one", trimmedPath)
+			logFields.WithField("trimmedPath", trimmedPath).Debug("A scan routine is already running for file, not starting a new one")
 			return nil
 		}
 
@@ -112,15 +114,15 @@ func scanForNewFiles(ctx context.Context, importDir string) error {
 			defer unlockFile(trimmedPath)
 			processErr := processImportFile(ctx, wg, path, d)
 			if processErr != nil {
-				logrus.WithError(processErr).WithField("file", path).Error("Failed to process file, leaving it behind to retry")
+				logFields.WithError(processErr).Error("Failed to process file, leaving it behind to retry")
 				writeErr := setErrorForFileAndWrite(importDir, trimmedPath, processErr)
 				if writeErr != nil {
-					logrus.WithError(writeErr).WithField("file", trimmedPath).Error("Failed to write errors to file")
+					logFields.WithError(writeErr).Error("Failed to write errors to file")
 				}
 			} else {
 				writeErr := clearErrorForFileAndWrite(importDir, trimmedPath)
 				if writeErr != nil {
-					logrus.WithError(writeErr).WithField("file", trimmedPath).Error("Failed to write errors to file")
+					logFields.WithError(writeErr).Error("Failed to write errors to file")
 				}
 			}
 		}()

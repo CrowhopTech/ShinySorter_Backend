@@ -26,7 +26,7 @@ func generateFfmpegCommand(inputPath string, outputPath string, isVideo bool, ta
 	// -ss: Seek to the specified time (in seconds) in the input file
 	// -vframes: Number of frames to extract
 	// -vf: Video filter to use (scale)
-	args := []string{"-i", inputPath, "-vframes", "1", "-vf", fmt.Sprintf("scale=%d:-1", targetWidth)}
+	args := []string{"-y", "-i", inputPath, "-vframes", "1", "-vf", fmt.Sprintf("scale=%d:-1", targetWidth)}
 	if isVideo {
 		args = append(args, "-ss", "00:00:00")
 	}
