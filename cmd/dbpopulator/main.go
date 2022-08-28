@@ -25,6 +25,10 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 )
 
+const (
+	fileSizeDebounceTime = time.Second * 5
+)
+
 var (
 	importDirFlag      = flag.String("import-dir", "./import", "The directory to import files from")
 	rescanIntervalFlag = flag.Duration("rescan-interval", time.Second*5, "How often to rescan the import dir for new files")
@@ -140,17 +144,60 @@ func scanForNewFiles(ctx context.Context, importDir string) error {
 	return nil
 }
 
+func waitForFileToStabilize(ctx context.Context, path string, d fs.DirEntry) error {
+	lastSize := int64(0)
+	for {
+		time.Sleep(fileSizeDebounceTime) // Wait a bit to give the file time to finish writing
+
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return context.Canceled
+		default:
+		}
+
+		// Read the file size and compare to the last loop
+		fileInfo, err := os.Stat(path)
+		if err != nil {
+			return fmt.Errorf("failed to stat file '%s': %v", d.Name(), err)
+		}
+
+		currentSize := fileInfo.Size()
+		if currentSize != lastSize {
+			if lastSize == int64(0) {
+				logrus.Debugf("First file scan for file '%s', size is %d", d.Name(), currentSize)
+			} else {
+				logrus.Infof("File '%s' is still being written to, now %d bytes", d.Name(), currentSize)
+			}
+			lastSize = currentSize
+			continue
+		}
+
+		// File hasn't changed size since the last check: it's probably done writing
+		return nil
+	}
+}
+
 func processImportFile(ctx context.Context, wg *sync.WaitGroup, path string, d fs.DirEntry) error {
 	wg.Add(1)
-	defer wg.Done()
-
+	defer func() {
+		wg.Done()
+	}()
+	// Wait until file is done being written to
 	// Create file entry with file hash set (will fail if doesn't match)
 	// Set file contents
 	// Delete original file
 
+	logrus.Infof("Waiting for file %s to stabilize", path)
+	err := waitForFileToStabilize(ctx, path, d)
+	if err != nil {
+		logrus.Errorf("Failed: %v", err)
+		return err
+	}
+
 	logrus.Infof("Processing file %s", path)
 
-	err := createOrCheckEntryForFile(ctx, path)
+	err = createOrCheckEntryForFile(ctx, path)
 	if err != nil {
 		return fmt.Errorf("failed to create entry for file '%s': %v", d.Name(), err)
 	}
