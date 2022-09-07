@@ -33,6 +33,7 @@ var (
 	importDirFlag      = flag.String("import-dir", "./import", "The directory to import files from")
 	rescanIntervalFlag = flag.Duration("rescan-interval", time.Second*5, "How often to rescan the import dir for new files")
 	restAddressFlag    = flag.String("rest-address", "localhost:10000", "The address (and port, no protocol) to reach the REST server")
+	logLevel           = flag.String("log-level", "info", "The log level to print at")
 
 	swaggerClient *apiclient.ShinySorter
 )
@@ -49,12 +50,16 @@ func parseFlags() {
 	} else if !result.IsDir() {
 		logrus.Fatalf("Import path '%s' exists but is not a directory", *importDirFlag)
 	}
+
+	parsedLevel, err := logrus.ParseLevel(*logLevel)
+	if err != nil {
+		logrus.Panicf("Failed to parse log level %s", *logLevel)
+	}
+	logrus.SetLevel(parsedLevel)
 }
 
 func main() {
 	rootCtx := context.Background()
-
-	logrus.SetLevel(logrus.InfoLevel)
 
 	parseFlags()
 
@@ -81,16 +86,16 @@ func main() {
 }
 
 func scanForNewFiles(ctx context.Context, importDir string) error {
-	// logrus.Debug("Testing if API server is reachable...")
-	// _, err := swaggerClient.Operations.CheckHealth(operations.NewCheckHealthParams())
-	// if err != nil {
-	// 	return fmt.Errorf("API server is not accessible, skipping scan: %v", err)
-	// }
-	// logrus.Debug("API server accessible, doing scan!")
+	logrus.Debug("Testing if API server is reachable...")
+	_, err := swaggerClient.Operations.CheckHealth(operations.NewCheckHealthParams())
+	if err != nil {
+		return fmt.Errorf("API server is not accessible, skipping scan: %v", err)
+	}
+	logrus.Debug("API server accessible, doing scan!")
 
 	wg := &sync.WaitGroup{}
 
-	err := filepath.WalkDir(importDir, func(path string, d fs.DirEntry, err error) error {
+	err = filepath.WalkDir(importDir, func(path string, d fs.DirEntry, err error) error {
 		logFields := logrus.WithField("file", path)
 
 		if err != nil {

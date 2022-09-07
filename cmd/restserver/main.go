@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -30,6 +31,9 @@ var (
 	storageDirFlag        = flag.String("storage-dir", "./storage", "The directory to store files in")
 	databaseDumpFrequency = flag.Duration("dump-frequency", time.Hour*24, "How often to dump a JSON copy of the database into the storage dir")
 	// TODO: implement a database retention policy (short-term clear out after x days, but keep one from every y up to z)
+
+	listenPort = flag.Int("listen-port", 10000, "The port for the server to listen on")
+	logLevel   = flag.String("log-level", "info", "The log level to print at")
 )
 
 func parseFlags() {
@@ -44,6 +48,12 @@ func parseFlags() {
 	} else if !result.IsDir() {
 		logrus.Fatalf("Storage path '%s' exists but is not a directory", *storageDirFlag)
 	}
+
+	parsedLevel, err := logrus.ParseLevel(*logLevel)
+	if err != nil {
+		logrus.Panicf("Failed to parse log level %s", *logLevel)
+	}
+	logrus.SetLevel(parsedLevel)
 }
 
 func CheckHealth(params operations.CheckHealthParams) middleware.Responder {
@@ -55,8 +65,6 @@ func CheckHealth(params operations.CheckHealthParams) middleware.Responder {
 
 func main() {
 	rootCtx = context.Background()
-
-	logrus.SetLevel(logrus.DebugLevel)
 
 	parseFlags()
 
@@ -110,7 +118,7 @@ func main() {
 	// Start listening using having the handlers and port already set up.
 	// Add the CORS AllowAll policy since the web UI is running on a different port
 	// on the same address, so technically cross-origin.
-	if err := http.ListenAndServe("0.0.0.0:10000", cors.AllowAll().Handler(api.Serve(nil))); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", *listenPort), cors.AllowAll().Handler(api.Serve(nil))); err != nil {
 		log.Fatalln(err)
 	}
 }
