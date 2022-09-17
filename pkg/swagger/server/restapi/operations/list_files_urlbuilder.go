@@ -48,6 +48,9 @@ func (o *ListFilesURL) Build() (*url.URL, error) {
 	var _path = "/files"
 
 	_basePath := o._basePath
+	if _basePath == "" {
+		_basePath = "/"
+	}
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)

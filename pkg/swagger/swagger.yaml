@@ -9,6 +9,7 @@ produces:
 - application/json
 schemes:
 - http
+basePath: /
 swagger: "2.0"
 
 definitions:

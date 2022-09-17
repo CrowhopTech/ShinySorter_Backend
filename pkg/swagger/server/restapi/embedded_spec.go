@@ -34,6 +34,7 @@ func init() {
     "title": "shiny-sorter",
     "version": "alpha-v0.0"
   },
+  "basePath": "/",
   "paths": {
     "/files": {
       "get": {
@@ -720,6 +721,7 @@ func init() {
     "title": "shiny-sorter",
     "version": "alpha-v0.0"
   },
+  "basePath": "/",
   "paths": {
     "/files": {
       "get": {
