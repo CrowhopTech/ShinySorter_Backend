@@ -66,7 +66,7 @@ func main() {
 	logrus.Info("Constructing Swagger client...")
 
 	swaggerClient = apiclient.New(
-		httptransport.New(*restAddressFlag, "/dev/api", []string{"http"}),
+		httptransport.New(*restAddressFlag, "/", []string{"http"}),
 		strfmt.Default,
 	)
 
