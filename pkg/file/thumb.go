@@ -18,7 +18,7 @@ func WriteFileThumbnail(path string, ft types.Type, outputPath string) error {
 	if strings.HasPrefix(ft.MIME.Type, "video") {
 		return runCommandWrapper(generateFfmpegCommand(path, outputPath, true, thumbnailWidth))
 	}
-	return fmt.Errorf("unsupported MIME type to make thumbnail for path '%s': %s", path, ft.MIME.Type)
+	return fmt.Errorf("unsupported MIME type '%s' to make thumbnail for path '%s'", ft.MIME.Type, path)
 }
 
 func generateFfmpegCommand(inputPath string, outputPath string, isVideo bool, targetWidth uint) *exec.Cmd {
