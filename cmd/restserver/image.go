@@ -31,9 +31,13 @@ func translateDBFileToREST(img *filedb.File) *models.File {
 func ListFiles(params operations.ListFilesParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	filter := filedb.FileFilter{
-		Tagged: params.HasBeenTagged,
+	requireTagged := true
+	filter := filedb.FileFilter{}
+
+	if params.HasBeenTagged != nil && !*params.HasBeenTagged {
+		requireTagged = false
 	}
+	filter.Tagged = &requireTagged
 
 	if len(params.IncludeTags) > 0 {
 		filter.RequireTagOperation = filedb.All
@@ -64,6 +68,8 @@ func ListFiles(params operations.ListFilesParams) middleware.Responder {
 		}
 		filter.ExcludeTags = params.ExcludeTags
 	}
+
+	logrus.WithField("filter", filter).Info("Running file query")
 
 	results, err := imageMetadataConnection.ListFiles(requestCtx, &filter)
 	if err != nil {
