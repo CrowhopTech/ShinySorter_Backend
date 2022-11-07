@@ -56,19 +56,19 @@ func NewGetFileByIDOK() *GetFileByIDOK {
 Returns the found file.
 */
 type GetFileByIDOK struct {
-	Payload *models.File
+	Payload *models.FileEntry
 }
 
 func (o *GetFileByIDOK) Error() string {
 	return fmt.Sprintf("[GET /files/{id}][%d] getFileByIdOK  %+v", 200, o.Payload)
 }
-func (o *GetFileByIDOK) GetPayload() *models.File {
+func (o *GetFileByIDOK) GetPayload() *models.FileEntry {
 	return o.Payload
 }
 
 func (o *GetFileByIDOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.File)
+	o.Payload = new(models.FileEntry)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

@@ -71,7 +71,7 @@ type PatchFileByIDParams struct {
 
 	   Patch modifications for the file
 	*/
-	Patch *models.File
+	Patch *models.FilePatch
 
 	timeout    time.Duration
 	Context    context.Context
@@ -138,13 +138,13 @@ func (o *PatchFileByIDParams) SetID(id string) {
 }
 
 // WithPatch adds the patch to the patch file by Id params
-func (o *PatchFileByIDParams) WithPatch(patch *models.File) *PatchFileByIDParams {
+func (o *PatchFileByIDParams) WithPatch(patch *models.FilePatch) *PatchFileByIDParams {
 	o.SetPatch(patch)
 	return o
 }
 
 // SetPatch adds the patch to the patch file by Id params
-func (o *PatchFileByIDParams) SetPatch(patch *models.File) {
+func (o *PatchFileByIDParams) SetPatch(patch *models.FilePatch) {
 	o.Patch = patch
 }
 

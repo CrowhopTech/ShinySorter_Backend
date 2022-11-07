@@ -56,19 +56,19 @@ func NewPatchQuestionByIDOK() *PatchQuestionByIDOK {
 Question was modified successfully
 */
 type PatchQuestionByIDOK struct {
-	Payload *models.Question
+	Payload *models.QuestionEntry
 }
 
 func (o *PatchQuestionByIDOK) Error() string {
 	return fmt.Sprintf("[PATCH /questions/{id}][%d] patchQuestionByIdOK  %+v", 200, o.Payload)
 }
-func (o *PatchQuestionByIDOK) GetPayload() *models.Question {
+func (o *PatchQuestionByIDOK) GetPayload() *models.QuestionEntry {
 	return o.Payload
 }
 
 func (o *PatchQuestionByIDOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Question)
+	o.Payload = new(models.QuestionEntry)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

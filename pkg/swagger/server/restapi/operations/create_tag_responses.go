@@ -25,7 +25,7 @@ type CreateTagCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Tag `json:"body,omitempty"`
+	Payload *models.TagEntry `json:"body,omitempty"`
 }
 
 // NewCreateTagCreated creates CreateTagCreated with default headers values
@@ -35,13 +35,13 @@ func NewCreateTagCreated() *CreateTagCreated {
 }
 
 // WithPayload adds the payload to the create tag created response
-func (o *CreateTagCreated) WithPayload(payload *models.Tag) *CreateTagCreated {
+func (o *CreateTagCreated) WithPayload(payload *models.TagEntry) *CreateTagCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the create tag created response
-func (o *CreateTagCreated) SetPayload(payload *models.Tag) {
+func (o *CreateTagCreated) SetPayload(payload *models.TagEntry) {
 	o.Payload = payload
 }
 

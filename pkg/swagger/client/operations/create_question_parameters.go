@@ -65,7 +65,7 @@ type CreateQuestionParams struct {
 
 	   The new question to create
 	*/
-	NewQuestion *models.Question
+	NewQuestion *models.QuestionCreate
 
 	timeout    time.Duration
 	Context    context.Context
@@ -121,13 +121,13 @@ func (o *CreateQuestionParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithNewQuestion adds the newQuestion to the create question params
-func (o *CreateQuestionParams) WithNewQuestion(newQuestion *models.Question) *CreateQuestionParams {
+func (o *CreateQuestionParams) WithNewQuestion(newQuestion *models.QuestionCreate) *CreateQuestionParams {
 	o.SetNewQuestion(newQuestion)
 	return o
 }
 
 // SetNewQuestion adds the newQuestion to the create question params
-func (o *CreateQuestionParams) SetNewQuestion(newQuestion *models.Question) {
+func (o *CreateQuestionParams) SetNewQuestion(newQuestion *models.QuestionCreate) {
 	o.NewQuestion = newQuestion
 }
 

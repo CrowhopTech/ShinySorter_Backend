@@ -50,13 +50,13 @@ func NewListTagsOK() *ListTagsOK {
 Tags were listed successfully (array may be empty if no tags are registered)
 */
 type ListTagsOK struct {
-	Payload []*models.Tag
+	Payload []*models.TagEntry
 }
 
 func (o *ListTagsOK) Error() string {
 	return fmt.Sprintf("[GET /tags][%d] listTagsOK  %+v", 200, o.Payload)
 }
-func (o *ListTagsOK) GetPayload() []*models.Tag {
+func (o *ListTagsOK) GetPayload() []*models.TagEntry {
 	return o.Payload
 }
 

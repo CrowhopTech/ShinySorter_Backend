@@ -35,12 +35,6 @@ func (o *ListFilesReader) ReadResponse(response runtime.ClientResponse, consumer
 			return nil, err
 		}
 		return nil, result
-	case 404:
-		result := NewListFilesNotFound()
-		if err := result.readResponse(response, consumer, o.formats); err != nil {
-			return nil, err
-		}
-		return nil, result
 	case 500:
 		result := NewListFilesInternalServerError()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -59,16 +53,16 @@ func NewListFilesOK() *ListFilesOK {
 
 /* ListFilesOK describes a response with status code 200, with default header values.
 
-Files were found matching the given query
+Search was successful (may return an empty array)
 */
 type ListFilesOK struct {
-	Payload []*models.File
+	Payload []*models.FileEntry
 }
 
 func (o *ListFilesOK) Error() string {
 	return fmt.Sprintf("[GET /files][%d] listFilesOK  %+v", 200, o.Payload)
 }
-func (o *ListFilesOK) GetPayload() []*models.File {
+func (o *ListFilesOK) GetPayload() []*models.FileEntry {
 	return o.Payload
 }
 
@@ -103,36 +97,6 @@ func (o *ListFilesBadRequest) GetPayload() string {
 }
 
 func (o *ListFilesBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
-
-	// response payload
-	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
-		return err
-	}
-
-	return nil
-}
-
-// NewListFilesNotFound creates a ListFilesNotFound with default headers values
-func NewListFilesNotFound() *ListFilesNotFound {
-	return &ListFilesNotFound{}
-}
-
-/* ListFilesNotFound describes a response with status code 404, with default header values.
-
-No files were found matching the given query. Also returns an empty array for easier parsing
-*/
-type ListFilesNotFound struct {
-	Payload []*models.File
-}
-
-func (o *ListFilesNotFound) Error() string {
-	return fmt.Sprintf("[GET /files][%d] listFilesNotFound  %+v", 404, o.Payload)
-}
-func (o *ListFilesNotFound) GetPayload() []*models.File {
-	return o.Payload
-}
-
-func (o *ListFilesNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {

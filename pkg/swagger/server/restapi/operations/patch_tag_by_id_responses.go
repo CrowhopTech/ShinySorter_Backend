@@ -25,7 +25,7 @@ type PatchTagByIDOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Tag `json:"body,omitempty"`
+	Payload *models.TagEntry `json:"body,omitempty"`
 }
 
 // NewPatchTagByIDOK creates PatchTagByIDOK with default headers values
@@ -35,13 +35,13 @@ func NewPatchTagByIDOK() *PatchTagByIDOK {
 }
 
 // WithPayload adds the payload to the patch tag by Id o k response
-func (o *PatchTagByIDOK) WithPayload(payload *models.Tag) *PatchTagByIDOK {
+func (o *PatchTagByIDOK) WithPayload(payload *models.TagEntry) *PatchTagByIDOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the patch tag by Id o k response
-func (o *PatchTagByIDOK) SetPayload(payload *models.Tag) {
+func (o *PatchTagByIDOK) SetPayload(payload *models.TagEntry) {
 	o.Payload = payload
 }
 

@@ -32,7 +32,7 @@ func init() {
   "info": {
     "description": "Endpoint definitions for the shiny-sorter file sorting project",
     "title": "shiny-sorter",
-    "version": "alpha-v0.0"
+    "version": "alpha-v0.2"
   },
   "basePath": "/",
   "paths": {
@@ -62,11 +62,11 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Files were found matching the given query",
+            "description": "Search was successful (may return an empty array)",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/file"
+                "$ref": "#/definitions/fileEntry"
               }
             }
           },
@@ -75,43 +75,6 @@ func init() {
             "schema": {
               "type": "string"
             }
-          },
-          "404": {
-            "description": "No files were found matching the given query. Also returns an empty array for easier parsing",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/file"
-              }
-            }
-          },
-          "500": {
-            "$ref": "#/responses/genericServerError"
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new file entry",
-        "operationId": "createFile",
-        "parameters": [
-          {
-            "description": "The new file to create",
-            "name": "newFile",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/file"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "File was created successfully",
-            "schema": {
-              "$ref": "#/definitions/file"
-            }
-          },
-          "400": {
-            "description": "Some part of the provided File was invalid."
           },
           "500": {
             "$ref": "#/responses/genericServerError"
@@ -221,11 +184,47 @@ func init() {
           "200": {
             "description": "Returns the found file.",
             "schema": {
-              "$ref": "#/definitions/file"
+              "$ref": "#/definitions/fileEntry"
             }
           },
           "404": {
             "description": "The given file was not found."
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new file entry",
+        "operationId": "createFile",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "File ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "The new file to create",
+            "name": "newFile",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/fileCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "File was created successfully",
+            "schema": {
+              "$ref": "#/definitions/fileEntry"
+            }
+          },
+          "400": {
+            "description": "Some part of the provided File was invalid."
           },
           "500": {
             "$ref": "#/responses/genericServerError"
@@ -249,7 +248,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/file"
+              "$ref": "#/definitions/filePatch"
             }
           }
         ],
@@ -257,7 +256,7 @@ func init() {
           "200": {
             "description": "Returns the modified file.",
             "schema": {
-              "$ref": "#/definitions/file"
+              "$ref": "#/definitions/fileEntry"
             }
           },
           "400": {
@@ -310,7 +309,7 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/question"
+                "$ref": "#/definitions/questionEntry"
               }
             }
           },
@@ -328,7 +327,7 @@ func init() {
             "name": "newQuestion",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/question"
+              "$ref": "#/definitions/questionCreate"
             }
           }
         ],
@@ -336,7 +335,7 @@ func init() {
           "201": {
             "description": "Question was created successfully",
             "schema": {
-              "$ref": "#/definitions/question"
+              "$ref": "#/definitions/questionEntry"
             }
           },
           "400": {
@@ -396,7 +395,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/question"
+              "$ref": "#/definitions/questionPatch"
             }
           }
         ],
@@ -404,7 +403,7 @@ func init() {
           "200": {
             "description": "Question was modified successfully",
             "schema": {
-              "$ref": "#/definitions/question"
+              "$ref": "#/definitions/questionEntry"
             }
           },
           "400": {
@@ -429,7 +428,7 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/tag"
+                "$ref": "#/definitions/tagEntry"
               }
             }
           },
@@ -447,7 +446,7 @@ func init() {
             "name": "newTag",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagCreate"
             }
           }
         ],
@@ -455,7 +454,7 @@ func init() {
           "201": {
             "description": "Tag was created successfully",
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagEntry"
             }
           },
           "400": {
@@ -487,7 +486,7 @@ func init() {
           "200": {
             "description": "Tag was deleted successfully",
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagEntry"
             }
           },
           "400": {
@@ -518,7 +517,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagPatch"
             }
           }
         ],
@@ -526,7 +525,7 @@ func init() {
           "200": {
             "description": "Tag was modified successfully",
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagEntry"
             }
           },
           "400": {
@@ -543,7 +542,15 @@ func init() {
     }
   },
   "definitions": {
-    "file": {
+    "fileCreate": {},
+    "fileEntry": {
+      "required": [
+        "id",
+        "md5sum",
+        "tags",
+        "hasBeenTagged",
+        "mimeType"
+      ],
       "properties": {
         "hasBeenTagged": {
           "type": "boolean",
@@ -574,12 +581,67 @@ func init() {
         }
       }
     },
-    "question": {
+    "filePatch": {
+      "properties": {
+        "hasBeenTagged": {
+          "type": "boolean",
+          "default": true
+        },
+        "mimeType": {
+          "type": "string",
+          "example": "image/png"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "example": [
+            5,
+            7,
+            37
+          ]
+        }
+      }
+    },
+    "questionCreate": {
+      "required": [
+        "orderingID",
+        "questionText",
+        "tagOptions",
+        "mutuallyExclusive"
+      ],
       "properties": {
         "mutuallyExclusive": {
           "description": "Whether this functions as an \"and\" (true, only one option selected) or an \"or\" question false, default, can select multiple)",
-          "type": "boolean",
-          "default": false
+          "type": "boolean"
+        },
+        "orderingID": {
+          "type": "integer"
+        },
+        "questionText": {
+          "type": "string"
+        },
+        "tagOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tagOption"
+          }
+        }
+      }
+    },
+    "questionEntry": {
+      "required": [
+        "questionID",
+        "orderingID",
+        "questionText",
+        "tagOptions",
+        "mutuallyExclusive"
+      ],
+      "properties": {
+        "mutuallyExclusive": {
+          "description": "Whether this functions as an \"and\" (true, only one option selected) or an \"or\" question false, default, can select multiple)",
+          "type": "boolean"
         },
         "orderingID": {
           "type": "integer"
@@ -593,19 +655,7 @@ func init() {
         "tagOptions": {
           "type": "array",
           "items": {
-            "type": "object",
-            "required": [
-              "tagID",
-              "optionText"
-            ],
-            "properties": {
-              "optionText": {
-                "type": "string"
-              },
-              "tagID": {
-                "type": "integer"
-              }
-            }
+            "$ref": "#/definitions/tagOption"
           }
         }
       },
@@ -633,7 +683,58 @@ func init() {
         ]
       }
     },
-    "tag": {
+    "questionPatch": {
+      "properties": {
+        "mutuallyExclusive": {
+          "description": "Whether this functions as an \"and\" (true, only one option selected) or an \"or\" question false, default, can select multiple)",
+          "type": "string",
+          "enum": [
+            "true",
+            "false"
+          ]
+        },
+        "orderingID": {
+          "type": "integer"
+        },
+        "questionText": {
+          "type": "string"
+        },
+        "tagOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tagOption"
+          }
+        }
+      }
+    },
+    "tagCreate": {
+      "required": [
+        "name",
+        "userFriendlyName",
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "This image contains a Tulip"
+        },
+        "name": {
+          "type": "string",
+          "example": "flower:type:tulip"
+        },
+        "userFriendlyName": {
+          "type": "string",
+          "example": "Tulip"
+        }
+      }
+    },
+    "tagEntry": {
+      "required": [
+        "id",
+        "name",
+        "userFriendlyName",
+        "description"
+      ],
       "properties": {
         "description": {
           "type": "string",
@@ -641,6 +742,36 @@ func init() {
         },
         "id": {
           "type": "integer"
+        },
+        "name": {
+          "type": "string",
+          "example": "flower:type:tulip"
+        },
+        "userFriendlyName": {
+          "type": "string",
+          "example": "Tulip"
+        }
+      }
+    },
+    "tagOption": {
+      "required": [
+        "tagID",
+        "optionText"
+      ],
+      "properties": {
+        "optionText": {
+          "type": "string"
+        },
+        "tagID": {
+          "type": "integer"
+        }
+      }
+    },
+    "tagPatch": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "This image contains a Tulip"
         },
         "name": {
           "type": "string",
@@ -719,7 +850,7 @@ func init() {
   "info": {
     "description": "Endpoint definitions for the shiny-sorter file sorting project",
     "title": "shiny-sorter",
-    "version": "alpha-v0.0"
+    "version": "alpha-v0.2"
   },
   "basePath": "/",
   "paths": {
@@ -777,11 +908,11 @@ func init() {
         ],
         "responses": {
           "200": {
-            "description": "Files were found matching the given query",
+            "description": "Search was successful (may return an empty array)",
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/file"
+                "$ref": "#/definitions/fileEntry"
               }
             }
           },
@@ -790,46 +921,6 @@ func init() {
             "schema": {
               "type": "string"
             }
-          },
-          "404": {
-            "description": "No files were found matching the given query. Also returns an empty array for easier parsing",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/file"
-              }
-            }
-          },
-          "500": {
-            "description": "Something else went wrong during the request",
-            "schema": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new file entry",
-        "operationId": "createFile",
-        "parameters": [
-          {
-            "description": "The new file to create",
-            "name": "newFile",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/file"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "File was created successfully",
-            "schema": {
-              "$ref": "#/definitions/file"
-            }
-          },
-          "400": {
-            "description": "Some part of the provided File was invalid."
           },
           "500": {
             "description": "Something else went wrong during the request",
@@ -948,11 +1039,50 @@ func init() {
           "200": {
             "description": "Returns the found file.",
             "schema": {
-              "$ref": "#/definitions/file"
+              "$ref": "#/definitions/fileEntry"
             }
           },
           "404": {
             "description": "The given file was not found."
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new file entry",
+        "operationId": "createFile",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "File ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "The new file to create",
+            "name": "newFile",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/fileCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "File was created successfully",
+            "schema": {
+              "$ref": "#/definitions/fileEntry"
+            }
+          },
+          "400": {
+            "description": "Some part of the provided File was invalid."
           },
           "500": {
             "description": "Something else went wrong during the request",
@@ -979,7 +1109,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/file"
+              "$ref": "#/definitions/filePatch"
             }
           }
         ],
@@ -987,7 +1117,7 @@ func init() {
           "200": {
             "description": "Returns the modified file.",
             "schema": {
-              "$ref": "#/definitions/file"
+              "$ref": "#/definitions/fileEntry"
             }
           },
           "400": {
@@ -1043,7 +1173,7 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/question"
+                "$ref": "#/definitions/questionEntry"
               }
             }
           },
@@ -1064,7 +1194,7 @@ func init() {
             "name": "newQuestion",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/question"
+              "$ref": "#/definitions/questionCreate"
             }
           }
         ],
@@ -1072,7 +1202,7 @@ func init() {
           "201": {
             "description": "Question was created successfully",
             "schema": {
-              "$ref": "#/definitions/question"
+              "$ref": "#/definitions/questionEntry"
             }
           },
           "400": {
@@ -1138,7 +1268,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/question"
+              "$ref": "#/definitions/questionPatch"
             }
           }
         ],
@@ -1146,7 +1276,7 @@ func init() {
           "200": {
             "description": "Question was modified successfully",
             "schema": {
-              "$ref": "#/definitions/question"
+              "$ref": "#/definitions/questionEntry"
             }
           },
           "400": {
@@ -1174,7 +1304,7 @@ func init() {
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/tag"
+                "$ref": "#/definitions/tagEntry"
               }
             }
           },
@@ -1195,7 +1325,7 @@ func init() {
             "name": "newTag",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagCreate"
             }
           }
         ],
@@ -1203,7 +1333,7 @@ func init() {
           "201": {
             "description": "Tag was created successfully",
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagEntry"
             }
           },
           "400": {
@@ -1238,7 +1368,7 @@ func init() {
           "200": {
             "description": "Tag was deleted successfully",
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagEntry"
             }
           },
           "400": {
@@ -1272,7 +1402,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagPatch"
             }
           }
         ],
@@ -1280,7 +1410,7 @@ func init() {
           "200": {
             "description": "Tag was modified successfully",
             "schema": {
-              "$ref": "#/definitions/tag"
+              "$ref": "#/definitions/tagEntry"
             }
           },
           "400": {
@@ -1300,22 +1430,15 @@ func init() {
     }
   },
   "definitions": {
-    "QuestionTagOptionsItems0": {
-      "type": "object",
+    "fileCreate": {},
+    "fileEntry": {
       "required": [
-        "tagID",
-        "optionText"
+        "id",
+        "md5sum",
+        "tags",
+        "hasBeenTagged",
+        "mimeType"
       ],
-      "properties": {
-        "optionText": {
-          "type": "string"
-        },
-        "tagID": {
-          "type": "integer"
-        }
-      }
-    },
-    "file": {
       "properties": {
         "hasBeenTagged": {
           "type": "boolean",
@@ -1346,12 +1469,67 @@ func init() {
         }
       }
     },
-    "question": {
+    "filePatch": {
+      "properties": {
+        "hasBeenTagged": {
+          "type": "boolean",
+          "default": true
+        },
+        "mimeType": {
+          "type": "string",
+          "example": "image/png"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "example": [
+            5,
+            7,
+            37
+          ]
+        }
+      }
+    },
+    "questionCreate": {
+      "required": [
+        "orderingID",
+        "questionText",
+        "tagOptions",
+        "mutuallyExclusive"
+      ],
       "properties": {
         "mutuallyExclusive": {
           "description": "Whether this functions as an \"and\" (true, only one option selected) or an \"or\" question false, default, can select multiple)",
-          "type": "boolean",
-          "default": false
+          "type": "boolean"
+        },
+        "orderingID": {
+          "type": "integer"
+        },
+        "questionText": {
+          "type": "string"
+        },
+        "tagOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tagOption"
+          }
+        }
+      }
+    },
+    "questionEntry": {
+      "required": [
+        "questionID",
+        "orderingID",
+        "questionText",
+        "tagOptions",
+        "mutuallyExclusive"
+      ],
+      "properties": {
+        "mutuallyExclusive": {
+          "description": "Whether this functions as an \"and\" (true, only one option selected) or an \"or\" question false, default, can select multiple)",
+          "type": "boolean"
         },
         "orderingID": {
           "type": "integer"
@@ -1365,7 +1543,7 @@ func init() {
         "tagOptions": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/QuestionTagOptionsItems0"
+            "$ref": "#/definitions/tagOption"
           }
         }
       },
@@ -1393,7 +1571,58 @@ func init() {
         ]
       }
     },
-    "tag": {
+    "questionPatch": {
+      "properties": {
+        "mutuallyExclusive": {
+          "description": "Whether this functions as an \"and\" (true, only one option selected) or an \"or\" question false, default, can select multiple)",
+          "type": "string",
+          "enum": [
+            "true",
+            "false"
+          ]
+        },
+        "orderingID": {
+          "type": "integer"
+        },
+        "questionText": {
+          "type": "string"
+        },
+        "tagOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tagOption"
+          }
+        }
+      }
+    },
+    "tagCreate": {
+      "required": [
+        "name",
+        "userFriendlyName",
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "This image contains a Tulip"
+        },
+        "name": {
+          "type": "string",
+          "example": "flower:type:tulip"
+        },
+        "userFriendlyName": {
+          "type": "string",
+          "example": "Tulip"
+        }
+      }
+    },
+    "tagEntry": {
+      "required": [
+        "id",
+        "name",
+        "userFriendlyName",
+        "description"
+      ],
       "properties": {
         "description": {
           "type": "string",
@@ -1401,6 +1630,36 @@ func init() {
         },
         "id": {
           "type": "integer"
+        },
+        "name": {
+          "type": "string",
+          "example": "flower:type:tulip"
+        },
+        "userFriendlyName": {
+          "type": "string",
+          "example": "Tulip"
+        }
+      }
+    },
+    "tagOption": {
+      "required": [
+        "tagID",
+        "optionText"
+      ],
+      "properties": {
+        "optionText": {
+          "type": "string"
+        },
+        "tagID": {
+          "type": "integer"
+        }
+      }
+    },
+    "tagPatch": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "This image contains a Tulip"
         },
         "name": {
           "type": "string",

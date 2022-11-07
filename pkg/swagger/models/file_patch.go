@@ -12,21 +12,13 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// File file
+// FilePatch file patch
 //
-// swagger:model file
-type File struct {
+// swagger:model filePatch
+type FilePatch struct {
 
 	// has been tagged
 	HasBeenTagged *bool `json:"hasBeenTagged,omitempty"`
-
-	// id
-	// Example: filename.jpg
-	ID string `json:"id,omitempty"`
-
-	// md5sum
-	// Example: 0a8bd0c4863ec1720da0f69d2795d18a
-	Md5sum string `json:"md5sum,omitempty"`
 
 	// mime type
 	// Example: image/png
@@ -37,18 +29,18 @@ type File struct {
 	Tags []int64 `json:"tags"`
 }
 
-// Validate validates this file
-func (m *File) Validate(formats strfmt.Registry) error {
+// Validate validates this file patch
+func (m *FilePatch) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this file based on context it is used
-func (m *File) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validates this file patch based on context it is used
+func (m *FilePatch) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *File) MarshalBinary() ([]byte, error) {
+func (m *FilePatch) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -56,8 +48,8 @@ func (m *File) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *File) UnmarshalBinary(b []byte) error {
-	var res File
+func (m *FilePatch) UnmarshalBinary(b []byte) error {
+	var res FilePatch
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

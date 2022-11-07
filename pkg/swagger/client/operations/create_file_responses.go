@@ -56,19 +56,19 @@ func NewCreateFileCreated() *CreateFileCreated {
 File was created successfully
 */
 type CreateFileCreated struct {
-	Payload *models.File
+	Payload *models.FileEntry
 }
 
 func (o *CreateFileCreated) Error() string {
-	return fmt.Sprintf("[POST /files][%d] createFileCreated  %+v", 201, o.Payload)
+	return fmt.Sprintf("[POST /files/{id}][%d] createFileCreated  %+v", 201, o.Payload)
 }
-func (o *CreateFileCreated) GetPayload() *models.File {
+func (o *CreateFileCreated) GetPayload() *models.FileEntry {
 	return o.Payload
 }
 
 func (o *CreateFileCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.File)
+	o.Payload = new(models.FileEntry)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -91,7 +91,7 @@ type CreateFileBadRequest struct {
 }
 
 func (o *CreateFileBadRequest) Error() string {
-	return fmt.Sprintf("[POST /files][%d] createFileBadRequest ", 400)
+	return fmt.Sprintf("[POST /files/{id}][%d] createFileBadRequest ", 400)
 }
 
 func (o *CreateFileBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -113,7 +113,7 @@ type CreateFileInternalServerError struct {
 }
 
 func (o *CreateFileInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /files][%d] createFileInternalServerError  %+v", 500, o.Payload)
+	return fmt.Sprintf("[POST /files/{id}][%d] createFileInternalServerError  %+v", 500, o.Payload)
 }
 func (o *CreateFileInternalServerError) GetPayload() string {
 	return o.Payload

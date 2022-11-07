@@ -25,7 +25,7 @@ type PatchQuestionByIDOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Question `json:"body,omitempty"`
+	Payload *models.QuestionEntry `json:"body,omitempty"`
 }
 
 // NewPatchQuestionByIDOK creates PatchQuestionByIDOK with default headers values
@@ -35,13 +35,13 @@ func NewPatchQuestionByIDOK() *PatchQuestionByIDOK {
 }
 
 // WithPayload adds the payload to the patch question by Id o k response
-func (o *PatchQuestionByIDOK) WithPayload(payload *models.Question) *PatchQuestionByIDOK {
+func (o *PatchQuestionByIDOK) WithPayload(payload *models.QuestionEntry) *PatchQuestionByIDOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the patch question by Id o k response
-func (o *PatchQuestionByIDOK) SetPayload(payload *models.Question) {
+func (o *PatchQuestionByIDOK) SetPayload(payload *models.QuestionEntry) {
 	o.Payload = payload
 }
 

@@ -61,11 +61,17 @@ func NewCreateFileParamsWithHTTPClient(client *http.Client) *CreateFileParams {
 */
 type CreateFileParams struct {
 
+	/* ID.
+
+	   File ID
+	*/
+	ID string
+
 	/* NewFile.
 
 	   The new file to create
 	*/
-	NewFile *models.File
+	NewFile models.FileCreate
 
 	timeout    time.Duration
 	Context    context.Context
@@ -120,14 +126,25 @@ func (o *CreateFileParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
+// WithID adds the id to the create file params
+func (o *CreateFileParams) WithID(id string) *CreateFileParams {
+	o.SetID(id)
+	return o
+}
+
+// SetID adds the id to the create file params
+func (o *CreateFileParams) SetID(id string) {
+	o.ID = id
+}
+
 // WithNewFile adds the newFile to the create file params
-func (o *CreateFileParams) WithNewFile(newFile *models.File) *CreateFileParams {
+func (o *CreateFileParams) WithNewFile(newFile models.FileCreate) *CreateFileParams {
 	o.SetNewFile(newFile)
 	return o
 }
 
 // SetNewFile adds the newFile to the create file params
-func (o *CreateFileParams) SetNewFile(newFile *models.File) {
+func (o *CreateFileParams) SetNewFile(newFile models.FileCreate) {
 	o.NewFile = newFile
 }
 
@@ -138,6 +155,11 @@ func (o *CreateFileParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 		return err
 	}
 	var res []error
+
+	// path param id
+	if err := r.SetPathParam("id", o.ID); err != nil {
+		return err
+	}
 	if o.NewFile != nil {
 		if err := r.SetBodyParam(o.NewFile); err != nil {
 			return err

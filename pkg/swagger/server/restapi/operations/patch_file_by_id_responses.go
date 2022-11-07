@@ -25,7 +25,7 @@ type PatchFileByIDOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.File `json:"body,omitempty"`
+	Payload *models.FileEntry `json:"body,omitempty"`
 }
 
 // NewPatchFileByIDOK creates PatchFileByIDOK with default headers values
@@ -35,13 +35,13 @@ func NewPatchFileByIDOK() *PatchFileByIDOK {
 }
 
 // WithPayload adds the payload to the patch file by Id o k response
-func (o *PatchFileByIDOK) WithPayload(payload *models.File) *PatchFileByIDOK {
+func (o *PatchFileByIDOK) WithPayload(payload *models.FileEntry) *PatchFileByIDOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the patch file by Id o k response
-func (o *PatchFileByIDOK) SetPayload(payload *models.File) {
+func (o *PatchFileByIDOK) SetPayload(payload *models.FileEntry) {
 	o.Payload = payload
 }
 

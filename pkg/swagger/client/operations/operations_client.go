@@ -113,7 +113,7 @@ func (a *Client) CreateFile(params *CreateFileParams, opts ...ClientOption) (*Cr
 	op := &runtime.ClientOperation{
 		ID:                 "createFile",
 		Method:             "POST",
-		PathPattern:        "/files",
+		PathPattern:        "/files/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json", "multipart/form-data"},
 		Schemes:            []string{"http"},

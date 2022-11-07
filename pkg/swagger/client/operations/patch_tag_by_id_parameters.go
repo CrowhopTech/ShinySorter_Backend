@@ -72,7 +72,7 @@ type PatchTagByIDParams struct {
 
 	   Patch modifications for the tag
 	*/
-	Patch *models.Tag
+	Patch *models.TagPatch
 
 	timeout    time.Duration
 	Context    context.Context
@@ -139,13 +139,13 @@ func (o *PatchTagByIDParams) SetID(id int64) {
 }
 
 // WithPatch adds the patch to the patch tag by ID params
-func (o *PatchTagByIDParams) WithPatch(patch *models.Tag) *PatchTagByIDParams {
+func (o *PatchTagByIDParams) WithPatch(patch *models.TagPatch) *PatchTagByIDParams {
 	o.SetPatch(patch)
 	return o
 }
 
 // SetPatch adds the patch to the patch tag by ID params
-func (o *PatchTagByIDParams) SetPatch(patch *models.Tag) {
+func (o *PatchTagByIDParams) SetPatch(patch *models.TagPatch) {
 	o.Patch = patch
 }
 

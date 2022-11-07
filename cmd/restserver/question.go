@@ -9,11 +9,11 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 )
 
-func translateDBQuestionToREST(question *filedb.Question) *models.Question {
-	return &models.Question{
-		OrderingID:        question.OrderingID,
-		QuestionID:        question.ID,
-		QuestionText:      question.QuestionText,
+func translateDBQuestionToREST(question *filedb.Question) *models.QuestionEntry {
+	return &models.QuestionEntry{
+		OrderingID:        &question.OrderingID,
+		QuestionID:        &question.ID,
+		QuestionText:      &question.QuestionText,
 		TagOptions:        tagOptionArrayToSwagger(question.TagOptions),
 		MutuallyExclusive: question.MutuallyExclusive,
 	}
@@ -28,7 +28,7 @@ func ListQuestions(params operations.ListQuestionsParams) middleware.Responder {
 		return operations.NewListQuestionsInternalServerError().WithPayload(fmt.Sprintf("failed to list questions: %v", err))
 	}
 
-	output := []*models.Question{}
+	output := []*models.QuestionEntry{}
 
 	for _, question := range results {
 		converted := translateDBQuestionToREST(question)
@@ -42,9 +42,9 @@ func CreateQuestion(params operations.CreateQuestionParams) middleware.Responder
 	requestCtx := rootCtx
 
 	createdQuestion, err := imageMetadataConnection.CreateQuestion(requestCtx, &filedb.Question{
-		ID:           params.NewQuestion.QuestionID,
-		OrderingID:   params.NewQuestion.OrderingID,
-		QuestionText: params.NewQuestion.QuestionText,
+		// TODO: determine new ID? Or will it auto-increment?
+		OrderingID:   *params.NewQuestion.OrderingID,
+		QuestionText: *params.NewQuestion.QuestionText,
 		TagOptions:   tagOptionArrayTofiledb(params.NewQuestion.TagOptions),
 	})
 	if err != nil {
@@ -76,8 +76,12 @@ func PatchQuestionByID(params operations.PatchQuestionByIDParams) middleware.Res
 		question.OrderingID = params.Patch.OrderingID
 	}
 
-	if params.Patch.MutuallyExclusive != nil {
-		question.MutuallyExclusive = params.Patch.MutuallyExclusive
+	if params.Patch.MutuallyExclusive != "" {
+		me := false
+		if params.Patch.MutuallyExclusive == "true" {
+			me = true
+		}
+		question.MutuallyExclusive = &me
 	}
 
 	newQuestion, err := imageMetadataConnection.ModifyQuestion(requestCtx, &question)

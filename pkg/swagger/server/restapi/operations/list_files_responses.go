@@ -16,7 +16,7 @@ import (
 // ListFilesOKCode is the HTTP code returned for type ListFilesOK
 const ListFilesOKCode int = 200
 
-/*ListFilesOK Files were found matching the given query
+/*ListFilesOK Search was successful (may return an empty array)
 
 swagger:response listFilesOK
 */
@@ -25,7 +25,7 @@ type ListFilesOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.File `json:"body,omitempty"`
+	Payload []*models.FileEntry `json:"body,omitempty"`
 }
 
 // NewListFilesOK creates ListFilesOK with default headers values
@@ -35,13 +35,13 @@ func NewListFilesOK() *ListFilesOK {
 }
 
 // WithPayload adds the payload to the list files o k response
-func (o *ListFilesOK) WithPayload(payload []*models.File) *ListFilesOK {
+func (o *ListFilesOK) WithPayload(payload []*models.FileEntry) *ListFilesOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the list files o k response
-func (o *ListFilesOK) SetPayload(payload []*models.File) {
+func (o *ListFilesOK) SetPayload(payload []*models.FileEntry) {
 	o.Payload = payload
 }
 
@@ -52,7 +52,7 @@ func (o *ListFilesOK) WriteResponse(rw http.ResponseWriter, producer runtime.Pro
 	payload := o.Payload
 	if payload == nil {
 		// return empty array
-		payload = make([]*models.File, 0, 50)
+		payload = make([]*models.FileEntry, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {
@@ -97,53 +97,6 @@ func (o *ListFilesBadRequest) WriteResponse(rw http.ResponseWriter, producer run
 
 	rw.WriteHeader(400)
 	payload := o.Payload
-	if err := producer.Produce(rw, payload); err != nil {
-		panic(err) // let the recovery middleware deal with this
-	}
-}
-
-// ListFilesNotFoundCode is the HTTP code returned for type ListFilesNotFound
-const ListFilesNotFoundCode int = 404
-
-/*ListFilesNotFound No files were found matching the given query. Also returns an empty array for easier parsing
-
-swagger:response listFilesNotFound
-*/
-type ListFilesNotFound struct {
-
-	/*
-	  In: Body
-	*/
-	Payload []*models.File `json:"body,omitempty"`
-}
-
-// NewListFilesNotFound creates ListFilesNotFound with default headers values
-func NewListFilesNotFound() *ListFilesNotFound {
-
-	return &ListFilesNotFound{}
-}
-
-// WithPayload adds the payload to the list files not found response
-func (o *ListFilesNotFound) WithPayload(payload []*models.File) *ListFilesNotFound {
-	o.Payload = payload
-	return o
-}
-
-// SetPayload sets the payload to the list files not found response
-func (o *ListFilesNotFound) SetPayload(payload []*models.File) {
-	o.Payload = payload
-}
-
-// WriteResponse to the client
-func (o *ListFilesNotFound) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
-
-	rw.WriteHeader(404)
-	payload := o.Payload
-	if payload == nil {
-		// return empty array
-		payload = make([]*models.File, 0, 50)
-	}
-
 	if err := producer.Produce(rw, payload); err != nil {
 		panic(err) // let the recovery middleware deal with this
 	}

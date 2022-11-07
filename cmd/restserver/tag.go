@@ -9,19 +9,19 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 )
 
-func translateDBTagToREST(tag *filedb.Tag) *models.Tag {
+func translateDBTagToREST(tag *filedb.Tag) *models.TagEntry {
 	if tag == nil {
 		return nil
 	}
-	return &models.Tag{
-		Description:      tag.Description,
-		ID:               tag.ID,
-		Name:             tag.Name,
-		UserFriendlyName: tag.UserFriendlyName,
+	return &models.TagEntry{
+		Description:      &tag.Description,
+		ID:               &tag.ID,
+		Name:             &tag.Name,
+		UserFriendlyName: &tag.UserFriendlyName,
 	}
 }
 
-func tagOptionToFiledb(to *models.QuestionTagOptionsItems0) filedb.TagOption {
+func tagOptionToFiledb(to *models.TagOption) filedb.TagOption {
 	// TODO: possible NPE
 	return filedb.TagOption{
 		TagID:      *to.TagID,
@@ -29,7 +29,7 @@ func tagOptionToFiledb(to *models.QuestionTagOptionsItems0) filedb.TagOption {
 	}
 }
 
-func tagOptionArrayTofiledb(input []*models.QuestionTagOptionsItems0) []filedb.TagOption {
+func tagOptionArrayTofiledb(input []*models.TagOption) []filedb.TagOption {
 	toReturn := make([]filedb.TagOption, len(input))
 	for i, t := range input {
 		toReturn[i] = tagOptionToFiledb(t)
@@ -37,15 +37,15 @@ func tagOptionArrayTofiledb(input []*models.QuestionTagOptionsItems0) []filedb.T
 	return toReturn
 }
 
-func tagOptionToSwagger(to filedb.TagOption) *models.QuestionTagOptionsItems0 {
-	return &models.QuestionTagOptionsItems0{
+func tagOptionToSwagger(to filedb.TagOption) *models.TagOption {
+	return &models.TagOption{
 		OptionText: &to.OptionText,
 		TagID:      &to.TagID,
 	}
 }
 
-func tagOptionArrayToSwagger(input []filedb.TagOption) []*models.QuestionTagOptionsItems0 {
-	toReturn := make([]*models.QuestionTagOptionsItems0, len(input))
+func tagOptionArrayToSwagger(input []filedb.TagOption) []*models.TagOption {
+	toReturn := make([]*models.TagOption, len(input))
 	for i, t := range input {
 		toReturn[i] = tagOptionToSwagger(t)
 	}
@@ -61,7 +61,7 @@ func ListTags(params operations.ListTagsParams) middleware.Responder {
 		return operations.NewListTagsInternalServerError().WithPayload(fmt.Sprintf("failed to list tags: %v", err))
 	}
 
-	output := []*models.Tag{}
+	output := []*models.TagEntry{}
 
 	for _, tag := range results {
 		converted := translateDBTagToREST(tag)
@@ -75,9 +75,9 @@ func CreateTag(params operations.CreateTagParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	createdTag, err := imageMetadataConnection.CreateTag(requestCtx, &filedb.Tag{
-		Name:             params.NewTag.Name,
-		UserFriendlyName: params.NewTag.UserFriendlyName,
-		Description:      params.NewTag.Description,
+		Name:             *params.NewTag.Name,
+		UserFriendlyName: *params.NewTag.UserFriendlyName,
+		Description:      *params.NewTag.Description,
 	})
 	if err != nil {
 		return operations.NewCreateTagInternalServerError().WithPayload(fmt.Sprintf("failed to insert tag: %v", err))

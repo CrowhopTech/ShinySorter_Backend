@@ -65,7 +65,7 @@ type CreateTagParams struct {
 
 	   The new tag to create
 	*/
-	NewTag *models.Tag
+	NewTag *models.TagCreate
 
 	timeout    time.Duration
 	Context    context.Context
@@ -121,13 +121,13 @@ func (o *CreateTagParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithNewTag adds the newTag to the create tag params
-func (o *CreateTagParams) WithNewTag(newTag *models.Tag) *CreateTagParams {
+func (o *CreateTagParams) WithNewTag(newTag *models.TagCreate) *CreateTagParams {
 	o.SetNewTag(newTag)
 	return o
 }
 
 // SetNewTag adds the newTag to the create tag params
-func (o *CreateTagParams) SetNewTag(newTag *models.Tag) {
+func (o *CreateTagParams) SetNewTag(newTag *models.TagCreate) {
 	o.NewTag = newTag
 }
 

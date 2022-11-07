@@ -25,7 +25,7 @@ type DeleteTagOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Tag `json:"body,omitempty"`
+	Payload *models.TagEntry `json:"body,omitempty"`
 }
 
 // NewDeleteTagOK creates DeleteTagOK with default headers values
@@ -35,13 +35,13 @@ func NewDeleteTagOK() *DeleteTagOK {
 }
 
 // WithPayload adds the payload to the delete tag o k response
-func (o *DeleteTagOK) WithPayload(payload *models.Tag) *DeleteTagOK {
+func (o *DeleteTagOK) WithPayload(payload *models.TagEntry) *DeleteTagOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the delete tag o k response
-func (o *DeleteTagOK) SetPayload(payload *models.Tag) {
+func (o *DeleteTagOK) SetPayload(payload *models.TagEntry) {
 	o.Payload = payload
 }
 

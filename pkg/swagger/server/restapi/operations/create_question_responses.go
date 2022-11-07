@@ -25,7 +25,7 @@ type CreateQuestionCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Question `json:"body,omitempty"`
+	Payload *models.QuestionEntry `json:"body,omitempty"`
 }
 
 // NewCreateQuestionCreated creates CreateQuestionCreated with default headers values
@@ -35,13 +35,13 @@ func NewCreateQuestionCreated() *CreateQuestionCreated {
 }
 
 // WithPayload adds the payload to the create question created response
-func (o *CreateQuestionCreated) WithPayload(payload *models.Question) *CreateQuestionCreated {
+func (o *CreateQuestionCreated) WithPayload(payload *models.QuestionEntry) *CreateQuestionCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the create question created response
-func (o *CreateQuestionCreated) SetPayload(payload *models.Question) {
+func (o *CreateQuestionCreated) SetPayload(payload *models.QuestionEntry) {
 	o.Payload = payload
 }
 

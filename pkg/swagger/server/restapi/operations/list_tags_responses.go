@@ -25,7 +25,7 @@ type ListTagsOK struct {
 	/*
 	  In: Body
 	*/
-	Payload []*models.Tag `json:"body,omitempty"`
+	Payload []*models.TagEntry `json:"body,omitempty"`
 }
 
 // NewListTagsOK creates ListTagsOK with default headers values
@@ -35,13 +35,13 @@ func NewListTagsOK() *ListTagsOK {
 }
 
 // WithPayload adds the payload to the list tags o k response
-func (o *ListTagsOK) WithPayload(payload []*models.Tag) *ListTagsOK {
+func (o *ListTagsOK) WithPayload(payload []*models.TagEntry) *ListTagsOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the list tags o k response
-func (o *ListTagsOK) SetPayload(payload []*models.Tag) {
+func (o *ListTagsOK) SetPayload(payload []*models.TagEntry) {
 	o.Payload = payload
 }
 
@@ -52,7 +52,7 @@ func (o *ListTagsOK) WriteResponse(rw http.ResponseWriter, producer runtime.Prod
 	payload := o.Payload
 	if payload == nil {
 		// return empty array
-		payload = make([]*models.Tag, 0, 50)
+		payload = make([]*models.TagEntry, 0, 50)
 	}
 
 	if err := producer.Produce(rw, payload); err != nil {

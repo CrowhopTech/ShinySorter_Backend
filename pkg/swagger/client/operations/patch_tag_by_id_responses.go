@@ -56,19 +56,19 @@ func NewPatchTagByIDOK() *PatchTagByIDOK {
 Tag was modified successfully
 */
 type PatchTagByIDOK struct {
-	Payload *models.Tag
+	Payload *models.TagEntry
 }
 
 func (o *PatchTagByIDOK) Error() string {
 	return fmt.Sprintf("[PATCH /tags/{id}][%d] patchTagByIdOK  %+v", 200, o.Payload)
 }
-func (o *PatchTagByIDOK) GetPayload() *models.Tag {
+func (o *PatchTagByIDOK) GetPayload() *models.TagEntry {
 	return o.Payload
 }
 
 func (o *PatchTagByIDOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Tag)
+	o.Payload = new(models.TagEntry)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

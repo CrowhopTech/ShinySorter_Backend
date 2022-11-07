@@ -45,7 +45,7 @@ type PatchFileByIDParams struct {
 	  Required: true
 	  In: body
 	*/
-	Patch *models.File
+	Patch *models.FilePatch
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -64,7 +64,7 @@ func (o *PatchFileByIDParams) BindRequest(r *http.Request, route *middleware.Mat
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.File
+		var body models.FilePatch
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("patch", "body", ""))

@@ -56,19 +56,19 @@ func NewDeleteTagOK() *DeleteTagOK {
 Tag was deleted successfully
 */
 type DeleteTagOK struct {
-	Payload *models.Tag
+	Payload *models.TagEntry
 }
 
 func (o *DeleteTagOK) Error() string {
 	return fmt.Sprintf("[DELETE /tags/{id}][%d] deleteTagOK  %+v", 200, o.Payload)
 }
-func (o *DeleteTagOK) GetPayload() *models.Tag {
+func (o *DeleteTagOK) GetPayload() *models.TagEntry {
 	return o.Payload
 }
 
 func (o *DeleteTagOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Tag)
+	o.Payload = new(models.TagEntry)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

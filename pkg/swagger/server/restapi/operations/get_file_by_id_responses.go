@@ -25,7 +25,7 @@ type GetFileByIDOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.File `json:"body,omitempty"`
+	Payload *models.FileEntry `json:"body,omitempty"`
 }
 
 // NewGetFileByIDOK creates GetFileByIDOK with default headers values
@@ -35,13 +35,13 @@ func NewGetFileByIDOK() *GetFileByIDOK {
 }
 
 // WithPayload adds the payload to the get file by Id o k response
-func (o *GetFileByIDOK) WithPayload(payload *models.File) *GetFileByIDOK {
+func (o *GetFileByIDOK) WithPayload(payload *models.FileEntry) *GetFileByIDOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get file by Id o k response
-func (o *GetFileByIDOK) SetPayload(payload *models.File) {
+func (o *GetFileByIDOK) SetPayload(payload *models.FileEntry) {
 	o.Payload = payload
 }
 

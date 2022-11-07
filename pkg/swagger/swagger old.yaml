@@ -1,19 +1,19 @@
 consumes:
-  - application/json
-  - multipart/form-data
+- application/json
+- multipart/form-data
 info:
   description: Endpoint definitions for the shiny-sorter file sorting project
   title: shiny-sorter
-  version: alpha-v0.2
+  version: alpha-v0.0
 produces:
-  - application/json
+- application/json
 schemes:
-  - http
+- http
 basePath: /
 swagger: "2.0"
 
 definitions:
-  fileEntry:
+  file:
     properties:
       id:
         type: string
@@ -35,37 +35,7 @@ definitions:
       mimeType:
         type: string
         example: "image/png"
-    required:
-      - id
-      - md5sum
-      - tags
-      - hasBeenTagged
-      - mimeType
-  filePatch:
-    properties:
-      tags:
-        type: array
-        items:
-          type: integer
-        example:
-          - 5
-          - 7
-          - 37
-      hasBeenTagged:
-        type: boolean
-        default: true
-      mimeType:
-        type: string
-        example: "image/png"
-  fileCreate:
-    {}
-    # File creation is (currently) a no-body operation
-    # * Image ID is provided in URL
-    # * Tags are rarely provided at creation: will add here if we end up needing it
-    # * "Has been tagged" requires separate human action, will always be false here
-    # * MIME type and md5sum are derived once content is uploaded
-
-  tagEntry:
+  tag:
     properties:
       id:
         type: integer
@@ -78,61 +48,20 @@ definitions:
       description:
         type: string
         example: "This image contains a Tulip"
-    required:
-      - id
-      - name
-      - userFriendlyName
-      - description
-  tagPatch:
-    properties:
-      name:
-        type: string
-        example: "flower:type:tulip"
-      userFriendlyName:
-        type: string
-        example: "Tulip"
-      description:
-        type: string
-        example: "This image contains a Tulip"
-  tagCreate:
-    properties:
-      name:
-        type: string
-        example: "flower:type:tulip"
-      userFriendlyName:
-        type: string
-        example: "Tulip"
-      description:
-        type: string
-        example: "This image contains a Tulip"
-    required:
-      - name
-      - userFriendlyName
-      - description
-
-  tagOption:
-    required:
-      - tagID
-      - optionText
-    properties:
-      tagID:
-        type: integer
-      optionText:
-        type: string
-  questionEntry:
+  question:
     example:
       questionID: 5
       orderingID: 500
       questionText: "What kinds of flowers are present in this picture?"
       tagOptions:
-        - tagID: 5
-          optionText: "Tulips"
-        - tagID: 6
-          optionText: "Roses"
-        - tagID: 7
-          optionText: "Violets"
-        - tagID: 8
-          optionText: "Daisies"
+      - tagID: 5
+        optionText: "Tulips"
+      - tagID: 6
+        optionText: "Roses"
+      - tagID: 7
+        optionText: "Violets"
+      - tagID: 8
+        optionText: "Daisies"
     properties:
       questionID:
         type: integer
@@ -143,51 +72,19 @@ definitions:
       tagOptions:
         type: array
         items:
-          $ref: "#/definitions/tagOption"
+          type: object
+          required:
+            - tagID
+            - optionText
+          properties:
+            tagID:
+              type: integer
+            optionText:
+              type: string
       mutuallyExclusive:
         type: boolean
+        default: false
         description: Whether this functions as an "and" (true, only one option selected) or an "or" question false, default, can select multiple)
-    required:
-      - questionID
-      - orderingID
-      - questionText
-      - tagOptions
-      - mutuallyExclusive
-  questionPatch:
-    properties:
-      orderingID:
-        type: integer
-      questionText:
-        type: string
-      tagOptions:
-        type: array
-        items:
-          $ref: "#/definitions/tagOption"
-      mutuallyExclusive:
-        type: string
-        enum: # This is a hack since "optional" booleans don't seem to be a thing?
-          - "true"
-          - "false"
-        description: Whether this functions as an "and" (true, only one option selected) or an "or" question false, default, can select multiple)
-  questionCreate:
-    properties:
-      orderingID:
-        type: integer
-      questionText:
-        type: string
-      tagOptions:
-        type: array
-        items:
-          $ref: "#/definitions/tagOption"
-      mutuallyExclusive:
-        type: boolean
-        description: Whether this functions as an "and" (true, only one option selected) or an "or" question false, default, can select multiple)
-    required:
-      - orderingID
-      - questionText
-      - tagOptions
-      - mutuallyExclusive
-
 parameters:
   includeTags:
     in: query
@@ -228,46 +125,70 @@ paths:
     get:
       operationId: checkHealth
       produces:
-        - text/plain
+      - text/plain
       responses:
-        "200":
+        '200':
           description: OK message
           schema:
             type: string
             enum:
-              - OK
-        "503":
+            - OK
+        '503':
           description: Server still starting
           schema:
             type: string
             enum:
-              - Service Unavailable
-
+            - Service Unavailable
+  
   /files:
     get:
       operationId: listFiles
       description: Lists and queries files
       parameters:
-        - $ref: "#/parameters/includeTags"
-        - $ref: "#/parameters/includeOperator"
-        - $ref: "#/parameters/excludeTags"
-        - $ref: "#/parameters/excludeOperator"
-        - name: hasBeenTagged
-          in: query
-          description: "Whether to filter to tags that have or have not been tagged"
-          type: boolean
+      - $ref: "#/parameters/includeTags"
+      - $ref: "#/parameters/includeOperator"
+      - $ref: "#/parameters/excludeTags"
+      - $ref: "#/parameters/excludeOperator"
+      - name: hasBeenTagged
+        in: query
+        description: "Whether to filter to tags that have or have not been tagged"
+        type: boolean
       responses:
         200:
-          description: Search was successful (may return an empty array)
+          description: Files were found matching the given query
           schema:
             type: array
             items:
-              $ref: "#/definitions/fileEntry"
+              $ref: "#/definitions/file"
         400:
           # This may happen when, for example, includeTags is specified without includeOperator or vice-versa
           description: Some part of the request was invalid. More information will be included in the error string
           schema:
             type: string
+        404:
+          description: No files were found matching the given query. Also returns an empty array for easier parsing
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/file"
+        500:
+          $ref: "#/responses/genericServerError"
+    post:
+      operationId: createFile
+      description: Creates a new file entry
+      parameters:
+        - in: body
+          name: newFile
+          description: "The new file to create"
+          schema:
+            $ref: "#/definitions/file"
+      responses:
+        201:
+          description: File was created successfully
+          schema:
+            $ref: "#/definitions/file"
+        400:
+          description: Some part of the provided File was invalid.
         500:
           $ref: "#/responses/genericServerError"
 
@@ -285,33 +206,9 @@ paths:
         200:
           description: Returns the found file.
           schema:
-            $ref: "#/definitions/fileEntry"
+            $ref: "#/definitions/file"
         404:
           description: The given file was not found.
-        500:
-          $ref: "#/responses/genericServerError"
-    post:
-      operationId: createFile
-      description: Creates a new file entry
-      parameters:
-        - name: id
-          in: path
-          description: File ID
-          type: string
-          required: true
-        - in: body
-          name: newFile
-          description: "The new file to create"
-          required: true
-          schema:
-            $ref: "#/definitions/fileCreate"
-      responses:
-        201:
-          description: File was created successfully
-          schema:
-            $ref: "#/definitions/fileEntry"
-        400:
-          description: Some part of the provided File was invalid.
         500:
           $ref: "#/responses/genericServerError"
     patch:
@@ -328,12 +225,12 @@ paths:
           description: Patch modifications for the file
           required: true
           schema:
-            $ref: "#/definitions/filePatch"
+            $ref: "#/definitions/file"
       responses:
         200:
           description: Returns the modified file.
           schema:
-            $ref: "#/definitions/fileEntry"
+            $ref: "#/definitions/file"
         400:
           description: Some part of the request was invalid. More information will be included in the error string
           schema:
@@ -397,7 +294,7 @@ paths:
           description: The given file was not found.
         500:
           $ref: "#/responses/genericServerError"
-
+  
   /tags:
     get:
       operationId: listTags
@@ -408,7 +305,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/tagEntry"
+              $ref: "#/definitions/tag"
         500:
           $ref: "#/responses/genericServerError"
     post:
@@ -419,12 +316,12 @@ paths:
           name: newTag
           description: "The new tag to create"
           schema:
-            $ref: "#/definitions/tagCreate"
+            $ref: "#/definitions/tag"
       responses:
         201:
           description: Tag was created successfully
           schema:
-            $ref: "#/definitions/tagEntry"
+            $ref: "#/definitions/tag"
         400:
           # This may happen when a tag already exists or some piece of information is missing
           description: Some part of the request was invalid. More information will be included in the error string
@@ -447,12 +344,12 @@ paths:
           description: Patch modifications for the tag
           required: true
           schema:
-            $ref: "#/definitions/tagPatch"
+            $ref: "#/definitions/tag"
       responses:
         200:
           description: Tag was modified successfully
           schema:
-            $ref: "#/definitions/tagEntry"
+            $ref: "#/definitions/tag"
         400:
           # This may happen when a tag already exists or some piece of information is missing
           description: Some part of the request was invalid. More information will be included in the error string
@@ -473,7 +370,7 @@ paths:
         200:
           description: Tag was deleted successfully
           schema:
-            $ref: "#/definitions/tagEntry"
+            $ref: "#/definitions/tag"
         400:
           # This may happen when an invalid tag ID is provided
           description: Some part of the request was invalid. More information will be included in the error string
@@ -492,7 +389,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/questionEntry"
+              $ref: "#/definitions/question"
         500:
           $ref: "#/responses/genericServerError"
     post:
@@ -503,12 +400,12 @@ paths:
           name: newQuestion
           description: "The new question to create"
           schema:
-            $ref: "#/definitions/questionCreate"
+            $ref: "#/definitions/question"
       responses:
         201:
           description: Question was created successfully
           schema:
-            $ref: "#/definitions/questionEntry"
+            $ref: "#/definitions/question"
         400:
           # This may happen when a question already exists or some piece of information is missing
           description: Some part of the request was invalid. More information will be included in the error string
@@ -531,12 +428,12 @@ paths:
           description: Patch modifications for the question
           required: true
           schema:
-            $ref: "#/definitions/questionPatch"
+            $ref: "#/definitions/question"
       responses:
         200:
           description: Question was modified successfully
           schema:
-            $ref: "#/definitions/questionEntry"
+            $ref: "#/definitions/question"
         400:
           # This may happen when a question already exists or some piece of information is missing
           description: Some part of the request was invalid. More information will be included in the error string

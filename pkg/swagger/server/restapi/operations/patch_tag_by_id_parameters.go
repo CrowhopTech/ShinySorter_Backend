@@ -46,7 +46,7 @@ type PatchTagByIDParams struct {
 	  Required: true
 	  In: body
 	*/
-	Patch *models.Tag
+	Patch *models.TagPatch
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -65,7 +65,7 @@ func (o *PatchTagByIDParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Tag
+		var body models.TagPatch
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("patch", "body", ""))

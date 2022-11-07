@@ -56,19 +56,19 @@ func NewPatchFileByIDOK() *PatchFileByIDOK {
 Returns the modified file.
 */
 type PatchFileByIDOK struct {
-	Payload *models.File
+	Payload *models.FileEntry
 }
 
 func (o *PatchFileByIDOK) Error() string {
 	return fmt.Sprintf("[PATCH /files/{id}][%d] patchFileByIdOK  %+v", 200, o.Payload)
 }
-func (o *PatchFileByIDOK) GetPayload() *models.File {
+func (o *PatchFileByIDOK) GetPayload() *models.FileEntry {
 	return o.Payload
 }
 
 func (o *PatchFileByIDOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.File)
+	o.Payload = new(models.FileEntry)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

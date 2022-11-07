@@ -56,19 +56,19 @@ func NewCreateQuestionCreated() *CreateQuestionCreated {
 Question was created successfully
 */
 type CreateQuestionCreated struct {
-	Payload *models.Question
+	Payload *models.QuestionEntry
 }
 
 func (o *CreateQuestionCreated) Error() string {
 	return fmt.Sprintf("[POST /questions][%d] createQuestionCreated  %+v", 201, o.Payload)
 }
-func (o *CreateQuestionCreated) GetPayload() *models.Question {
+func (o *CreateQuestionCreated) GetPayload() *models.QuestionEntry {
 	return o.Payload
 }
 
 func (o *CreateQuestionCreated) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models.Question)
+	o.Payload = new(models.QuestionEntry)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

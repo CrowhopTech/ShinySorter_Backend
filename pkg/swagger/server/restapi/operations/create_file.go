@@ -29,7 +29,7 @@ func NewCreateFile(ctx *middleware.Context, handler CreateFileHandler) *CreateFi
 	return &CreateFile{Context: ctx, Handler: handler}
 }
 
-/* CreateFile swagger:route POST /files createFile
+/* CreateFile swagger:route POST /files/{id} createFile
 
 Creates a new file entry
 

@@ -50,13 +50,13 @@ func NewListQuestionsOK() *ListQuestionsOK {
 Questions were listed successfully (array may be empty if no questions are registered)
 */
 type ListQuestionsOK struct {
-	Payload []*models.Question
+	Payload []*models.QuestionEntry
 }
 
 func (o *ListQuestionsOK) Error() string {
 	return fmt.Sprintf("[GET /questions][%d] listQuestionsOK  %+v", 200, o.Payload)
 }
-func (o *ListQuestionsOK) GetPayload() []*models.Question {
+func (o *ListQuestionsOK) GetPayload() []*models.QuestionEntry {
 	return o.Payload
 }
 

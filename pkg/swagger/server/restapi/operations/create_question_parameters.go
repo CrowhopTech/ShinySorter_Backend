@@ -37,7 +37,7 @@ type CreateQuestionParams struct {
 	/*The new question to create
 	  In: body
 	*/
-	NewQuestion *models.Question
+	NewQuestion *models.QuestionCreate
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -51,7 +51,7 @@ func (o *CreateQuestionParams) BindRequest(r *http.Request, route *middleware.Ma
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Question
+		var body models.QuestionCreate
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("newQuestion", "body", "", err))
 		} else {

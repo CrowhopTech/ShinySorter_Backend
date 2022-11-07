@@ -37,7 +37,7 @@ type CreateTagParams struct {
 	/*The new tag to create
 	  In: body
 	*/
-	NewTag *models.Tag
+	NewTag *models.TagCreate
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -51,7 +51,7 @@ func (o *CreateTagParams) BindRequest(r *http.Request, route *middleware.Matched
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Tag
+		var body models.TagCreate
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			res = append(res, errors.NewParseError("newTag", "body", "", err))
 		} else {

@@ -72,7 +72,7 @@ type PatchQuestionByIDParams struct {
 
 	   Patch modifications for the question
 	*/
-	Patch *models.Question
+	Patch *models.QuestionPatch
 
 	timeout    time.Duration
 	Context    context.Context
@@ -139,13 +139,13 @@ func (o *PatchQuestionByIDParams) SetID(id int64) {
 }
 
 // WithPatch adds the patch to the patch question by ID params
-func (o *PatchQuestionByIDParams) WithPatch(patch *models.Question) *PatchQuestionByIDParams {
+func (o *PatchQuestionByIDParams) WithPatch(patch *models.QuestionPatch) *PatchQuestionByIDParams {
 	o.SetPatch(patch)
 	return o
 }
 
 // SetPatch adds the patch to the patch question by ID params
-func (o *PatchQuestionByIDParams) SetPatch(patch *models.Question) {
+func (o *PatchQuestionByIDParams) SetPatch(patch *models.QuestionPatch) {
 	o.Patch = patch
 }
 

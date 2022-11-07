@@ -397,7 +397,7 @@ func (o *ShinySorterAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/files"] = NewCreateFile(o.context, o.CreateFileHandler)
+	o.handlers["POST"]["/files/{id}"] = NewCreateFile(o.context, o.CreateFileHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

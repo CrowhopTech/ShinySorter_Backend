@@ -25,7 +25,7 @@ type CreateFileCreated struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.File `json:"body,omitempty"`
+	Payload *models.FileEntry `json:"body,omitempty"`
 }
 
 // NewCreateFileCreated creates CreateFileCreated with default headers values
@@ -35,13 +35,13 @@ func NewCreateFileCreated() *CreateFileCreated {
 }
 
 // WithPayload adds the payload to the create file created response
-func (o *CreateFileCreated) WithPayload(payload *models.File) *CreateFileCreated {
+func (o *CreateFileCreated) WithPayload(payload *models.FileEntry) *CreateFileCreated {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the create file created response
-func (o *CreateFileCreated) SetPayload(payload *models.File) {
+func (o *CreateFileCreated) SetPayload(payload *models.FileEntry) {
 	o.Payload = payload
 }
 

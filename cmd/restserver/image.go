@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func translateDBFileToREST(img *filedb.File) *models.File {
+func translateDBFileToREST(img *filedb.File) *models.FileEntry {
 	if img == nil {
 		return nil
 	}
@@ -18,12 +18,12 @@ func translateDBFileToREST(img *filedb.File) *models.File {
 	if img.Tags != nil {
 		tags = *img.Tags
 	}
-	return &models.File{
-		ID:            img.Name,
-		Md5sum:        img.Md5Sum,
+	return &models.FileEntry{
+		ID:            &img.Name,
+		Md5sum:        &img.Md5Sum,
 		Tags:          tags,
-		HasBeenTagged: img.HasBeenTagged,
-		MimeType:      img.MIMEType,
+		HasBeenTagged: *img.HasBeenTagged,
+		MimeType:      &img.MIMEType,
 	}
 }
 
@@ -76,11 +76,7 @@ func ListFiles(params operations.ListFilesParams) middleware.Responder {
 		return operations.NewListFilesInternalServerError().WithPayload(fmt.Sprintf("failed to list images: %v", err))
 	}
 
-	if len(results) == 0 {
-		return operations.NewListFilesNotFound().WithPayload([]*models.File{})
-	}
-
-	output := []*models.File{}
+	output := []*models.FileEntry{}
 
 	for _, img := range results {
 		converted := translateDBFileToREST(img)
@@ -119,11 +115,9 @@ func CreateFile(params operations.CreateFileParams) middleware.Responder {
 	f := false
 	err := imageMetadataConnection.CreateFileEntry(requestCtx, &filedb.File{
 		FileMetadata: filedb.FileMetadata{
-			Name:   params.NewFile.ID,
-			Md5Sum: params.NewFile.Md5sum,
+			Name: params.ID,
 		},
 		// TODO: validate that tags actually exist
-		Tags:          &params.NewFile.Tags,
 		HasContent:    &f,
 		HasBeenTagged: &f,
 	})
@@ -131,7 +125,7 @@ func CreateFile(params operations.CreateFileParams) middleware.Responder {
 		return operations.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))
 	}
 
-	createdFile, err := imageMetadataConnection.GetFile(requestCtx, params.NewFile.ID)
+	createdFile, err := imageMetadataConnection.GetFile(requestCtx, params.ID)
 	if err != nil {
 		return operations.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to get created image: %v", err))
 	}
@@ -153,10 +147,6 @@ func PatchFileByID(params operations.PatchFileByIDParams) middleware.Responder {
 		FileMetadata: filedb.FileMetadata{
 			Name: params.ID,
 		},
-	}
-
-	if len(params.Patch.Md5sum) > 0 {
-		img.FileMetadata.Md5Sum = params.Patch.Md5sum
 	}
 
 	// TODO: validate that tags actually exist

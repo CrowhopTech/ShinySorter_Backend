@@ -46,7 +46,7 @@ type PatchQuestionByIDParams struct {
 	  Required: true
 	  In: body
 	*/
-	Patch *models.Question
+	Patch *models.QuestionPatch
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -65,7 +65,7 @@ func (o *PatchQuestionByIDParams) BindRequest(r *http.Request, route *middleware
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.Question
+		var body models.QuestionPatch
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("patch", "body", ""))
