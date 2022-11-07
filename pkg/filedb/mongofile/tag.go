@@ -138,7 +138,7 @@ func (mc *mongoConnection) ModifyTag(ctx context.Context, t *filedb.Tag) (*filed
 
 // DeleteTag will delete the given tag, as well as remove it from all files that reference it.
 func (mc *mongoConnection) DeleteTag(ctx context.Context, id int64) error {
-	res, err := mc.tagsCollection.DeleteOne(ctx, bson.M{"$_id": id})
+	res, err := mc.tagsCollection.DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {
 		return err
 	}

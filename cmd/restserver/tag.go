@@ -116,3 +116,14 @@ func PatchTagByID(params operations.PatchTagByIDParams) middleware.Responder {
 
 	return operations.NewPatchTagByIDOK().WithPayload(output)
 }
+
+func DeleteTag(params operations.DeleteTagParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	err := imageMetadataConnection.DeleteTag(requestCtx, params.ID)
+	if err != nil {
+		return operations.NewDeleteTagInternalServerError().WithPayload(fmt.Sprintf("failed to delete tag: %v", err))
+	}
+
+	return operations.NewDeleteTagOK()
+}

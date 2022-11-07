@@ -93,3 +93,14 @@ func PatchQuestionByID(params operations.PatchQuestionByIDParams) middleware.Res
 
 	return operations.NewPatchQuestionByIDOK().WithPayload(output)
 }
+
+func DeleteQuestion(params operations.DeleteQuestionParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	err := imageMetadataConnection.DeleteQuestion(requestCtx, params.ID)
+	if err != nil {
+		return operations.NewDeleteQuestionInternalServerError().WithPayload(fmt.Sprintf("failed to delete question: %v", err))
+	}
+
+	return operations.NewDeleteQuestionOK()
+}

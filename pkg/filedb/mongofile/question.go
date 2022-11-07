@@ -13,7 +13,9 @@ import (
 // ListQuestions will return the list of all questions. There are no filter options as this
 // list will never be extremely large.
 func (mc *mongoConnection) ListQuestions(ctx context.Context) ([]*filedb.Question, error) {
-	cursor, err := mc.questionsCollection.Find(ctx, bson.M{})
+	cursor, err := mc.questionsCollection.Find(ctx, bson.M{}, &options.FindOptions{
+		Sort: bson.D{bson.E{Key: "orderingID", Value: 1}},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error while running Find: %v", err)
 	}
@@ -141,7 +143,7 @@ func (mc *mongoConnection) ModifyQuestion(ctx context.Context, q *filedb.Questio
 }
 
 func (mc *mongoConnection) DeleteQuestion(ctx context.Context, id int64) error {
-	res, err := mc.questionsCollection.DeleteOne(ctx, bson.M{"$_id": id})
+	res, err := mc.questionsCollection.DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {
 		return err
 	}

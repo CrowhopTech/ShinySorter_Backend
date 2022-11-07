@@ -106,10 +106,12 @@ func main() {
 	api.ListTagsHandler = operations.ListTagsHandlerFunc(ListTags)
 	api.CreateTagHandler = operations.CreateTagHandlerFunc(CreateTag)
 	api.PatchTagByIDHandler = operations.PatchTagByIDHandlerFunc(PatchTagByID)
+	api.DeleteTagHandler = operations.DeleteTagHandlerFunc(DeleteTag)
 
 	api.ListQuestionsHandler = operations.ListQuestionsHandlerFunc(ListQuestions)
 	api.CreateQuestionHandler = operations.CreateQuestionHandlerFunc(CreateQuestion)
 	api.PatchQuestionByIDHandler = operations.PatchQuestionByIDHandlerFunc(PatchQuestionByID)
+	api.DeleteQuestionHandler = operations.DeleteQuestionHandlerFunc(DeleteQuestion)
 
 	logrus.Info("Swagger spec and handlers initialized, starting to listen for requests")
 
