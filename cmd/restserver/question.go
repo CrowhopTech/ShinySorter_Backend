@@ -104,3 +104,14 @@ func DeleteQuestion(params operations.DeleteQuestionParams) middleware.Responder
 
 	return operations.NewDeleteQuestionOK()
 }
+
+func ReorderQuestions(params operations.ReorderQuestionsParams) middleware.Responder {
+	requestCtx := rootCtx
+
+	err := imageMetadataConnection.ReorderQuestions(requestCtx, params.NewOrder)
+	if err != nil {
+		return operations.NewReorderQuestionsInternalServerError().WithPayload(fmt.Sprintf("failed to reorder questions: %v", err))
+	}
+
+	return operations.NewReorderQuestionsOK()
+}

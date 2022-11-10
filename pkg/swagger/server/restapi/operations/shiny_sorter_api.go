@@ -87,6 +87,9 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		PatchTagByIDHandler: PatchTagByIDHandlerFunc(func(params PatchTagByIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation PatchTagByID has not yet been implemented")
 		}),
+		ReorderQuestionsHandler: ReorderQuestionsHandlerFunc(func(params ReorderQuestionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation ReorderQuestions has not yet been implemented")
+		}),
 		SetFileContentHandler: SetFileContentHandlerFunc(func(params SetFileContentParams) middleware.Responder {
 			return middleware.NotImplemented("operation SetFileContent has not yet been implemented")
 		}),
@@ -163,6 +166,8 @@ type ShinySorterAPI struct {
 	PatchQuestionByIDHandler PatchQuestionByIDHandler
 	// PatchTagByIDHandler sets the operation handler for the patch tag by ID operation
 	PatchTagByIDHandler PatchTagByIDHandler
+	// ReorderQuestionsHandler sets the operation handler for the reorder questions operation
+	ReorderQuestionsHandler ReorderQuestionsHandler
 	// SetFileContentHandler sets the operation handler for the set file content operation
 	SetFileContentHandler SetFileContentHandler
 
@@ -292,6 +297,9 @@ func (o *ShinySorterAPI) Validate() error {
 	}
 	if o.PatchTagByIDHandler == nil {
 		unregistered = append(unregistered, "PatchTagByIDHandler")
+	}
+	if o.ReorderQuestionsHandler == nil {
+		unregistered = append(unregistered, "ReorderQuestionsHandler")
 	}
 	if o.SetFileContentHandler == nil {
 		unregistered = append(unregistered, "SetFileContentHandler")
@@ -446,6 +454,10 @@ func (o *ShinySorterAPI) initHandlerCache() {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/tags/{id}"] = NewPatchTagByID(o.context, o.PatchTagByIDHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/questions/reorder"] = NewReorderQuestions(o.context, o.ReorderQuestionsHandler)
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}

@@ -10,6 +10,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var (
+	errNoQuestionsUpdated = fmt.Errorf("no documents updated")
+)
+
 // ListQuestions will return the list of all questions. There are no filter options as this
 // list will never be extremely large.
 func (mc *mongoConnection) ListQuestions(ctx context.Context) ([]*filedb.Question, error) {
@@ -126,7 +130,7 @@ func (mc *mongoConnection) ModifyQuestion(ctx context.Context, q *filedb.Questio
 
 	// TODO: better distinguish between "ID didn't exist" and "document matched original"
 	if res.ModifiedCount == 0 {
-		return nil, fmt.Errorf("no documents updated")
+		return nil, errNoQuestionsUpdated
 	}
 
 	updated := mc.questionsCollection.FindOne(ctx, bson.M{"_id": q.ID})
@@ -150,5 +154,68 @@ func (mc *mongoConnection) DeleteQuestion(ctx context.Context, id int64) error {
 	if res.DeletedCount == 0 {
 		return fmt.Errorf("no documents deleted")
 	}
+	return nil
+}
+
+func (mc *mongoConnection) ReorderQuestions(ctx context.Context, newOrder []int64) error {
+	// List all questions
+	allQuestions, err := mc.questionsCollection.Find(ctx, bson.M{})
+	if err != nil {
+		return err
+	}
+	questionMap := map[int64]*filedb.Question{}
+
+	// Create a map from question ID to question struct
+	for allQuestions.Next(ctx) {
+		nextQuestion := filedb.Question{}
+		err = allQuestions.Decode(&nextQuestion)
+		if err != nil {
+			return fmt.Errorf("error decoding document: %v", err)
+		}
+		questionMap[nextQuestion.ID] = &nextQuestion
+	}
+
+	if allQuestions.Err() != nil {
+		return fmt.Errorf("error getting questions: %v", allQuestions.Err())
+	}
+
+	// Loop over new order, populate new array with proper ordering IDs as we go, removing from map
+	newOrderArray := []*filedb.Question{}
+
+	orderingID := int64(1)
+	for _, qid := range newOrder {
+		question, ok := questionMap[qid]
+		if !ok {
+			return fmt.Errorf("question %d not found", qid)
+		}
+
+		delete(questionMap, qid)
+
+		question.OrderingID = orderingID
+		newOrderArray = append(newOrderArray, question)
+	}
+
+	// At end, if anything is left in map, return error
+	if len(questionMap) > 0 {
+		missingQuestions := []int64{}
+		for qid := range questionMap {
+			missingQuestions = append(missingQuestions, qid)
+		}
+		return fmt.Errorf("not all questions were included in the reorder request, missing questions: %v", missingQuestions)
+	}
+	// Re-write questions with new order
+	for oid, q := range newOrderArray {
+		newOID := int64(oid) + 1
+		_, err = mc.ModifyQuestion(ctx, &filedb.Question{
+			ID:         q.ID,
+			OrderingID: newOID,
+		})
+		if err != nil {
+			if err != nil && err != errNoQuestionsUpdated {
+				return fmt.Errorf("error while updating question %d to OID %d during reorder: %v", q.ID, newOID, err)
+			}
+		}
+	}
+
 	return nil
 }

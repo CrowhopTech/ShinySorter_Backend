@@ -112,6 +112,7 @@ func main() {
 	api.CreateQuestionHandler = operations.CreateQuestionHandlerFunc(CreateQuestion)
 	api.PatchQuestionByIDHandler = operations.PatchQuestionByIDHandlerFunc(PatchQuestionByID)
 	api.DeleteQuestionHandler = operations.DeleteQuestionHandlerFunc(DeleteQuestion)
+	api.ReorderQuestionsHandler = operations.ReorderQuestionsHandlerFunc(ReorderQuestions)
 
 	logrus.Info("Swagger spec and handlers initialized, starting to listen for requests")
 

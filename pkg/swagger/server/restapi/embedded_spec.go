@@ -350,6 +350,38 @@ func init() {
         }
       }
     },
+    "/questions/reorder": {
+      "post": {
+        "description": "Reorders all questions (requires all question IDs to be passed in, e.g. a complete order)",
+        "operationId": "reorderQuestions",
+        "parameters": [
+          {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "The new order of the questions",
+            "name": "newOrder",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Questions were reordered successfully"
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericServerError"
+          }
+        }
+      }
+    },
     "/questions/{id}": {
       "delete": {
         "description": "Deletes a question.",
@@ -1204,6 +1236,41 @@ func init() {
             "schema": {
               "$ref": "#/definitions/questionEntry"
             }
+          },
+          "400": {
+            "description": "Some part of the request was invalid. More information will be included in the error string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Something else went wrong during the request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/questions/reorder": {
+      "post": {
+        "description": "Reorders all questions (requires all question IDs to be passed in, e.g. a complete order)",
+        "operationId": "reorderQuestions",
+        "parameters": [
+          {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "The new order of the questions",
+            "name": "newOrder",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Questions were reordered successfully"
           },
           "400": {
             "description": "Some part of the request was invalid. More information will be included in the error string",

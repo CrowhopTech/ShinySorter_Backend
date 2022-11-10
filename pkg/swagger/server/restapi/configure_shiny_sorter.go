@@ -113,6 +113,11 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.PatchTagByID has not yet been implemented")
 		})
 	}
+	if api.ReorderQuestionsHandler == nil {
+		api.ReorderQuestionsHandler = operations.ReorderQuestionsHandlerFunc(func(params operations.ReorderQuestionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.ReorderQuestions has not yet been implemented")
+		})
+	}
 	if api.SetFileContentHandler == nil {
 		api.SetFileContentHandler = operations.SetFileContentHandlerFunc(func(params operations.SetFileContentParams) middleware.Responder {
 			return middleware.NotImplemented("operation operations.SetFileContent has not yet been implemented")

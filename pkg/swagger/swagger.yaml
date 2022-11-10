@@ -563,3 +563,25 @@ paths:
             type: string
         500:
           $ref: "#/responses/genericServerError"
+  /questions/reorder:
+    post:
+      operationId: reorderQuestions
+      description: Reorders all questions (requires all question IDs to be passed in, e.g. a complete order)
+      parameters:
+        - name: newOrder
+          in: query
+          description: The new order of the questions
+          required: true
+          type: array
+          items:
+            type: integer
+      responses:
+        200:
+          description: Questions were reordered successfully
+        400:
+          # This may happen if not all questions are provided, some ID is invalid, or something else
+          description: Some part of the request was invalid. More information will be included in the error string
+          schema:
+            type: string
+        500:
+          $ref: "#/responses/genericServerError"

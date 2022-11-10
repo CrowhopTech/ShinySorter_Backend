@@ -59,6 +59,8 @@ type ClientService interface {
 
 	PatchTagByID(params *PatchTagByIDParams, opts ...ClientOption) (*PatchTagByIDOK, error)
 
+	ReorderQuestions(params *ReorderQuestionsParams, opts ...ClientOption) (*ReorderQuestionsOK, error)
+
 	SetFileContent(params *SetFileContentParams, opts ...ClientOption) (*SetFileContentOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
@@ -593,6 +595,44 @@ func (a *Client) PatchTagByID(params *PatchTagByIDParams, opts ...ClientOption) 
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for patchTagByID: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+  ReorderQuestions Reorders all questions (requires all question IDs to be passed in, e.g. a complete order)
+*/
+func (a *Client) ReorderQuestions(params *ReorderQuestionsParams, opts ...ClientOption) (*ReorderQuestionsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewReorderQuestionsParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "reorderQuestions",
+		Method:             "POST",
+		PathPattern:        "/questions/reorder",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json", "multipart/form-data"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &ReorderQuestionsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*ReorderQuestionsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for reorderQuestions: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

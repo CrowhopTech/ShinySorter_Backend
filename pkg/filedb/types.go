@@ -127,4 +127,6 @@ type FileMetadataService interface {
 	ModifyQuestion(ctx context.Context, q *Question) (*Question, error)
 
 	DeleteQuestion(ctx context.Context, id int64) error
+
+	ReorderQuestions(ctx context.Context, newOrder []int64) error
 }
