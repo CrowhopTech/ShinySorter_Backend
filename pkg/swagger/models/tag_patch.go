@@ -21,10 +21,6 @@ type TagPatch struct {
 	// Example: This image contains a Tulip
 	Description string `json:"description,omitempty"`
 
-	// name
-	// Example: flower:type:tulip
-	Name string `json:"name,omitempty"`
-
 	// user friendly name
 	// Example: Tulip
 	UserFriendlyName string `json:"userFriendlyName,omitempty"`

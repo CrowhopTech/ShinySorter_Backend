@@ -69,9 +69,6 @@ definitions:
     properties:
       id:
         type: integer
-      name:
-        type: string
-        example: "flower:type:tulip"
       userFriendlyName:
         type: string
         example: "Tulip"
@@ -80,14 +77,10 @@ definitions:
         example: "This image contains a Tulip"
     required:
       - id
-      - name
       - userFriendlyName
       - description
   tagPatch:
     properties:
-      name:
-        type: string
-        example: "flower:type:tulip"
       userFriendlyName:
         type: string
         example: "Tulip"
@@ -96,9 +89,6 @@ definitions:
         example: "This image contains a Tulip"
   tagCreate:
     properties:
-      name:
-        type: string
-        example: "flower:type:tulip"
       userFriendlyName:
         type: string
         example: "Tulip"
@@ -106,7 +96,6 @@ definitions:
         type: string
         example: "This image contains a Tulip"
     required:
-      - name
       - userFriendlyName
       - description
 

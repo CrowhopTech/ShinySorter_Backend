@@ -28,11 +28,6 @@ type TagEntry struct {
 	// Required: true
 	ID *int64 `json:"id"`
 
-	// name
-	// Example: flower:type:tulip
-	// Required: true
-	Name *string `json:"name"`
-
 	// user friendly name
 	// Example: Tulip
 	// Required: true
@@ -48,10 +43,6 @@ func (m *TagEntry) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -77,15 +68,6 @@ func (m *TagEntry) validateDescription(formats strfmt.Registry) error {
 func (m *TagEntry) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("id", "body", m.ID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *TagEntry) validateName(formats strfmt.Registry) error {
-
-	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
 	}
 

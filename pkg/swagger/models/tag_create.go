@@ -24,11 +24,6 @@ type TagCreate struct {
 	// Required: true
 	Description *string `json:"description"`
 
-	// name
-	// Example: flower:type:tulip
-	// Required: true
-	Name *string `json:"name"`
-
 	// user friendly name
 	// Example: Tulip
 	// Required: true
@@ -40,10 +35,6 @@ func (m *TagCreate) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -60,15 +51,6 @@ func (m *TagCreate) Validate(formats strfmt.Registry) error {
 func (m *TagCreate) validateDescription(formats strfmt.Registry) error {
 
 	if err := validate.Required("description", "body", m.Description); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *TagCreate) validateName(formats strfmt.Registry) error {
-
-	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
 	}
 

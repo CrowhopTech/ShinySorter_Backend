@@ -16,7 +16,6 @@ func translateDBTagToREST(tag *filedb.Tag) *models.TagEntry {
 	return &models.TagEntry{
 		Description:      &tag.Description,
 		ID:               &tag.ID,
-		Name:             &tag.Name,
 		UserFriendlyName: &tag.UserFriendlyName,
 	}
 }
@@ -75,7 +74,6 @@ func CreateTag(params operations.CreateTagParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	createdTag, err := imageMetadataConnection.CreateTag(requestCtx, &filedb.Tag{
-		Name:             *params.NewTag.Name,
 		UserFriendlyName: *params.NewTag.UserFriendlyName,
 		Description:      *params.NewTag.Description,
 	})
@@ -93,10 +91,6 @@ func PatchTagByID(params operations.PatchTagByIDParams) middleware.Responder {
 
 	tag := filedb.Tag{
 		ID: params.ID,
-	}
-
-	if len(params.Patch.Name) > 0 {
-		tag.Name = params.Patch.Name
 	}
 
 	if len(params.Patch.UserFriendlyName) > 0 {

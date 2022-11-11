@@ -741,7 +741,6 @@ func init() {
     },
     "tagCreate": {
       "required": [
-        "name",
         "userFriendlyName",
         "description"
       ],
@@ -749,10 +748,6 @@ func init() {
         "description": {
           "type": "string",
           "example": "This image contains a Tulip"
-        },
-        "name": {
-          "type": "string",
-          "example": "flower:type:tulip"
         },
         "userFriendlyName": {
           "type": "string",
@@ -763,7 +758,6 @@ func init() {
     "tagEntry": {
       "required": [
         "id",
-        "name",
         "userFriendlyName",
         "description"
       ],
@@ -774,10 +768,6 @@ func init() {
         },
         "id": {
           "type": "integer"
-        },
-        "name": {
-          "type": "string",
-          "example": "flower:type:tulip"
         },
         "userFriendlyName": {
           "type": "string",
@@ -804,10 +794,6 @@ func init() {
         "description": {
           "type": "string",
           "example": "This image contains a Tulip"
-        },
-        "name": {
-          "type": "string",
-          "example": "flower:type:tulip"
         },
         "userFriendlyName": {
           "type": "string",
@@ -1664,7 +1650,6 @@ func init() {
     },
     "tagCreate": {
       "required": [
-        "name",
         "userFriendlyName",
         "description"
       ],
@@ -1672,10 +1657,6 @@ func init() {
         "description": {
           "type": "string",
           "example": "This image contains a Tulip"
-        },
-        "name": {
-          "type": "string",
-          "example": "flower:type:tulip"
         },
         "userFriendlyName": {
           "type": "string",
@@ -1686,7 +1667,6 @@ func init() {
     "tagEntry": {
       "required": [
         "id",
-        "name",
         "userFriendlyName",
         "description"
       ],
@@ -1697,10 +1677,6 @@ func init() {
         },
         "id": {
           "type": "integer"
-        },
-        "name": {
-          "type": "string",
-          "example": "flower:type:tulip"
         },
         "userFriendlyName": {
           "type": "string",
@@ -1727,10 +1703,6 @@ func init() {
         "description": {
           "type": "string",
           "example": "This image contains a Tulip"
-        },
-        "name": {
-          "type": "string",
-          "example": "flower:type:tulip"
         },
         "userFriendlyName": {
           "type": "string",
