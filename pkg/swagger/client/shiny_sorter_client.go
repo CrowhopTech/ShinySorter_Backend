@@ -6,10 +6,14 @@ package client
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client/operations"
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client/files"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client/operations"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client/questions"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client/tags"
 )
 
 // Default shiny sorter HTTP client.
@@ -54,7 +58,10 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *ShinySorte
 
 	cli := new(ShinySorter)
 	cli.Transport = transport
+	cli.Files = files.New(transport, formats)
 	cli.Operations = operations.New(transport, formats)
+	cli.Questions = questions.New(transport, formats)
+	cli.Tags = tags.New(transport, formats)
 	return cli
 }
 
@@ -99,7 +106,13 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // ShinySorter is a client for shiny sorter
 type ShinySorter struct {
+	Files files.ClientService
+
 	Operations operations.ClientService
+
+	Questions questions.ClientService
+
+	Tags tags.ClientService
 
 	Transport runtime.ClientTransport
 }
@@ -107,5 +120,8 @@ type ShinySorter struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *ShinySorter) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
+	c.Files.SetTransport(transport)
 	c.Operations.SetTransport(transport)
+	c.Questions.SetTransport(transport)
+	c.Tags.SetTransport(transport)
 }

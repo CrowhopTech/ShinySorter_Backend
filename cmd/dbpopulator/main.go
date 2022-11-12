@@ -20,7 +20,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	apiclient "github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client"
-	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client/operations"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client/files"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/models"
 	httptransport "github.com/go-openapi/runtime/client"
 )
@@ -271,7 +271,7 @@ func createFileEntryOnServer(ctx context.Context, importDir string, file string)
 
 	// Create entry on the server
 	// Will also fail if the md5sum deosn't match (this is how we check for conflicts)
-	_, err = swaggerClient.Operations.CreateFile(operations.NewCreateFileParams().WithNewFile(&img))
+	_, err = swaggerClient.Files.CreateFile(files.NewCreateFileParams().WithNewFile(&img))
 	if err != nil {
 		return fmt.Errorf("failed to create file through REST: %v", err)
 	}
@@ -285,7 +285,7 @@ func uploadFileContents(ctx context.Context, importDir string, file string) erro
 		return fmt.Errorf("failed to open file: %v", err)
 	}
 
-	_, err = swaggerClient.Operations.SetFileContent(operations.NewSetFileContentParams().
+	_, err = swaggerClient.Files.SetFileContent(files.NewSetFileContentParams().
 		WithContext(ctx).
 		WithID(filepath.Base(file)).
 		WithFileContents(osFile),

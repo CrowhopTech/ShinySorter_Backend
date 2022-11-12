@@ -212,6 +212,14 @@ responses:
     schema:
       type: string
 
+tags:
+  - name: files
+    description: Everything about files
+  - name: tags
+    description: Everything about tags
+  - name: questions
+    description: Everything about questions
+
 paths:
   /healthz:
     get:
@@ -234,6 +242,8 @@ paths:
 
   /files:
     get:
+      tags:
+        - files
       operationId: listFiles
       description: Lists and queries files
       parameters:
@@ -262,6 +272,8 @@ paths:
 
   /files/{id}:
     get:
+      tags:
+        - files
       operationId: getFileById
       description: Gets the file metadata with the specified id
       parameters:
@@ -280,6 +292,8 @@ paths:
         500:
           $ref: "#/responses/genericServerError"
     post:
+      tags:
+        - files
       operationId: createFile
       description: Creates a new file entry
       parameters:
@@ -304,6 +318,8 @@ paths:
         500:
           $ref: "#/responses/genericServerError"
     patch:
+      tags:
+        - files
       operationId: patchFileById
       description: Modifies the file metadata with the specified id
       parameters:
@@ -331,6 +347,8 @@ paths:
           $ref: "#/responses/genericServerError"
   /files/contents/{id}:
     get:
+      tags:
+        - files
       operationId: getFileContent
       description: Gets the file contents with the specified id
       produces:
@@ -360,6 +378,8 @@ paths:
         500:
           $ref: "#/responses/genericServerError"
     patch:
+      tags:
+        - files
       operationId: setFileContent
       description: Sets the file contents for the specified id
       consumes:
@@ -389,6 +409,8 @@ paths:
 
   /tags:
     get:
+      tags:
+        - tags
       operationId: listTags
       description: Lists tags and their metadata
       responses:
@@ -401,6 +423,8 @@ paths:
         500:
           $ref: "#/responses/genericServerError"
     post:
+      tags:
+        - tags
       operationId: createTag
       description: Creates a new tag
       parameters:
@@ -423,6 +447,8 @@ paths:
           $ref: "#/responses/genericServerError"
   /tags/{id}:
     patch:
+      tags:
+        - tags
       operationId: patchTagByID
       description: Modifies tag metadata such as description, icon, etc.
       parameters:
@@ -450,6 +476,8 @@ paths:
         500:
           $ref: "#/responses/genericServerError"
     delete:
+      tags:
+        - tags
       operationId: deleteTag
       description: Deletes a tag. Should also remove it from all files that use it.
       parameters:
@@ -473,6 +501,8 @@ paths:
 
   /questions:
     get:
+      tags:
+        - questions
       operationId: listQuestions
       description: Lists questions
       responses:
@@ -485,6 +515,8 @@ paths:
         500:
           $ref: "#/responses/genericServerError"
     post:
+      tags:
+        - questions
       operationId: createQuestion
       description: Creates a new question
       parameters:
@@ -507,6 +539,8 @@ paths:
           $ref: "#/responses/genericServerError"
   /questions/{id}:
     patch:
+      tags:
+        - questions
       operationId: patchQuestionByID
       description: Modifies question metadata
       parameters:
@@ -534,6 +568,8 @@ paths:
         500:
           $ref: "#/responses/genericServerError"
     delete:
+      tags:
+        - questions
       operationId: deleteQuestion
       description: Deletes a question.
       parameters:
@@ -554,6 +590,8 @@ paths:
           $ref: "#/responses/genericServerError"
   /questions/reorder:
     post:
+      tags:
+        - questions
       operationId: reorderQuestions
       description: Reorders all questions (requires all question IDs to be passed in, e.g. a complete order)
       parameters:

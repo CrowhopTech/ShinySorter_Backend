@@ -5,7 +5,7 @@ import (
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/models"
-	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/tags"
 	"github.com/go-openapi/runtime/middleware"
 )
 
@@ -52,12 +52,12 @@ func tagOptionArrayToSwagger(input []filedb.TagOption) []*models.TagOption {
 }
 
 //ListTags lists all registered tags
-func ListTags(params operations.ListTagsParams) middleware.Responder {
+func ListTags(params tags.ListTagsParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	results, err := imageMetadataConnection.ListTags(requestCtx)
 	if err != nil {
-		return operations.NewListTagsInternalServerError().WithPayload(fmt.Sprintf("failed to list tags: %v", err))
+		return tags.NewListTagsInternalServerError().WithPayload(fmt.Sprintf("failed to list tags: %v", err))
 	}
 
 	output := []*models.TagEntry{}
@@ -67,10 +67,10 @@ func ListTags(params operations.ListTagsParams) middleware.Responder {
 		output = append(output, converted)
 	}
 
-	return operations.NewListTagsOK().WithPayload(output)
+	return tags.NewListTagsOK().WithPayload(output)
 }
 
-func CreateTag(params operations.CreateTagParams) middleware.Responder {
+func CreateTag(params tags.CreateTagParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	createdTag, err := imageMetadataConnection.CreateTag(requestCtx, &filedb.Tag{
@@ -78,15 +78,15 @@ func CreateTag(params operations.CreateTagParams) middleware.Responder {
 		Description:      *params.NewTag.Description,
 	})
 	if err != nil {
-		return operations.NewCreateTagInternalServerError().WithPayload(fmt.Sprintf("failed to insert tag: %v", err))
+		return tags.NewCreateTagInternalServerError().WithPayload(fmt.Sprintf("failed to insert tag: %v", err))
 	}
 
 	output := translateDBTagToREST(createdTag)
 
-	return operations.NewCreateTagCreated().WithPayload(output)
+	return tags.NewCreateTagCreated().WithPayload(output)
 }
 
-func PatchTagByID(params operations.PatchTagByIDParams) middleware.Responder {
+func PatchTagByID(params tags.PatchTagByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	tag := filedb.Tag{
@@ -103,21 +103,21 @@ func PatchTagByID(params operations.PatchTagByIDParams) middleware.Responder {
 
 	newTag, err := imageMetadataConnection.ModifyTag(requestCtx, &tag)
 	if err != nil {
-		return operations.NewPatchTagByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify tag entry %d: %v", params.ID, err))
+		return tags.NewPatchTagByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify tag entry %d: %v", params.ID, err))
 	}
 
 	output := translateDBTagToREST(newTag)
 
-	return operations.NewPatchTagByIDOK().WithPayload(output)
+	return tags.NewPatchTagByIDOK().WithPayload(output)
 }
 
-func DeleteTag(params operations.DeleteTagParams) middleware.Responder {
+func DeleteTag(params tags.DeleteTagParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	err := imageMetadataConnection.DeleteTag(requestCtx, params.ID)
 	if err != nil {
-		return operations.NewDeleteTagInternalServerError().WithPayload(fmt.Sprintf("failed to delete tag: %v", err))
+		return tags.NewDeleteTagInternalServerError().WithPayload(fmt.Sprintf("failed to delete tag: %v", err))
 	}
 
-	return operations.NewDeleteTagOK()
+	return tags.NewDeleteTagOK()
 }

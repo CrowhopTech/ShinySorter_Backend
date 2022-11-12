@@ -19,6 +19,9 @@ import (
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb/mongofile"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/files"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/questions"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/tags"
 	"github.com/sirupsen/logrus"
 )
 
@@ -95,24 +98,24 @@ func main() {
 
 	api.CheckHealthHandler = operations.CheckHealthHandlerFunc(CheckHealth)
 
-	api.ListFilesHandler = operations.ListFilesHandlerFunc(ListFiles)
-	api.GetFileByIDHandler = operations.GetFileByIDHandlerFunc(GetFileByID)
-	api.CreateFileHandler = operations.CreateFileHandlerFunc(CreateFile)
-	api.PatchFileByIDHandler = operations.PatchFileByIDHandlerFunc(PatchFileByID)
+	api.FilesListFilesHandler = files.ListFilesHandlerFunc(ListFiles)
+	api.FilesGetFileByIDHandler = files.GetFileByIDHandlerFunc(GetFileByID)
+	api.FilesCreateFileHandler = files.CreateFileHandlerFunc(CreateFile)
+	api.FilesPatchFileByIDHandler = files.PatchFileByIDHandlerFunc(PatchFileByID)
 
-	api.GetFileContentHandler = operations.GetFileContentHandlerFunc(GetFileContent)
-	api.SetFileContentHandler = operations.SetFileContentHandlerFunc(SetFileContent)
+	api.FilesGetFileContentHandler = files.GetFileContentHandlerFunc(GetFileContent)
+	api.FilesSetFileContentHandler = files.SetFileContentHandlerFunc(SetFileContent)
 
-	api.ListTagsHandler = operations.ListTagsHandlerFunc(ListTags)
-	api.CreateTagHandler = operations.CreateTagHandlerFunc(CreateTag)
-	api.PatchTagByIDHandler = operations.PatchTagByIDHandlerFunc(PatchTagByID)
-	api.DeleteTagHandler = operations.DeleteTagHandlerFunc(DeleteTag)
+	api.TagsListTagsHandler = tags.ListTagsHandlerFunc(ListTags)
+	api.TagsCreateTagHandler = tags.CreateTagHandlerFunc(CreateTag)
+	api.TagsPatchTagByIDHandler = tags.PatchTagByIDHandlerFunc(PatchTagByID)
+	api.TagsDeleteTagHandler = tags.DeleteTagHandlerFunc(DeleteTag)
 
-	api.ListQuestionsHandler = operations.ListQuestionsHandlerFunc(ListQuestions)
-	api.CreateQuestionHandler = operations.CreateQuestionHandlerFunc(CreateQuestion)
-	api.PatchQuestionByIDHandler = operations.PatchQuestionByIDHandlerFunc(PatchQuestionByID)
-	api.DeleteQuestionHandler = operations.DeleteQuestionHandlerFunc(DeleteQuestion)
-	api.ReorderQuestionsHandler = operations.ReorderQuestionsHandlerFunc(ReorderQuestions)
+	api.QuestionsListQuestionsHandler = questions.ListQuestionsHandlerFunc(ListQuestions)
+	api.QuestionsCreateQuestionHandler = questions.CreateQuestionHandlerFunc(CreateQuestion)
+	api.QuestionsPatchQuestionByIDHandler = questions.PatchQuestionByIDHandlerFunc(PatchQuestionByID)
+	api.QuestionsDeleteQuestionHandler = questions.DeleteQuestionHandlerFunc(DeleteQuestion)
+	api.QuestionsReorderQuestionsHandler = questions.ReorderQuestionsHandlerFunc(ReorderQuestions)
 
 	logrus.Info("Swagger spec and handlers initialized, starting to listen for requests")
 

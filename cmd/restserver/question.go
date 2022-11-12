@@ -5,7 +5,7 @@ import (
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/models"
-	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/questions"
 	"github.com/go-openapi/runtime/middleware"
 )
 
@@ -20,12 +20,12 @@ func translateDBQuestionToREST(question *filedb.Question) *models.QuestionEntry 
 }
 
 //ListQuestions lists all registered questions
-func ListQuestions(params operations.ListQuestionsParams) middleware.Responder {
+func ListQuestions(params questions.ListQuestionsParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	results, err := imageMetadataConnection.ListQuestions(requestCtx)
 	if err != nil {
-		return operations.NewListQuestionsInternalServerError().WithPayload(fmt.Sprintf("failed to list questions: %v", err))
+		return questions.NewListQuestionsInternalServerError().WithPayload(fmt.Sprintf("failed to list questions: %v", err))
 	}
 
 	output := []*models.QuestionEntry{}
@@ -35,10 +35,10 @@ func ListQuestions(params operations.ListQuestionsParams) middleware.Responder {
 		output = append(output, converted)
 	}
 
-	return operations.NewListQuestionsOK().WithPayload(output)
+	return questions.NewListQuestionsOK().WithPayload(output)
 }
 
-func CreateQuestion(params operations.CreateQuestionParams) middleware.Responder {
+func CreateQuestion(params questions.CreateQuestionParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	createdQuestion, err := imageMetadataConnection.CreateQuestion(requestCtx, &filedb.Question{
@@ -48,15 +48,15 @@ func CreateQuestion(params operations.CreateQuestionParams) middleware.Responder
 		TagOptions:   tagOptionArrayTofiledb(params.NewQuestion.TagOptions),
 	})
 	if err != nil {
-		return operations.NewCreateQuestionInternalServerError().WithPayload(fmt.Sprintf("failed to insert question: %v", err))
+		return questions.NewCreateQuestionInternalServerError().WithPayload(fmt.Sprintf("failed to insert question: %v", err))
 	}
 
 	output := translateDBQuestionToREST(createdQuestion)
 
-	return operations.NewCreateQuestionCreated().WithPayload(output)
+	return questions.NewCreateQuestionCreated().WithPayload(output)
 }
 
-func PatchQuestionByID(params operations.PatchQuestionByIDParams) middleware.Responder {
+func PatchQuestionByID(params questions.PatchQuestionByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	question := filedb.Question{
@@ -86,32 +86,32 @@ func PatchQuestionByID(params operations.PatchQuestionByIDParams) middleware.Res
 
 	newQuestion, err := imageMetadataConnection.ModifyQuestion(requestCtx, &question)
 	if err != nil {
-		return operations.NewPatchQuestionByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify question entry %d: %v", params.ID, err))
+		return questions.NewPatchQuestionByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify question entry %d: %v", params.ID, err))
 	}
 
 	output := translateDBQuestionToREST(newQuestion)
 
-	return operations.NewPatchQuestionByIDOK().WithPayload(output)
+	return questions.NewPatchQuestionByIDOK().WithPayload(output)
 }
 
-func DeleteQuestion(params operations.DeleteQuestionParams) middleware.Responder {
+func DeleteQuestion(params questions.DeleteQuestionParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	err := imageMetadataConnection.DeleteQuestion(requestCtx, params.ID)
 	if err != nil {
-		return operations.NewDeleteQuestionInternalServerError().WithPayload(fmt.Sprintf("failed to delete question: %v", err))
+		return questions.NewDeleteQuestionInternalServerError().WithPayload(fmt.Sprintf("failed to delete question: %v", err))
 	}
 
-	return operations.NewDeleteQuestionOK()
+	return questions.NewDeleteQuestionOK()
 }
 
-func ReorderQuestions(params operations.ReorderQuestionsParams) middleware.Responder {
+func ReorderQuestions(params questions.ReorderQuestionsParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	err := imageMetadataConnection.ReorderQuestions(requestCtx, params.NewOrder)
 	if err != nil {
-		return operations.NewReorderQuestionsInternalServerError().WithPayload(fmt.Sprintf("failed to reorder questions: %v", err))
+		return questions.NewReorderQuestionsInternalServerError().WithPayload(fmt.Sprintf("failed to reorder questions: %v", err))
 	}
 
-	return operations.NewReorderQuestionsOK()
+	return questions.NewReorderQuestionsOK()
 }

@@ -18,6 +18,10 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/files"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/questions"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/tags"
 )
 
 // NewShinySorterAPI creates a new ShinySorter instance
@@ -48,50 +52,50 @@ func NewShinySorterAPI(spec *loads.Document) *ShinySorterAPI {
 		CheckHealthHandler: CheckHealthHandlerFunc(func(params CheckHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation CheckHealth has not yet been implemented")
 		}),
-		CreateFileHandler: CreateFileHandlerFunc(func(params CreateFileParams) middleware.Responder {
-			return middleware.NotImplemented("operation CreateFile has not yet been implemented")
+		FilesCreateFileHandler: files.CreateFileHandlerFunc(func(params files.CreateFileParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.CreateFile has not yet been implemented")
 		}),
-		CreateQuestionHandler: CreateQuestionHandlerFunc(func(params CreateQuestionParams) middleware.Responder {
-			return middleware.NotImplemented("operation CreateQuestion has not yet been implemented")
+		QuestionsCreateQuestionHandler: questions.CreateQuestionHandlerFunc(func(params questions.CreateQuestionParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.CreateQuestion has not yet been implemented")
 		}),
-		CreateTagHandler: CreateTagHandlerFunc(func(params CreateTagParams) middleware.Responder {
-			return middleware.NotImplemented("operation CreateTag has not yet been implemented")
+		TagsCreateTagHandler: tags.CreateTagHandlerFunc(func(params tags.CreateTagParams) middleware.Responder {
+			return middleware.NotImplemented("operation tags.CreateTag has not yet been implemented")
 		}),
-		DeleteQuestionHandler: DeleteQuestionHandlerFunc(func(params DeleteQuestionParams) middleware.Responder {
-			return middleware.NotImplemented("operation DeleteQuestion has not yet been implemented")
+		QuestionsDeleteQuestionHandler: questions.DeleteQuestionHandlerFunc(func(params questions.DeleteQuestionParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.DeleteQuestion has not yet been implemented")
 		}),
-		DeleteTagHandler: DeleteTagHandlerFunc(func(params DeleteTagParams) middleware.Responder {
-			return middleware.NotImplemented("operation DeleteTag has not yet been implemented")
+		TagsDeleteTagHandler: tags.DeleteTagHandlerFunc(func(params tags.DeleteTagParams) middleware.Responder {
+			return middleware.NotImplemented("operation tags.DeleteTag has not yet been implemented")
 		}),
-		GetFileByIDHandler: GetFileByIDHandlerFunc(func(params GetFileByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetFileByID has not yet been implemented")
+		FilesGetFileByIDHandler: files.GetFileByIDHandlerFunc(func(params files.GetFileByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.GetFileByID has not yet been implemented")
 		}),
-		GetFileContentHandler: GetFileContentHandlerFunc(func(params GetFileContentParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetFileContent has not yet been implemented")
+		FilesGetFileContentHandler: files.GetFileContentHandlerFunc(func(params files.GetFileContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.GetFileContent has not yet been implemented")
 		}),
-		ListFilesHandler: ListFilesHandlerFunc(func(params ListFilesParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListFiles has not yet been implemented")
+		FilesListFilesHandler: files.ListFilesHandlerFunc(func(params files.ListFilesParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.ListFiles has not yet been implemented")
 		}),
-		ListQuestionsHandler: ListQuestionsHandlerFunc(func(params ListQuestionsParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListQuestions has not yet been implemented")
+		QuestionsListQuestionsHandler: questions.ListQuestionsHandlerFunc(func(params questions.ListQuestionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.ListQuestions has not yet been implemented")
 		}),
-		ListTagsHandler: ListTagsHandlerFunc(func(params ListTagsParams) middleware.Responder {
-			return middleware.NotImplemented("operation ListTags has not yet been implemented")
+		TagsListTagsHandler: tags.ListTagsHandlerFunc(func(params tags.ListTagsParams) middleware.Responder {
+			return middleware.NotImplemented("operation tags.ListTags has not yet been implemented")
 		}),
-		PatchFileByIDHandler: PatchFileByIDHandlerFunc(func(params PatchFileByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation PatchFileByID has not yet been implemented")
+		FilesPatchFileByIDHandler: files.PatchFileByIDHandlerFunc(func(params files.PatchFileByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.PatchFileByID has not yet been implemented")
 		}),
-		PatchQuestionByIDHandler: PatchQuestionByIDHandlerFunc(func(params PatchQuestionByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation PatchQuestionByID has not yet been implemented")
+		QuestionsPatchQuestionByIDHandler: questions.PatchQuestionByIDHandlerFunc(func(params questions.PatchQuestionByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.PatchQuestionByID has not yet been implemented")
 		}),
-		PatchTagByIDHandler: PatchTagByIDHandlerFunc(func(params PatchTagByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation PatchTagByID has not yet been implemented")
+		TagsPatchTagByIDHandler: tags.PatchTagByIDHandlerFunc(func(params tags.PatchTagByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation tags.PatchTagByID has not yet been implemented")
 		}),
-		ReorderQuestionsHandler: ReorderQuestionsHandlerFunc(func(params ReorderQuestionsParams) middleware.Responder {
-			return middleware.NotImplemented("operation ReorderQuestions has not yet been implemented")
+		QuestionsReorderQuestionsHandler: questions.ReorderQuestionsHandlerFunc(func(params questions.ReorderQuestionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.ReorderQuestions has not yet been implemented")
 		}),
-		SetFileContentHandler: SetFileContentHandlerFunc(func(params SetFileContentParams) middleware.Responder {
-			return middleware.NotImplemented("operation SetFileContent has not yet been implemented")
+		FilesSetFileContentHandler: files.SetFileContentHandlerFunc(func(params files.SetFileContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.SetFileContent has not yet been implemented")
 		}),
 	}
 }
@@ -140,36 +144,36 @@ type ShinySorterAPI struct {
 
 	// CheckHealthHandler sets the operation handler for the check health operation
 	CheckHealthHandler CheckHealthHandler
-	// CreateFileHandler sets the operation handler for the create file operation
-	CreateFileHandler CreateFileHandler
-	// CreateQuestionHandler sets the operation handler for the create question operation
-	CreateQuestionHandler CreateQuestionHandler
-	// CreateTagHandler sets the operation handler for the create tag operation
-	CreateTagHandler CreateTagHandler
-	// DeleteQuestionHandler sets the operation handler for the delete question operation
-	DeleteQuestionHandler DeleteQuestionHandler
-	// DeleteTagHandler sets the operation handler for the delete tag operation
-	DeleteTagHandler DeleteTagHandler
-	// GetFileByIDHandler sets the operation handler for the get file by Id operation
-	GetFileByIDHandler GetFileByIDHandler
-	// GetFileContentHandler sets the operation handler for the get file content operation
-	GetFileContentHandler GetFileContentHandler
-	// ListFilesHandler sets the operation handler for the list files operation
-	ListFilesHandler ListFilesHandler
-	// ListQuestionsHandler sets the operation handler for the list questions operation
-	ListQuestionsHandler ListQuestionsHandler
-	// ListTagsHandler sets the operation handler for the list tags operation
-	ListTagsHandler ListTagsHandler
-	// PatchFileByIDHandler sets the operation handler for the patch file by Id operation
-	PatchFileByIDHandler PatchFileByIDHandler
-	// PatchQuestionByIDHandler sets the operation handler for the patch question by ID operation
-	PatchQuestionByIDHandler PatchQuestionByIDHandler
-	// PatchTagByIDHandler sets the operation handler for the patch tag by ID operation
-	PatchTagByIDHandler PatchTagByIDHandler
-	// ReorderQuestionsHandler sets the operation handler for the reorder questions operation
-	ReorderQuestionsHandler ReorderQuestionsHandler
-	// SetFileContentHandler sets the operation handler for the set file content operation
-	SetFileContentHandler SetFileContentHandler
+	// FilesCreateFileHandler sets the operation handler for the create file operation
+	FilesCreateFileHandler files.CreateFileHandler
+	// QuestionsCreateQuestionHandler sets the operation handler for the create question operation
+	QuestionsCreateQuestionHandler questions.CreateQuestionHandler
+	// TagsCreateTagHandler sets the operation handler for the create tag operation
+	TagsCreateTagHandler tags.CreateTagHandler
+	// QuestionsDeleteQuestionHandler sets the operation handler for the delete question operation
+	QuestionsDeleteQuestionHandler questions.DeleteQuestionHandler
+	// TagsDeleteTagHandler sets the operation handler for the delete tag operation
+	TagsDeleteTagHandler tags.DeleteTagHandler
+	// FilesGetFileByIDHandler sets the operation handler for the get file by Id operation
+	FilesGetFileByIDHandler files.GetFileByIDHandler
+	// FilesGetFileContentHandler sets the operation handler for the get file content operation
+	FilesGetFileContentHandler files.GetFileContentHandler
+	// FilesListFilesHandler sets the operation handler for the list files operation
+	FilesListFilesHandler files.ListFilesHandler
+	// QuestionsListQuestionsHandler sets the operation handler for the list questions operation
+	QuestionsListQuestionsHandler questions.ListQuestionsHandler
+	// TagsListTagsHandler sets the operation handler for the list tags operation
+	TagsListTagsHandler tags.ListTagsHandler
+	// FilesPatchFileByIDHandler sets the operation handler for the patch file by Id operation
+	FilesPatchFileByIDHandler files.PatchFileByIDHandler
+	// QuestionsPatchQuestionByIDHandler sets the operation handler for the patch question by ID operation
+	QuestionsPatchQuestionByIDHandler questions.PatchQuestionByIDHandler
+	// TagsPatchTagByIDHandler sets the operation handler for the patch tag by ID operation
+	TagsPatchTagByIDHandler tags.PatchTagByIDHandler
+	// QuestionsReorderQuestionsHandler sets the operation handler for the reorder questions operation
+	QuestionsReorderQuestionsHandler questions.ReorderQuestionsHandler
+	// FilesSetFileContentHandler sets the operation handler for the set file content operation
+	FilesSetFileContentHandler files.SetFileContentHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -259,50 +263,50 @@ func (o *ShinySorterAPI) Validate() error {
 	if o.CheckHealthHandler == nil {
 		unregistered = append(unregistered, "CheckHealthHandler")
 	}
-	if o.CreateFileHandler == nil {
-		unregistered = append(unregistered, "CreateFileHandler")
+	if o.FilesCreateFileHandler == nil {
+		unregistered = append(unregistered, "files.CreateFileHandler")
 	}
-	if o.CreateQuestionHandler == nil {
-		unregistered = append(unregistered, "CreateQuestionHandler")
+	if o.QuestionsCreateQuestionHandler == nil {
+		unregistered = append(unregistered, "questions.CreateQuestionHandler")
 	}
-	if o.CreateTagHandler == nil {
-		unregistered = append(unregistered, "CreateTagHandler")
+	if o.TagsCreateTagHandler == nil {
+		unregistered = append(unregistered, "tags.CreateTagHandler")
 	}
-	if o.DeleteQuestionHandler == nil {
-		unregistered = append(unregistered, "DeleteQuestionHandler")
+	if o.QuestionsDeleteQuestionHandler == nil {
+		unregistered = append(unregistered, "questions.DeleteQuestionHandler")
 	}
-	if o.DeleteTagHandler == nil {
-		unregistered = append(unregistered, "DeleteTagHandler")
+	if o.TagsDeleteTagHandler == nil {
+		unregistered = append(unregistered, "tags.DeleteTagHandler")
 	}
-	if o.GetFileByIDHandler == nil {
-		unregistered = append(unregistered, "GetFileByIDHandler")
+	if o.FilesGetFileByIDHandler == nil {
+		unregistered = append(unregistered, "files.GetFileByIDHandler")
 	}
-	if o.GetFileContentHandler == nil {
-		unregistered = append(unregistered, "GetFileContentHandler")
+	if o.FilesGetFileContentHandler == nil {
+		unregistered = append(unregistered, "files.GetFileContentHandler")
 	}
-	if o.ListFilesHandler == nil {
-		unregistered = append(unregistered, "ListFilesHandler")
+	if o.FilesListFilesHandler == nil {
+		unregistered = append(unregistered, "files.ListFilesHandler")
 	}
-	if o.ListQuestionsHandler == nil {
-		unregistered = append(unregistered, "ListQuestionsHandler")
+	if o.QuestionsListQuestionsHandler == nil {
+		unregistered = append(unregistered, "questions.ListQuestionsHandler")
 	}
-	if o.ListTagsHandler == nil {
-		unregistered = append(unregistered, "ListTagsHandler")
+	if o.TagsListTagsHandler == nil {
+		unregistered = append(unregistered, "tags.ListTagsHandler")
 	}
-	if o.PatchFileByIDHandler == nil {
-		unregistered = append(unregistered, "PatchFileByIDHandler")
+	if o.FilesPatchFileByIDHandler == nil {
+		unregistered = append(unregistered, "files.PatchFileByIDHandler")
 	}
-	if o.PatchQuestionByIDHandler == nil {
-		unregistered = append(unregistered, "PatchQuestionByIDHandler")
+	if o.QuestionsPatchQuestionByIDHandler == nil {
+		unregistered = append(unregistered, "questions.PatchQuestionByIDHandler")
 	}
-	if o.PatchTagByIDHandler == nil {
-		unregistered = append(unregistered, "PatchTagByIDHandler")
+	if o.TagsPatchTagByIDHandler == nil {
+		unregistered = append(unregistered, "tags.PatchTagByIDHandler")
 	}
-	if o.ReorderQuestionsHandler == nil {
-		unregistered = append(unregistered, "ReorderQuestionsHandler")
+	if o.QuestionsReorderQuestionsHandler == nil {
+		unregistered = append(unregistered, "questions.ReorderQuestionsHandler")
 	}
-	if o.SetFileContentHandler == nil {
-		unregistered = append(unregistered, "SetFileContentHandler")
+	if o.FilesSetFileContentHandler == nil {
+		unregistered = append(unregistered, "files.SetFileContentHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -405,63 +409,63 @@ func (o *ShinySorterAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/files/{id}"] = NewCreateFile(o.context, o.CreateFileHandler)
+	o.handlers["POST"]["/files/{id}"] = files.NewCreateFile(o.context, o.FilesCreateFileHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/questions"] = NewCreateQuestion(o.context, o.CreateQuestionHandler)
+	o.handlers["POST"]["/questions"] = questions.NewCreateQuestion(o.context, o.QuestionsCreateQuestionHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/tags"] = NewCreateTag(o.context, o.CreateTagHandler)
+	o.handlers["POST"]["/tags"] = tags.NewCreateTag(o.context, o.TagsCreateTagHandler)
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/questions/{id}"] = NewDeleteQuestion(o.context, o.DeleteQuestionHandler)
+	o.handlers["DELETE"]["/questions/{id}"] = questions.NewDeleteQuestion(o.context, o.QuestionsDeleteQuestionHandler)
 	if o.handlers["DELETE"] == nil {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
-	o.handlers["DELETE"]["/tags/{id}"] = NewDeleteTag(o.context, o.DeleteTagHandler)
+	o.handlers["DELETE"]["/tags/{id}"] = tags.NewDeleteTag(o.context, o.TagsDeleteTagHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/files/{id}"] = NewGetFileByID(o.context, o.GetFileByIDHandler)
+	o.handlers["GET"]["/files/{id}"] = files.NewGetFileByID(o.context, o.FilesGetFileByIDHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/files/contents/{id}"] = NewGetFileContent(o.context, o.GetFileContentHandler)
+	o.handlers["GET"]["/files/contents/{id}"] = files.NewGetFileContent(o.context, o.FilesGetFileContentHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/files"] = NewListFiles(o.context, o.ListFilesHandler)
+	o.handlers["GET"]["/files"] = files.NewListFiles(o.context, o.FilesListFilesHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/questions"] = NewListQuestions(o.context, o.ListQuestionsHandler)
+	o.handlers["GET"]["/questions"] = questions.NewListQuestions(o.context, o.QuestionsListQuestionsHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/tags"] = NewListTags(o.context, o.ListTagsHandler)
+	o.handlers["GET"]["/tags"] = tags.NewListTags(o.context, o.TagsListTagsHandler)
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/files/{id}"] = NewPatchFileByID(o.context, o.PatchFileByIDHandler)
+	o.handlers["PATCH"]["/files/{id}"] = files.NewPatchFileByID(o.context, o.FilesPatchFileByIDHandler)
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/questions/{id}"] = NewPatchQuestionByID(o.context, o.PatchQuestionByIDHandler)
+	o.handlers["PATCH"]["/questions/{id}"] = questions.NewPatchQuestionByID(o.context, o.QuestionsPatchQuestionByIDHandler)
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/tags/{id}"] = NewPatchTagByID(o.context, o.PatchTagByIDHandler)
+	o.handlers["PATCH"]["/tags/{id}"] = tags.NewPatchTagByID(o.context, o.TagsPatchTagByIDHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/questions/reorder"] = NewReorderQuestions(o.context, o.ReorderQuestionsHandler)
+	o.handlers["POST"]["/questions/reorder"] = questions.NewReorderQuestions(o.context, o.QuestionsReorderQuestionsHandler)
 	if o.handlers["PATCH"] == nil {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
-	o.handlers["PATCH"]["/files/contents/{id}"] = NewSetFileContent(o.context, o.SetFileContentHandler)
+	o.handlers["PATCH"]["/files/contents/{id}"] = files.NewSetFileContent(o.context, o.FilesSetFileContentHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

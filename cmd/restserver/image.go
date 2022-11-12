@@ -5,7 +5,7 @@ import (
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/models"
-	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/files"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/sirupsen/logrus"
 )
@@ -28,7 +28,7 @@ func translateDBFileToREST(img *filedb.File) *models.FileEntry {
 }
 
 //ListFiles gets images matching the given query parameters
-func ListFiles(params operations.ListFilesParams) middleware.Responder {
+func ListFiles(params files.ListFilesParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	requireTagged := true
@@ -48,7 +48,7 @@ func ListFiles(params operations.ListFilesParams) middleware.Responder {
 			case "all":
 				filter.RequireTagOperation = filedb.All
 			default:
-				return operations.NewListFilesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.IncludeOperator))
+				return files.NewListFilesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.IncludeOperator))
 			}
 		}
 		filter.RequireTags = params.IncludeTags
@@ -63,7 +63,7 @@ func ListFiles(params operations.ListFilesParams) middleware.Responder {
 			case "all":
 				filter.ExcludeTagOperation = filedb.All
 			default:
-				return operations.NewListFilesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.ExcludeOperator))
+				return files.NewListFilesBadRequest().WithPayload(fmt.Sprintf("failed to parse tag operator '%s'", *params.ExcludeOperator))
 			}
 		}
 		filter.ExcludeTags = params.ExcludeTags
@@ -73,7 +73,7 @@ func ListFiles(params operations.ListFilesParams) middleware.Responder {
 
 	results, err := imageMetadataConnection.ListFiles(requestCtx, &filter)
 	if err != nil {
-		return operations.NewListFilesInternalServerError().WithPayload(fmt.Sprintf("failed to list images: %v", err))
+		return files.NewListFilesInternalServerError().WithPayload(fmt.Sprintf("failed to list images: %v", err))
 	}
 
 	output := []*models.FileEntry{}
@@ -83,33 +83,33 @@ func ListFiles(params operations.ListFilesParams) middleware.Responder {
 		output = append(output, converted)
 	}
 
-	return operations.NewListFilesOK().WithPayload(output)
+	return files.NewListFilesOK().WithPayload(output)
 }
 
-func GetFileByID(params operations.GetFileByIDParams) middleware.Responder {
+func GetFileByID(params files.GetFileByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	results, err := imageMetadataConnection.ListFiles(requestCtx, &filedb.FileFilter{
 		Name: params.ID,
 	})
 	if err != nil {
-		return operations.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
+		return files.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
 	}
 
 	if len(results) == 0 {
-		return operations.NewGetFileByIDNotFound()
+		return files.NewGetFileByIDNotFound()
 	}
 
 	if len(results) > 1 {
-		return operations.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("image list for ID %s returned %d results, expected exactly 1", params.ID, len(results)))
+		return files.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("image list for ID %s returned %d results, expected exactly 1", params.ID, len(results)))
 	}
 
 	output := translateDBFileToREST(results[0])
 
-	return operations.NewGetFileByIDOK().WithPayload(output)
+	return files.NewGetFileByIDOK().WithPayload(output)
 }
 
-func CreateFile(params operations.CreateFileParams) middleware.Responder {
+func CreateFile(params files.CreateFileParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	f := false
@@ -122,20 +122,20 @@ func CreateFile(params operations.CreateFileParams) middleware.Responder {
 		HasBeenTagged: &f,
 	})
 	if err != nil {
-		return operations.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))
+		return files.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))
 	}
 
 	createdFile, err := imageMetadataConnection.GetFile(requestCtx, params.ID)
 	if err != nil {
-		return operations.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to get created image: %v", err))
+		return files.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to get created image: %v", err))
 	}
 
 	output := translateDBFileToREST(createdFile)
 
-	return operations.NewCreateFileCreated().WithPayload(output)
+	return files.NewCreateFileCreated().WithPayload(output)
 }
 
-func PatchFileByID(params operations.PatchFileByIDParams) middleware.Responder {
+func PatchFileByID(params files.PatchFileByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	logrus.WithFields(logrus.Fields{
@@ -160,10 +160,10 @@ func PatchFileByID(params operations.PatchFileByIDParams) middleware.Responder {
 
 	newImg, err := imageMetadataConnection.ModifyFileEntry(requestCtx, &img)
 	if err != nil {
-		return operations.NewPatchFileByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify image entry %s: %v", params.ID, err))
+		return files.NewPatchFileByIDInternalServerError().WithPayload(fmt.Sprintf("failed to modify image entry %s: %v", params.ID, err))
 	}
 
 	output := translateDBFileToREST(newImg)
 
-	return operations.NewPatchFileByIDOK().WithPayload(output)
+	return files.NewPatchFileByIDOK().WithPayload(output)
 }

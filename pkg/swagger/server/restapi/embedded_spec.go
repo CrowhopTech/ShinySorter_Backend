@@ -39,6 +39,9 @@ func init() {
     "/files": {
       "get": {
         "description": "Lists and queries files",
+        "tags": [
+          "files"
+        ],
         "operationId": "listFiles",
         "parameters": [
           {
@@ -88,6 +91,9 @@ func init() {
         "produces": [
           "application/octet-stream"
         ],
+        "tags": [
+          "files"
+        ],
         "operationId": "getFileContent",
         "parameters": [
           {
@@ -131,6 +137,9 @@ func init() {
         "consumes": [
           "multipart/form-data"
         ],
+        "tags": [
+          "files"
+        ],
         "operationId": "setFileContent",
         "parameters": [
           {
@@ -170,6 +179,9 @@ func init() {
     "/files/{id}": {
       "get": {
         "description": "Gets the file metadata with the specified id",
+        "tags": [
+          "files"
+        ],
         "operationId": "getFileById",
         "parameters": [
           {
@@ -197,6 +209,9 @@ func init() {
       },
       "post": {
         "description": "Creates a new file entry",
+        "tags": [
+          "files"
+        ],
         "operationId": "createFile",
         "parameters": [
           {
@@ -233,6 +248,9 @@ func init() {
       },
       "patch": {
         "description": "Modifies the file metadata with the specified id",
+        "tags": [
+          "files"
+        ],
         "operationId": "patchFileById",
         "parameters": [
           {
@@ -302,6 +320,9 @@ func init() {
     "/questions": {
       "get": {
         "description": "Lists questions",
+        "tags": [
+          "questions"
+        ],
         "operationId": "listQuestions",
         "responses": {
           "200": {
@@ -320,6 +341,9 @@ func init() {
       },
       "post": {
         "description": "Creates a new question",
+        "tags": [
+          "questions"
+        ],
         "operationId": "createQuestion",
         "parameters": [
           {
@@ -353,6 +377,9 @@ func init() {
     "/questions/reorder": {
       "post": {
         "description": "Reorders all questions (requires all question IDs to be passed in, e.g. a complete order)",
+        "tags": [
+          "questions"
+        ],
         "operationId": "reorderQuestions",
         "parameters": [
           {
@@ -385,6 +412,9 @@ func init() {
     "/questions/{id}": {
       "delete": {
         "description": "Deletes a question.",
+        "tags": [
+          "questions"
+        ],
         "operationId": "deleteQuestion",
         "parameters": [
           {
@@ -412,6 +442,9 @@ func init() {
       },
       "patch": {
         "description": "Modifies question metadata",
+        "tags": [
+          "questions"
+        ],
         "operationId": "patchQuestionByID",
         "parameters": [
           {
@@ -453,6 +486,9 @@ func init() {
     "/tags": {
       "get": {
         "description": "Lists tags and their metadata",
+        "tags": [
+          "tags"
+        ],
         "operationId": "listTags",
         "responses": {
           "200": {
@@ -471,6 +507,9 @@ func init() {
       },
       "post": {
         "description": "Creates a new tag",
+        "tags": [
+          "tags"
+        ],
         "operationId": "createTag",
         "parameters": [
           {
@@ -504,6 +543,9 @@ func init() {
     "/tags/{id}": {
       "delete": {
         "description": "Deletes a tag. Should also remove it from all files that use it.",
+        "tags": [
+          "tags"
+        ],
         "operationId": "deleteTag",
         "parameters": [
           {
@@ -534,6 +576,9 @@ func init() {
       },
       "patch": {
         "description": "Modifies tag metadata such as description, icon, etc.",
+        "tags": [
+          "tags"
+        ],
         "operationId": "patchTagByID",
         "parameters": [
           {
@@ -851,7 +896,21 @@ func init() {
         "type": "string"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "description": "Everything about files",
+      "name": "files"
+    },
+    {
+      "description": "Everything about tags",
+      "name": "tags"
+    },
+    {
+      "description": "Everything about questions",
+      "name": "questions"
+    }
+  ]
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
   "consumes": [
@@ -875,6 +934,9 @@ func init() {
     "/files": {
       "get": {
         "description": "Lists and queries files",
+        "tags": [
+          "files"
+        ],
         "operationId": "listFiles",
         "parameters": [
           {
@@ -955,6 +1017,9 @@ func init() {
         "produces": [
           "application/octet-stream"
         ],
+        "tags": [
+          "files"
+        ],
         "operationId": "getFileContent",
         "parameters": [
           {
@@ -1001,6 +1066,9 @@ func init() {
         "consumes": [
           "multipart/form-data"
         ],
+        "tags": [
+          "files"
+        ],
         "operationId": "setFileContent",
         "parameters": [
           {
@@ -1043,6 +1111,9 @@ func init() {
     "/files/{id}": {
       "get": {
         "description": "Gets the file metadata with the specified id",
+        "tags": [
+          "files"
+        ],
         "operationId": "getFileById",
         "parameters": [
           {
@@ -1073,6 +1144,9 @@ func init() {
       },
       "post": {
         "description": "Creates a new file entry",
+        "tags": [
+          "files"
+        ],
         "operationId": "createFile",
         "parameters": [
           {
@@ -1112,6 +1186,9 @@ func init() {
       },
       "patch": {
         "description": "Modifies the file metadata with the specified id",
+        "tags": [
+          "files"
+        ],
         "operationId": "patchFileById",
         "parameters": [
           {
@@ -1184,6 +1261,9 @@ func init() {
     "/questions": {
       "get": {
         "description": "Lists questions",
+        "tags": [
+          "questions"
+        ],
         "operationId": "listQuestions",
         "responses": {
           "200": {
@@ -1205,6 +1285,9 @@ func init() {
       },
       "post": {
         "description": "Creates a new question",
+        "tags": [
+          "questions"
+        ],
         "operationId": "createQuestion",
         "parameters": [
           {
@@ -1241,6 +1324,9 @@ func init() {
     "/questions/reorder": {
       "post": {
         "description": "Reorders all questions (requires all question IDs to be passed in, e.g. a complete order)",
+        "tags": [
+          "questions"
+        ],
         "operationId": "reorderQuestions",
         "parameters": [
           {
@@ -1276,6 +1362,9 @@ func init() {
     "/questions/{id}": {
       "delete": {
         "description": "Deletes a question.",
+        "tags": [
+          "questions"
+        ],
         "operationId": "deleteQuestion",
         "parameters": [
           {
@@ -1306,6 +1395,9 @@ func init() {
       },
       "patch": {
         "description": "Modifies question metadata",
+        "tags": [
+          "questions"
+        ],
         "operationId": "patchQuestionByID",
         "parameters": [
           {
@@ -1350,6 +1442,9 @@ func init() {
     "/tags": {
       "get": {
         "description": "Lists tags and their metadata",
+        "tags": [
+          "tags"
+        ],
         "operationId": "listTags",
         "responses": {
           "200": {
@@ -1371,6 +1466,9 @@ func init() {
       },
       "post": {
         "description": "Creates a new tag",
+        "tags": [
+          "tags"
+        ],
         "operationId": "createTag",
         "parameters": [
           {
@@ -1407,6 +1505,9 @@ func init() {
     "/tags/{id}": {
       "delete": {
         "description": "Deletes a tag. Should also remove it from all files that use it.",
+        "tags": [
+          "tags"
+        ],
         "operationId": "deleteTag",
         "parameters": [
           {
@@ -1440,6 +1541,9 @@ func init() {
       },
       "patch": {
         "description": "Modifies tag metadata such as description, icon, etc.",
+        "tags": [
+          "tags"
+        ],
         "operationId": "patchTagByID",
         "parameters": [
           {
@@ -1760,6 +1864,20 @@ func init() {
         "type": "string"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "description": "Everything about files",
+      "name": "files"
+    },
+    {
+      "description": "Everything about tags",
+      "name": "tags"
+    },
+    {
+      "description": "Everything about questions",
+      "name": "questions"
+    }
+  ]
 }`))
 }

@@ -11,7 +11,7 @@ import (
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/file"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
-	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/files"
 	"github.com/go-openapi/runtime/middleware"
 )
 
@@ -24,7 +24,7 @@ func getThumbnailPath(imageID string) string {
 	return path.Join(*storageDirFlag, thumbnailSubdirName, imageID+thumbnailExtension)
 }
 
-func GetFileContent(params operations.GetFileContentParams) middleware.Responder {
+func GetFileContent(params files.GetFileContentParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	// Verify that the image exists
@@ -32,15 +32,15 @@ func GetFileContent(params operations.GetFileContentParams) middleware.Responder
 		Name: params.ID,
 	})
 	if err != nil {
-		return operations.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
+		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
 	}
 
 	if len(results) == 0 {
-		return operations.NewGetFileContentNotFound()
+		return files.NewGetFileContentNotFound()
 	}
 
 	if len(results) > 1 {
-		return operations.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("image list for ID %s returned %d results, expected exactly 1", params.ID, len(results)))
+		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("image list for ID %s returned %d results, expected exactly 1", params.ID, len(results)))
 	}
 
 	// Now that we know the image exists in the DB, let's read the contents (also prevents against file traversal!)
@@ -55,7 +55,7 @@ func GetFileContent(params operations.GetFileContentParams) middleware.Responder
 	// TODO: do this whenever we set the content and save it in the DB!
 	fileType, err := filetype.MatchFile(filePath)
 	if err != nil {
-		return operations.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to identify filetype for path '%s': %v", filePath, err))
+		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to identify filetype for path '%s': %v", filePath, err))
 	}
 
 	fileMimeType := "application/octet-stream"
@@ -65,26 +65,26 @@ func GetFileContent(params operations.GetFileContentParams) middleware.Responder
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		return operations.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to open file '%s': %v", filePath, err))
+		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to open file '%s': %v", filePath, err))
 	}
 
-	return operations.NewGetFileContentOK().WithContentType(fileMimeType).WithPayload(file)
+	return files.NewGetFileContentOK().WithContentType(fileMimeType).WithPayload(file)
 }
 
-func SetFileContent(params operations.SetFileContentParams) middleware.Responder {
+func SetFileContent(params files.SetFileContentParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	if params.FileContents == nil {
-		return operations.NewSetFileContentBadRequest().WithPayload("no file contents provided")
+		return files.NewSetFileContentBadRequest().WithPayload("no file contents provided")
 	}
 
 	// Verify that the image exists
 	img, err := imageMetadataConnection.GetFile(requestCtx, params.ID)
 	if err != nil {
-		return operations.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
+		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
 	}
 	if img == nil {
-		return operations.NewSetFileContentNotFound()
+		return files.NewSetFileContentNotFound()
 	}
 
 	// Now that we know the image exists in the DB, let's set the contents (also prevents against file traversal!)
@@ -94,12 +94,12 @@ func SetFileContent(params operations.SetFileContentParams) middleware.Responder
 	// TODO: expose the file permissions as a parameter
 	openFile, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return operations.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to open file '%s': %v", filePath, err))
+		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to open file '%s': %v", filePath, err))
 	}
 
 	writtenBytes, err := io.Copy(openFile, params.FileContents)
 	if err != nil {
-		return operations.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to set image content for file '%s': %v", filePath, err))
+		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to set image content for file '%s': %v", filePath, err))
 	}
 
 	// TODO: compare md5sum of original to written?
@@ -112,12 +112,12 @@ func SetFileContent(params operations.SetFileContentParams) middleware.Responder
 
 	md5Sum, err := file.GetFileMd5Sum(filePath)
 	if err != nil {
-		return operations.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to get md5sum for file '%s': %v", filePath, err))
+		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to get md5sum for file '%s': %v", filePath, err))
 	}
 
 	fileType, err := filetype.MatchFile(filePath)
 	if err != nil {
-		return operations.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to determine MIME type for file '%s': %v", filePath, err))
+		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to determine MIME type for file '%s': %v", filePath, err))
 	}
 
 	logrus.WithFields(logrus.Fields{
@@ -127,7 +127,7 @@ func SetFileContent(params operations.SetFileContentParams) middleware.Responder
 
 	// Create the thumbnails directory if it doesn't exist
 	if err := os.MkdirAll(path.Join(*storageDirFlag, "thumbs"), 0755); err != nil {
-		return operations.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to create thumbnail directory '%s': %v", thumbPath, err))
+		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to create thumbnail directory '%s': %v", thumbPath, err))
 	}
 
 	// This will end up resulting in ".mp4.png" or ".png.png" or ".jpg.png"
@@ -135,7 +135,7 @@ func SetFileContent(params operations.SetFileContentParams) middleware.Responder
 	// TODO: store this in the DB so if we change the name format later we can still find things?
 	err = file.WriteFileThumbnail(filePath, fileType, thumbPath)
 	if err != nil {
-		return operations.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to write thumbnail for file '%s': %v", thumbPath, err))
+		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to write thumbnail for file '%s': %v", thumbPath, err))
 	}
 
 	// Patch to set file as having contents and set the md5sum
@@ -149,8 +149,8 @@ func SetFileContent(params operations.SetFileContentParams) middleware.Responder
 		HasContent: &t,
 	})
 	if err != nil {
-		return operations.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to mark file '%s' as having content: %v", filePath, err))
+		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to mark file '%s' as having content: %v", filePath, err))
 	}
 
-	return operations.NewSetFileContentOK()
+	return files.NewSetFileContentOK()
 }

@@ -11,6 +11,9 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/files"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/questions"
+	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/tags"
 )
 
 //go:generate swagger generate server --target ../../server --name ShinySorter --spec ../../swagger.yaml --principal interface{} --exclude-main
@@ -41,86 +44,86 @@ func configureAPI(api *operations.ShinySorterAPI) http.Handler {
 	api.TxtProducer = runtime.TextProducer()
 
 	// You may change here the memory limit for this multipart form parser. Below is the default (32 MB).
-	// operations.SetFileContentMaxParseMemory = 32 << 20
+	// files.SetFileContentMaxParseMemory = 32 << 20
 
 	if api.CheckHealthHandler == nil {
 		api.CheckHealthHandler = operations.CheckHealthHandlerFunc(func(params operations.CheckHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation operations.CheckHealth has not yet been implemented")
 		})
 	}
-	if api.CreateFileHandler == nil {
-		api.CreateFileHandler = operations.CreateFileHandlerFunc(func(params operations.CreateFileParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.CreateFile has not yet been implemented")
+	if api.FilesCreateFileHandler == nil {
+		api.FilesCreateFileHandler = files.CreateFileHandlerFunc(func(params files.CreateFileParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.CreateFile has not yet been implemented")
 		})
 	}
-	if api.CreateQuestionHandler == nil {
-		api.CreateQuestionHandler = operations.CreateQuestionHandlerFunc(func(params operations.CreateQuestionParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.CreateQuestion has not yet been implemented")
+	if api.QuestionsCreateQuestionHandler == nil {
+		api.QuestionsCreateQuestionHandler = questions.CreateQuestionHandlerFunc(func(params questions.CreateQuestionParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.CreateQuestion has not yet been implemented")
 		})
 	}
-	if api.CreateTagHandler == nil {
-		api.CreateTagHandler = operations.CreateTagHandlerFunc(func(params operations.CreateTagParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.CreateTag has not yet been implemented")
+	if api.TagsCreateTagHandler == nil {
+		api.TagsCreateTagHandler = tags.CreateTagHandlerFunc(func(params tags.CreateTagParams) middleware.Responder {
+			return middleware.NotImplemented("operation tags.CreateTag has not yet been implemented")
 		})
 	}
-	if api.DeleteQuestionHandler == nil {
-		api.DeleteQuestionHandler = operations.DeleteQuestionHandlerFunc(func(params operations.DeleteQuestionParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.DeleteQuestion has not yet been implemented")
+	if api.QuestionsDeleteQuestionHandler == nil {
+		api.QuestionsDeleteQuestionHandler = questions.DeleteQuestionHandlerFunc(func(params questions.DeleteQuestionParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.DeleteQuestion has not yet been implemented")
 		})
 	}
-	if api.DeleteTagHandler == nil {
-		api.DeleteTagHandler = operations.DeleteTagHandlerFunc(func(params operations.DeleteTagParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.DeleteTag has not yet been implemented")
+	if api.TagsDeleteTagHandler == nil {
+		api.TagsDeleteTagHandler = tags.DeleteTagHandlerFunc(func(params tags.DeleteTagParams) middleware.Responder {
+			return middleware.NotImplemented("operation tags.DeleteTag has not yet been implemented")
 		})
 	}
-	if api.GetFileByIDHandler == nil {
-		api.GetFileByIDHandler = operations.GetFileByIDHandlerFunc(func(params operations.GetFileByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetFileByID has not yet been implemented")
+	if api.FilesGetFileByIDHandler == nil {
+		api.FilesGetFileByIDHandler = files.GetFileByIDHandlerFunc(func(params files.GetFileByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.GetFileByID has not yet been implemented")
 		})
 	}
-	if api.GetFileContentHandler == nil {
-		api.GetFileContentHandler = operations.GetFileContentHandlerFunc(func(params operations.GetFileContentParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetFileContent has not yet been implemented")
+	if api.FilesGetFileContentHandler == nil {
+		api.FilesGetFileContentHandler = files.GetFileContentHandlerFunc(func(params files.GetFileContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.GetFileContent has not yet been implemented")
 		})
 	}
-	if api.ListFilesHandler == nil {
-		api.ListFilesHandler = operations.ListFilesHandlerFunc(func(params operations.ListFilesParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.ListFiles has not yet been implemented")
+	if api.FilesListFilesHandler == nil {
+		api.FilesListFilesHandler = files.ListFilesHandlerFunc(func(params files.ListFilesParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.ListFiles has not yet been implemented")
 		})
 	}
-	if api.ListQuestionsHandler == nil {
-		api.ListQuestionsHandler = operations.ListQuestionsHandlerFunc(func(params operations.ListQuestionsParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.ListQuestions has not yet been implemented")
+	if api.QuestionsListQuestionsHandler == nil {
+		api.QuestionsListQuestionsHandler = questions.ListQuestionsHandlerFunc(func(params questions.ListQuestionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.ListQuestions has not yet been implemented")
 		})
 	}
-	if api.ListTagsHandler == nil {
-		api.ListTagsHandler = operations.ListTagsHandlerFunc(func(params operations.ListTagsParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.ListTags has not yet been implemented")
+	if api.TagsListTagsHandler == nil {
+		api.TagsListTagsHandler = tags.ListTagsHandlerFunc(func(params tags.ListTagsParams) middleware.Responder {
+			return middleware.NotImplemented("operation tags.ListTags has not yet been implemented")
 		})
 	}
-	if api.PatchFileByIDHandler == nil {
-		api.PatchFileByIDHandler = operations.PatchFileByIDHandlerFunc(func(params operations.PatchFileByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.PatchFileByID has not yet been implemented")
+	if api.FilesPatchFileByIDHandler == nil {
+		api.FilesPatchFileByIDHandler = files.PatchFileByIDHandlerFunc(func(params files.PatchFileByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.PatchFileByID has not yet been implemented")
 		})
 	}
-	if api.PatchQuestionByIDHandler == nil {
-		api.PatchQuestionByIDHandler = operations.PatchQuestionByIDHandlerFunc(func(params operations.PatchQuestionByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.PatchQuestionByID has not yet been implemented")
+	if api.QuestionsPatchQuestionByIDHandler == nil {
+		api.QuestionsPatchQuestionByIDHandler = questions.PatchQuestionByIDHandlerFunc(func(params questions.PatchQuestionByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.PatchQuestionByID has not yet been implemented")
 		})
 	}
-	if api.PatchTagByIDHandler == nil {
-		api.PatchTagByIDHandler = operations.PatchTagByIDHandlerFunc(func(params operations.PatchTagByIDParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.PatchTagByID has not yet been implemented")
+	if api.TagsPatchTagByIDHandler == nil {
+		api.TagsPatchTagByIDHandler = tags.PatchTagByIDHandlerFunc(func(params tags.PatchTagByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation tags.PatchTagByID has not yet been implemented")
 		})
 	}
-	if api.ReorderQuestionsHandler == nil {
-		api.ReorderQuestionsHandler = operations.ReorderQuestionsHandlerFunc(func(params operations.ReorderQuestionsParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.ReorderQuestions has not yet been implemented")
+	if api.QuestionsReorderQuestionsHandler == nil {
+		api.QuestionsReorderQuestionsHandler = questions.ReorderQuestionsHandlerFunc(func(params questions.ReorderQuestionsParams) middleware.Responder {
+			return middleware.NotImplemented("operation questions.ReorderQuestions has not yet been implemented")
 		})
 	}
-	if api.SetFileContentHandler == nil {
-		api.SetFileContentHandler = operations.SetFileContentHandlerFunc(func(params operations.SetFileContentParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.SetFileContent has not yet been implemented")
+	if api.FilesSetFileContentHandler == nil {
+		api.FilesSetFileContentHandler = files.SetFileContentHandlerFunc(func(params files.SetFileContentParams) middleware.Responder {
+			return middleware.NotImplemented("operation files.SetFileContent has not yet been implemented")
 		})
 	}
 
