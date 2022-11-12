@@ -5,6 +5,7 @@ import (
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const tagsField = "tags"
@@ -73,9 +74,15 @@ func getQueriesForFilter(filter *filedb.FileFilter) bson.M {
 		hasContentQuery,
 	}
 
+	if filter.ID != primitive.NilObjectID {
+		andComponents = append(andComponents, bson.M{
+			"_id": filter.ID,
+		})
+	}
+
 	if filter.Name != "" {
 		andComponents = append(andComponents, bson.M{
-			"_id": filter.Name,
+			"name": filter.Name,
 		})
 	}
 

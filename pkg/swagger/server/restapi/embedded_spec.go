@@ -216,19 +216,10 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "description": "File ID",
+            "description": "File name",
             "name": "id",
             "in": "path",
             "required": true
-          },
-          {
-            "description": "The new file to create",
-            "name": "newFile",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/fileCreate"
-            }
           }
         ],
         "responses": {
@@ -622,20 +613,23 @@ func init() {
     "fileCreate": {},
     "fileEntry": {
       "required": [
-        "id",
+        "_id",
+        "name",
         "md5sum",
         "tags",
         "hasBeenTagged",
         "mimeType"
       ],
       "properties": {
+        "_id": {
+          "type": "string",
+          "maxLength": 24,
+          "minLength": 24,
+          "example": "507f1f77bcf86cd799439011"
+        },
         "hasBeenTagged": {
           "type": "boolean",
           "default": true
-        },
-        "id": {
-          "type": "string",
-          "example": "filename.jpg"
         },
         "md5sum": {
           "type": "string",
@@ -644,6 +638,10 @@ func init() {
         "mimeType": {
           "type": "string",
           "example": "image/png"
+        },
+        "name": {
+          "type": "string",
+          "example": "filename.jpg"
         },
         "tags": {
           "type": "array",
@@ -1151,19 +1149,10 @@ func init() {
         "parameters": [
           {
             "type": "string",
-            "description": "File ID",
+            "description": "File name",
             "name": "id",
             "in": "path",
             "required": true
-          },
-          {
-            "description": "The new file to create",
-            "name": "newFile",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/fileCreate"
-            }
           }
         ],
         "responses": {
@@ -1590,20 +1579,23 @@ func init() {
     "fileCreate": {},
     "fileEntry": {
       "required": [
-        "id",
+        "_id",
+        "name",
         "md5sum",
         "tags",
         "hasBeenTagged",
         "mimeType"
       ],
       "properties": {
+        "_id": {
+          "type": "string",
+          "maxLength": 24,
+          "minLength": 24,
+          "example": "507f1f77bcf86cd799439011"
+        },
         "hasBeenTagged": {
           "type": "boolean",
           "default": true
-        },
-        "id": {
-          "type": "string",
-          "example": "filename.jpg"
         },
         "md5sum": {
           "type": "string",
@@ -1612,6 +1604,10 @@ func init() {
         "mimeType": {
           "type": "string",
           "example": "image/png"
+        },
+        "name": {
+          "type": "string",
+          "example": "filename.jpg"
         },
         "tags": {
           "type": "array",

@@ -6,13 +6,15 @@ import (
 	"os"
 	"path"
 
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/h2non/filetype"
 	"github.com/sirupsen/logrus"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/file"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/files"
-	"github.com/go-openapi/runtime/middleware"
 )
 
 const (
@@ -27,29 +29,27 @@ func getThumbnailPath(imageID string) string {
 func GetFileContent(params files.GetFileContentParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	// Verify that the image exists
-	results, err := imageMetadataConnection.ListFiles(requestCtx, &filedb.FileFilter{
-		Name: params.ID,
-	})
+	imgID, err := primitive.ObjectIDFromHex(params.ID)
 	if err != nil {
-		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
+		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("invalid image ID '%s': %v", params.ID, err))
 	}
 
-	if len(results) == 0 {
+	// Verify that the image exists
+	img, err := imageMetadataConnection.GetFileByID(requestCtx, imgID)
+	if err != nil {
+		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to get images with ID '%s': %v", params.ID, err))
+	}
+	if img == nil {
 		return files.NewGetFileContentNotFound()
-	}
-
-	if len(results) > 1 {
-		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("image list for ID %s returned %d results, expected exactly 1", params.ID, len(results)))
 	}
 
 	// Now that we know the image exists in the DB, let's read the contents (also prevents against file traversal!)
 	// If the file is a thumbnail, we'll return the thumbnail instead
 	var filePath string
 	if params.Thumb {
-		filePath = getThumbnailPath(params.ID)
+		filePath = getThumbnailPath(img.Name)
 	} else {
-		filePath = path.Join(*storageDirFlag, params.ID)
+		filePath = path.Join(*storageDirFlag, img.Name)
 	}
 
 	// TODO: do this whenever we set the content and save it in the DB!
@@ -78,18 +78,23 @@ func SetFileContent(params files.SetFileContentParams) middleware.Responder {
 		return files.NewSetFileContentBadRequest().WithPayload("no file contents provided")
 	}
 
-	// Verify that the image exists
-	img, err := imageMetadataConnection.GetFile(requestCtx, params.ID)
+	parsedID, err := primitive.ObjectIDFromHex(params.ID)
 	if err != nil {
-		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
+		return files.NewSetFileContentBadRequest().WithPayload(fmt.Sprintf("invalid object ID '%s'", params.ID))
+	}
+
+	// Verify that the image exists
+	img, err := imageMetadataConnection.GetFileByID(requestCtx, parsedID)
+	if err != nil {
+		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to list images with ID filter: %v", err))
 	}
 	if img == nil {
 		return files.NewSetFileContentNotFound()
 	}
 
 	// Now that we know the image exists in the DB, let's set the contents (also prevents against file traversal!)
-	filePath := path.Join(*storageDirFlag, params.ID)
-	thumbPath := getThumbnailPath(params.ID)
+	filePath := path.Join(*storageDirFlag, img.Name)
+	thumbPath := getThumbnailPath(img.Name)
 
 	// TODO: expose the file permissions as a parameter
 	openFile, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0644)
@@ -142,7 +147,7 @@ func SetFileContent(params files.SetFileContentParams) middleware.Responder {
 	t := true
 	_, err = imageMetadataConnection.ModifyFileEntry(requestCtx, &filedb.File{
 		FileMetadata: filedb.FileMetadata{
-			Name:     params.ID,
+			ID:       parsedID,
 			Md5Sum:   md5Sum,
 			MIMEType: fileType.MIME.Value,
 		},

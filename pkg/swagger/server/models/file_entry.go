@@ -19,14 +19,16 @@ import (
 // swagger:model fileEntry
 type FileEntry struct {
 
+	// id
+	// Example: 507f1f77bcf86cd799439011
+	// Required: true
+	// Max Length: 24
+	// Min Length: 24
+	ID *string `json:"_id"`
+
 	// has been tagged
 	// Required: true
 	HasBeenTagged bool `json:"hasBeenTagged"`
-
-	// id
-	// Example: filename.jpg
-	// Required: true
-	ID *string `json:"id"`
 
 	// md5sum
 	// Example: 0a8bd0c4863ec1720da0f69d2795d18a
@@ -38,6 +40,11 @@ type FileEntry struct {
 	// Required: true
 	MimeType *string `json:"mimeType"`
 
+	// name
+	// Example: filename.jpg
+	// Required: true
+	Name *string `json:"name"`
+
 	// tags
 	// Example: [5,7,37]
 	// Required: true
@@ -48,11 +55,11 @@ type FileEntry struct {
 func (m *FileEntry) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateHasBeenTagged(formats); err != nil {
+	if err := m.validateID(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateID(formats); err != nil {
+	if err := m.validateHasBeenTagged(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -61,6 +68,10 @@ func (m *FileEntry) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateMimeType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -74,18 +85,26 @@ func (m *FileEntry) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *FileEntry) validateHasBeenTagged(formats strfmt.Registry) error {
+func (m *FileEntry) validateID(formats strfmt.Registry) error {
 
-	if err := validate.Required("hasBeenTagged", "body", bool(m.HasBeenTagged)); err != nil {
+	if err := validate.Required("_id", "body", m.ID); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("_id", "body", *m.ID, 24); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("_id", "body", *m.ID, 24); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *FileEntry) validateID(formats strfmt.Registry) error {
+func (m *FileEntry) validateHasBeenTagged(formats strfmt.Registry) error {
 
-	if err := validate.Required("id", "body", m.ID); err != nil {
+	if err := validate.Required("hasBeenTagged", "body", bool(m.HasBeenTagged)); err != nil {
 		return err
 	}
 
@@ -104,6 +123,15 @@ func (m *FileEntry) validateMd5sum(formats strfmt.Registry) error {
 func (m *FileEntry) validateMimeType(formats strfmt.Registry) error {
 
 	if err := validate.Required("mimeType", "body", m.MimeType); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *FileEntry) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
 	}
 

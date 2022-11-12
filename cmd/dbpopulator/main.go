@@ -18,10 +18,10 @@ import (
 	"github.com/CrowhopTech/shinysorter/backend/pkg/tickexecutor"
 	"github.com/go-openapi/strfmt"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	apiclient "github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/client/files"
-	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/models"
 	httptransport "github.com/go-openapi/runtime/client"
 )
 
@@ -167,13 +167,13 @@ func processFile(ctx context.Context, importDir string, file string) error {
 		return fmt.Errorf("error while waiting for file size to settle: %v", err)
 	}
 
-	err = createFileEntryOnServer(ctx, importDir, file)
+	fileID, err := createFileEntryOnServer(ctx, importDir, file)
 	if err != nil {
 		logFields.WithError(err).Error("Error while creating entry for file on server")
 		return fmt.Errorf("error while creating entry for file on server: %v", err)
 	}
 
-	err = uploadFileContents(ctx, importDir, file)
+	err = uploadFileContents(ctx, importDir, file, fileID)
 	if err != nil {
 		logFields.WithError(err).Error("Error while uploading file contents")
 		return fmt.Errorf("error while uploading file contents: %v", err)
@@ -257,29 +257,28 @@ func getFileMd5Sum(path string) (string, error) {
 	return fmt.Sprintf("%x", md5Summer.Sum(nil)), nil
 }
 
-func createFileEntryOnServer(ctx context.Context, importDir string, file string) error {
-	md5Sum, err := getFileMd5Sum(path.Join(importDir, file))
-	if err != nil {
-		return fmt.Errorf("failed to get file md5sum: %v", err)
-	}
-	f := false
-	img := models.File{
-		ID:            filepath.Base(file),
-		Md5sum:        md5Sum,
-		HasBeenTagged: &f,
-	}
+func createFileEntryOnServer(ctx context.Context, importDir string, file string) (primitive.ObjectID, error) {
+	// Check if an entry exists on the server for this filename
 
 	// Create entry on the server
-	// Will also fail if the md5sum deosn't match (this is how we check for conflicts)
-	_, err = swaggerClient.Files.CreateFile(files.NewCreateFileParams().WithNewFile(&img))
+	// TODO: this will likely fail on retries?
+	resp, err := swaggerClient.Files.CreateFile(files.NewCreateFileParams().WithID(filepath.Base(file)))
 	if err != nil {
-		return fmt.Errorf("failed to create file through REST: %v", err)
+		return primitive.NilObjectID, fmt.Errorf("failed to create file through REST: %v", err)
+	}
+	if resp.Payload == nil || resp.Payload.ID == nil {
+		return primitive.NilObjectID, fmt.Errorf("file create payload is nil: %v", err)
 	}
 
-	return nil
+	fileID, err := primitive.ObjectIDFromHex(*resp.Payload.ID)
+	if err != nil {
+		return primitive.NilObjectID, fmt.Errorf("invalid object ID '%s' returned: %v", *resp.Payload.ID, err)
+	}
+
+	return fileID, nil
 }
 
-func uploadFileContents(ctx context.Context, importDir string, file string) error {
+func uploadFileContents(ctx context.Context, importDir string, file string, fileID primitive.ObjectID) error {
 	osFile, err := os.Open(path.Join(importDir, file))
 	if err != nil {
 		return fmt.Errorf("failed to open file: %v", err)
@@ -287,7 +286,7 @@ func uploadFileContents(ctx context.Context, importDir string, file string) erro
 
 	_, err = swaggerClient.Files.SetFileContent(files.NewSetFileContentParams().
 		WithContext(ctx).
-		WithID(filepath.Base(file)).
+		WithID(fileID.Hex()).
 		WithFileContents(osFile),
 	)
 	if err != nil {

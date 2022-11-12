@@ -6,15 +6,28 @@ import (
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// GetFile will get the file with the given name.
+// GetFileByID will get the file with the given ID.
 // If not found, will return nil, not an error.
-func (mc *mongoConnection) GetFile(ctx context.Context, name string) (*filedb.File, error) {
-	res := mc.filesCollection.FindOne(ctx, bson.M{
-		"_id": name,
+func (mc *mongoConnection) GetFileByID(ctx context.Context, id primitive.ObjectID) (*filedb.File, error) {
+	return mc.getFile(ctx, bson.M{
+		"_id": id,
 	})
+}
+
+// GetFileByName will get the file with the given name.
+// If not found, will return nil, not an error.
+func (mc *mongoConnection) GetFileByName(ctx context.Context, name string) (*filedb.File, error) {
+	return mc.getFile(ctx, bson.M{
+		"name": name,
+	})
+}
+
+func (mc *mongoConnection) getFile(ctx context.Context, query bson.M) (*filedb.File, error) {
+	res := mc.filesCollection.FindOne(ctx, query)
 	if res.Err() != nil {
 		if res.Err() == mongo.ErrNoDocuments {
 			return nil, nil
@@ -60,11 +73,11 @@ func (mc *mongoConnection) ListFiles(ctx context.Context, filter *filedb.FileFil
 // If one already exists with the given name, this will check for conflicts
 // using ConflictsWith. If there is a conflict, an error will be returned.
 // If not, no action will be taken.
-func (mc *mongoConnection) CreateFileEntry(ctx context.Context, i *filedb.File) error {
+func (mc *mongoConnection) CreateFileEntry(ctx context.Context, i *filedb.File) (primitive.ObjectID, error) {
 	// TODO: filter for valid name characters here! (mainly need to restrict colons (:) and pipes (|) for tagging query purposes)
-	existingImg, err := mc.GetFile(ctx, i.Name)
+	existingImg, err := mc.GetFileByName(ctx, i.Name)
 	if err != nil {
-		return err
+		return primitive.NilObjectID, err
 	}
 
 	// TODO: validate length and characters of md5sum, and enforce case
@@ -73,17 +86,28 @@ func (mc *mongoConnection) CreateFileEntry(ctx context.Context, i *filedb.File) 
 		// Doesn't exist, let's just create it
 		count, err := mc.filesCollection.CountDocuments(ctx, bson.M{})
 		if err != nil {
-			return fmt.Errorf("failed to get document count: %v", err)
+			return primitive.NilObjectID, fmt.Errorf("failed to get document count: %v", err)
 		}
 		if count >= mc.maxFiles {
-			return fmt.Errorf("the maximum number of files (%d) have been inserted", mc.maxFiles)
+			return primitive.NilObjectID, fmt.Errorf("the maximum number of files (%d) have been inserted", mc.maxFiles)
 		}
-		_, err = mc.filesCollection.InsertOne(ctx, i)
-		return err
+		i.ID = primitive.NewObjectID()
+
+		res, err := mc.filesCollection.InsertOne(ctx, i)
+		if err != nil {
+			return primitive.NilObjectID, fmt.Errorf("failed to insert file: %v", err)
+		}
+		insertedID := res.InsertedID.(primitive.ObjectID)
+		return insertedID, err
+	}
+
+	err = i.ConflictsWith(existingImg)
+	if err != nil {
+		return primitive.NilObjectID, err
 	}
 
 	// Already exists, success depends on if the existing file conflicts with the new one
-	return i.ConflictsWith(existingImg)
+	return existingImg.ID, nil
 }
 
 // getUpdateParameter will return the update parameter for the given file.
@@ -121,21 +145,17 @@ func (mc *mongoConnection) getUpdateParameter(i *filedb.File) (bson.M, error) {
 
 func (mc *mongoConnection) ModifyFileEntry(ctx context.Context, i *filedb.File) (*filedb.File, error) {
 	// Check name length
-	if len(i.Name) == 0 {
-		return nil, fmt.Errorf("name empty in provided file")
-	}
-
 	update, err := mc.getUpdateParameter(i)
 	if err != nil {
 		return nil, fmt.Errorf("invalid file update provided (%v): %v", i, err)
 	}
 
-	_, err = mc.filesCollection.UpdateByID(ctx, i.Name, update)
+	_, err = mc.filesCollection.UpdateByID(ctx, i.ID, update)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update file %s: %v", i.Name, err)
 	}
 
-	modifiedFile, err := mc.GetFile(ctx, i.Name)
+	modifiedFile, err := mc.GetFileByID(ctx, i.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get modified file %s: %v", i.Name, err)
 	}

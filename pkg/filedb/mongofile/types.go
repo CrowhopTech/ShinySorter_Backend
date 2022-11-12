@@ -77,7 +77,22 @@ func getCollectionLimits() (int64, int64, int64) {
 
 func (mc *mongoConnection) setUpIndices(ctx context.Context) error {
 	unique := true
-	_, err := mc.tagsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+	_, err := mc.filesCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{
+			{
+				Key:   "name",
+				Value: 1,
+			},
+		},
+		Options: &options.IndexOptions{
+			Unique: &unique,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = mc.tagsCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys: bson.D{
 			{
 				Key:   "userFriendlyName",

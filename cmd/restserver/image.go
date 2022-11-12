@@ -8,6 +8,7 @@ import (
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/files"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func translateDBFileToREST(img *filedb.File) *models.FileEntry {
@@ -18,8 +19,10 @@ func translateDBFileToREST(img *filedb.File) *models.FileEntry {
 	if img.Tags != nil {
 		tags = *img.Tags
 	}
+	id := img.ID.Hex()
 	return &models.FileEntry{
-		ID:            &img.Name,
+		ID:            &id,
+		Name:          &img.Name,
 		Md5sum:        &img.Md5Sum,
 		Tags:          tags,
 		HasBeenTagged: *img.HasBeenTagged,
@@ -89,8 +92,13 @@ func ListFiles(params files.ListFilesParams) middleware.Responder {
 func GetFileByID(params files.GetFileByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
+	parsedID, err := primitive.ObjectIDFromHex(params.ID)
+	if err != nil {
+		return files.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("invalid object ID '%s': %v", params.ID, err))
+	}
+
 	results, err := imageMetadataConnection.ListFiles(requestCtx, &filedb.FileFilter{
-		Name: params.ID,
+		ID: parsedID,
 	})
 	if err != nil {
 		return files.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
@@ -113,7 +121,7 @@ func CreateFile(params files.CreateFileParams) middleware.Responder {
 	requestCtx := rootCtx
 
 	f := false
-	err := imageMetadataConnection.CreateFileEntry(requestCtx, &filedb.File{
+	createdID, err := imageMetadataConnection.CreateFileEntry(requestCtx, &filedb.File{
 		FileMetadata: filedb.FileMetadata{
 			Name: params.ID,
 		},
@@ -125,7 +133,7 @@ func CreateFile(params files.CreateFileParams) middleware.Responder {
 		return files.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to insert image: %v", err))
 	}
 
-	createdFile, err := imageMetadataConnection.GetFile(requestCtx, params.ID)
+	createdFile, err := imageMetadataConnection.GetFileByID(requestCtx, createdID)
 	if err != nil {
 		return files.NewCreateFileInternalServerError().WithPayload(fmt.Sprintf("failed to get created image: %v", err))
 	}
@@ -138,6 +146,11 @@ func CreateFile(params files.CreateFileParams) middleware.Responder {
 func PatchFileByID(params files.PatchFileByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
+	parsedID, err := primitive.ObjectIDFromHex(params.ID)
+	if err != nil {
+		return files.NewPatchFileByIDBadRequest().WithPayload(fmt.Sprintf("invalid object ID '%s': %v", params.ID, err))
+	}
+
 	logrus.WithFields(logrus.Fields{
 		"image_id": params.ID,
 		"patch":    params.Patch,
@@ -145,7 +158,7 @@ func PatchFileByID(params files.PatchFileByIDParams) middleware.Responder {
 
 	img := filedb.File{
 		FileMetadata: filedb.FileMetadata{
-			Name: params.ID,
+			ID: parsedID,
 		},
 	}
 

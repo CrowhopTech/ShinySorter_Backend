@@ -3,14 +3,17 @@ package filedb
 import (
 	"context"
 	"fmt"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // FileMetadata contains information that comes from the file itself:
 // the name of the file, its checksum, etc.
 type FileMetadata struct {
-	Name     string `bson:"_id"`
-	Md5Sum   string `bson:"md5sum"`
-	MIMEType string `bson:"mimeType"`
+	ID       primitive.ObjectID `bson:"_id"`
+	Name     string             `bson:"name"`
+	Md5Sum   string             `bson:"md5sum"`
+	MIMEType string             `bson:"mimeType"`
 }
 
 // File represents all data about a file: the file metadata, as well
@@ -84,9 +87,13 @@ func (i *File) Clone() *File {
 // FileMetadataService represents a service to access file metadata from a
 // given backing database.
 type FileMetadataService interface {
-	// GetFile will get the file with the given name.
+	// GetFileByName will get the file with the given name.
 	// If not found, will return nil, not an error.
-	GetFile(ctx context.Context, name string) (*File, error)
+	GetFileByName(ctx context.Context, name string) (*File, error)
+
+	// GetFileByID will get the file with the given ID.
+	// If not found, will return nil, not an error.
+	GetFileByID(ctx context.Context, name primitive.ObjectID) (*File, error)
 
 	// ListFiles will list files that match the given filter, if provided.
 	// If no filter is provided, all results will be returned (oh no).
@@ -98,7 +105,7 @@ type FileMetadataService interface {
 	// If one already exists with the given name, this will check for conflicts
 	// using ConflictsWith. If there is a conflict, an error will be returned.
 	// If not, no action will be taken.
-	CreateFileEntry(ctx context.Context, i *File) error
+	CreateFileEntry(ctx context.Context, i *File) (primitive.ObjectID, error)
 
 	// ModifyFileEntry will modify the given file. ID/name is required,
 	// If any of the others are set they will overwrite. This includes tags,

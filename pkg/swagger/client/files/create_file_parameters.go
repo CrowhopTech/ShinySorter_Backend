@@ -14,8 +14,6 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-
-	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/models"
 )
 
 // NewCreateFileParams creates a new CreateFileParams object,
@@ -63,15 +61,9 @@ type CreateFileParams struct {
 
 	/* ID.
 
-	   File ID
+	   File name
 	*/
 	ID string
-
-	/* NewFile.
-
-	   The new file to create
-	*/
-	NewFile models.FileCreate
 
 	timeout    time.Duration
 	Context    context.Context
@@ -137,17 +129,6 @@ func (o *CreateFileParams) SetID(id string) {
 	o.ID = id
 }
 
-// WithNewFile adds the newFile to the create file params
-func (o *CreateFileParams) WithNewFile(newFile models.FileCreate) *CreateFileParams {
-	o.SetNewFile(newFile)
-	return o
-}
-
-// SetNewFile adds the newFile to the create file params
-func (o *CreateFileParams) SetNewFile(newFile models.FileCreate) {
-	o.NewFile = newFile
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *CreateFileParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -159,11 +140,6 @@ func (o *CreateFileParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Re
 	// path param id
 	if err := r.SetPathParam("id", o.ID); err != nil {
 		return err
-	}
-	if o.NewFile != nil {
-		if err := r.SetBodyParam(o.NewFile); err != nil {
-			return err
-		}
 	}
 
 	if len(res) > 0 {

@@ -1,5 +1,7 @@
 package filedb
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type TagOperation int
 
 const (
@@ -13,6 +15,7 @@ type TagSearch struct {
 }
 
 type FileFilter struct {
+	ID     primitive.ObjectID
 	Name   string
 	Md5Sum *string
 
