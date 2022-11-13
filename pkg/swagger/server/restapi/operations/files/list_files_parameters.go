@@ -27,12 +27,16 @@ func NewListFilesParams() ListFilesParams {
 		excludeOperatorDefault = string("all")
 
 		includeOperatorDefault = string("all")
+
+		limitDefault = int64(5)
 	)
 
 	return ListFilesParams{
 		ExcludeOperator: &excludeOperatorDefault,
 
 		IncludeOperator: &includeOperatorDefault,
+
+		Limit: &limitDefault,
 	}
 }
 
@@ -45,6 +49,12 @@ type ListFilesParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
+	/*The last object ID of the previous page
+	  Max Length: 24
+	  Min Length: 24
+	  In: query
+	*/
+	Continue *string
 	/*Whether excludeTags requires all tags to match, or just one
 	  In: query
 	  Default: "all"
@@ -67,6 +77,13 @@ type ListFilesParams struct {
 	  In: query
 	*/
 	IncludeTags []int64
+	/*The count of results to return (aka page size)
+	  Maximum: 50
+	  Minimum: 1
+	  In: query
+	  Default: 5
+	*/
+	Limit *int64
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -79,6 +96,11 @@ func (o *ListFilesParams) BindRequest(r *http.Request, route *middleware.Matched
 	o.HTTPRequest = r
 
 	qs := runtime.Values(r.URL.Query())
+
+	qContinue, qhkContinue, _ := qs.GetOK("continue")
+	if err := o.bindContinue(qContinue, qhkContinue, route.Formats); err != nil {
+		res = append(res, err)
+	}
 
 	qExcludeOperator, qhkExcludeOperator, _ := qs.GetOK("excludeOperator")
 	if err := o.bindExcludeOperator(qExcludeOperator, qhkExcludeOperator, route.Formats); err != nil {
@@ -104,9 +126,50 @@ func (o *ListFilesParams) BindRequest(r *http.Request, route *middleware.Matched
 	if err := o.bindIncludeTags(qIncludeTags, qhkIncludeTags, route.Formats); err != nil {
 		res = append(res, err)
 	}
+
+	qLimit, qhkLimit, _ := qs.GetOK("limit")
+	if err := o.bindLimit(qLimit, qhkLimit, route.Formats); err != nil {
+		res = append(res, err)
+	}
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// bindContinue binds and validates parameter Continue from query.
+func (o *ListFilesParams) bindContinue(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Continue = &raw
+
+	if err := o.validateContinue(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateContinue carries on validations for parameter Continue
+func (o *ListFilesParams) validateContinue(formats strfmt.Registry) error {
+
+	if err := validate.MinLength("continue", "query", *o.Continue, 24); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("continue", "query", *o.Continue, 24); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -255,6 +318,48 @@ func (o *ListFilesParams) bindIncludeTags(rawData []string, hasKey bool, formats
 	}
 
 	o.IncludeTags = includeTagsIR
+
+	return nil
+}
+
+// bindLimit binds and validates parameter Limit from query.
+func (o *ListFilesParams) bindLimit(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		// Default values have been previously initialized by NewListFilesParams()
+		return nil
+	}
+
+	value, err := swag.ConvertInt64(raw)
+	if err != nil {
+		return errors.InvalidType("limit", "query", "int64", raw)
+	}
+	o.Limit = &value
+
+	if err := o.validateLimit(formats); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateLimit carries on validations for parameter Limit
+func (o *ListFilesParams) validateLimit(formats strfmt.Registry) error {
+
+	if err := validate.MinimumInt("limit", "query", *o.Limit, 1, false); err != nil {
+		return err
+	}
+
+	if err := validate.MaximumInt("limit", "query", *o.Limit, 50, false); err != nil {
+		return err
+	}
 
 	return nil
 }

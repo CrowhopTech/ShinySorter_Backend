@@ -72,6 +72,19 @@ func ListFiles(params files.ListFilesParams) middleware.Responder {
 		filter.ExcludeTags = params.ExcludeTags
 	}
 
+	if params.Limit != nil {
+		filter.Limit = *params.Limit
+	}
+
+	if params.Continue != nil {
+		parsedCont, err := primitive.ObjectIDFromHex(*params.Continue)
+		if err != nil {
+			return files.NewListFilesBadRequest().WithPayload(fmt.Sprintf("invalid object ID for continue '%s': %v", *params.Continue, err))
+		}
+
+		filter.Continue = parsedCont
+	}
+
 	logrus.WithField("filter", filter).Info("Running file query")
 
 	results, err := imageMetadataConnection.ListFiles(requestCtx, &filter)

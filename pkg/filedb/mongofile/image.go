@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // GetFileByID will get the file with the given ID.
@@ -50,7 +51,9 @@ func (mc *mongoConnection) getFile(ctx context.Context, query bson.M) (*filedb.F
 func (mc *mongoConnection) ListFiles(ctx context.Context, filter *filedb.FileFilter) ([]*filedb.File, error) {
 	compiledFilter := getQueriesForFilter(filter)
 
-	cursor, err := mc.filesCollection.Find(ctx, compiledFilter)
+	cursor, err := mc.filesCollection.Find(ctx, compiledFilter, &options.FindOptions{
+		Limit: &filter.Limit,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error while running Find: %v", err)
 	}

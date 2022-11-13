@@ -262,6 +262,19 @@ paths:
           in: query
           description: "Whether to filter to tags that have or have not been tagged"
           type: boolean
+        - in: query
+          name: limit
+          description: "The count of results to return (aka page size)"
+          type: integer
+          minimum: 1
+          default: 5
+          maximum: 50
+        - in: query
+          name: continue
+          description: "The last object ID of the previous page"
+          type: string
+          minLength: 24
+          maxLength: 24
       responses:
         200:
           description: Search was successful (may return an empty array)

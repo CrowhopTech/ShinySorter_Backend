@@ -15,11 +15,13 @@ import (
 
 // ListFilesURL generates an URL for the list files operation
 type ListFilesURL struct {
+	Continue        *string
 	ExcludeOperator *string
 	ExcludeTags     []int64
 	HasBeenTagged   *bool
 	IncludeOperator *string
 	IncludeTags     []int64
+	Limit           *int64
 
 	_basePath string
 	// avoid unkeyed usage
@@ -54,6 +56,14 @@ func (o *ListFilesURL) Build() (*url.URL, error) {
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)
+
+	var continueVarQ string
+	if o.Continue != nil {
+		continueVarQ = *o.Continue
+	}
+	if continueVarQ != "" {
+		qs.Set("continue", continueVarQ)
+	}
 
 	var excludeOperatorQ string
 	if o.ExcludeOperator != nil {
@@ -111,6 +121,14 @@ func (o *ListFilesURL) Build() (*url.URL, error) {
 		if qsv != "" {
 			qs.Set("includeTags", qsv)
 		}
+	}
+
+	var limitQ string
+	if o.Limit != nil {
+		limitQ = swag.FormatInt64(*o.Limit)
+	}
+	if limitQ != "" {
+		qs.Set("limit", limitQ)
 	}
 
 	_result.RawQuery = qs.Encode()

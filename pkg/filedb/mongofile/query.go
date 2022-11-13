@@ -98,6 +98,12 @@ func getQueriesForFilter(filter *filedb.FileFilter) bson.M {
 		})
 	}
 
+	if filter.Continue != primitive.NilObjectID {
+		andComponents = append(andComponents, bson.M{
+			"_id": bson.M{"$gt": filter.Continue},
+		})
+	}
+
 	requiredQuery := getComponentQuery(filter.RequireTags, filter.RequireTagOperation, false)
 	if len(requiredQuery) > 0 {
 		andComponents = append(andComponents, requiredQuery)

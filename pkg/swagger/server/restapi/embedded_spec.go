@@ -61,6 +61,23 @@ func init() {
             "description": "Whether to filter to tags that have or have not been tagged",
             "name": "hasBeenTagged",
             "in": "query"
+          },
+          {
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer",
+            "default": 5,
+            "description": "The count of results to return (aka page size)",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "maxLength": 24,
+            "minLength": 24,
+            "type": "string",
+            "description": "The last object ID of the previous page",
+            "name": "continue",
+            "in": "query"
           }
         ],
         "responses": {
@@ -981,6 +998,23 @@ func init() {
             "type": "boolean",
             "description": "Whether to filter to tags that have or have not been tagged",
             "name": "hasBeenTagged",
+            "in": "query"
+          },
+          {
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer",
+            "default": 5,
+            "description": "The count of results to return (aka page size)",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "maxLength": 24,
+            "minLength": 24,
+            "type": "string",
+            "description": "The last object ID of the previous page",
+            "name": "continue",
             "in": "query"
           }
         ],

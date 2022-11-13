@@ -60,6 +60,12 @@ func NewListFilesParamsWithHTTPClient(client *http.Client) *ListFilesParams {
 */
 type ListFilesParams struct {
 
+	/* Continue.
+
+	   The last object ID of the previous page
+	*/
+	Continue *string
+
 	/* ExcludeOperator.
 
 	   Whether excludeTags requires all tags to match, or just one
@@ -94,6 +100,14 @@ type ListFilesParams struct {
 	*/
 	IncludeTags []int64
 
+	/* Limit.
+
+	   The count of results to return (aka page size)
+
+	   Default: 5
+	*/
+	Limit *int64
+
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
@@ -115,11 +129,14 @@ func (o *ListFilesParams) SetDefaults() {
 		excludeOperatorDefault = string("all")
 
 		includeOperatorDefault = string("all")
+
+		limitDefault = int64(5)
 	)
 
 	val := ListFilesParams{
 		ExcludeOperator: &excludeOperatorDefault,
 		IncludeOperator: &includeOperatorDefault,
+		Limit:           &limitDefault,
 	}
 
 	val.timeout = o.timeout
@@ -159,6 +176,17 @@ func (o *ListFilesParams) WithHTTPClient(client *http.Client) *ListFilesParams {
 // SetHTTPClient adds the HTTPClient to the list files params
 func (o *ListFilesParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
+}
+
+// WithContinue adds the continueVar to the list files params
+func (o *ListFilesParams) WithContinue(continueVar *string) *ListFilesParams {
+	o.SetContinue(continueVar)
+	return o
+}
+
+// SetContinue adds the continue to the list files params
+func (o *ListFilesParams) SetContinue(continueVar *string) {
+	o.Continue = continueVar
 }
 
 // WithExcludeOperator adds the excludeOperator to the list files params
@@ -216,6 +244,17 @@ func (o *ListFilesParams) SetIncludeTags(includeTags []int64) {
 	o.IncludeTags = includeTags
 }
 
+// WithLimit adds the limit to the list files params
+func (o *ListFilesParams) WithLimit(limit *int64) *ListFilesParams {
+	o.SetLimit(limit)
+	return o
+}
+
+// SetLimit adds the limit to the list files params
+func (o *ListFilesParams) SetLimit(limit *int64) {
+	o.Limit = limit
+}
+
 // WriteToRequest writes these params to a swagger request
 func (o *ListFilesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -223,6 +262,23 @@ func (o *ListFilesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		return err
 	}
 	var res []error
+
+	if o.Continue != nil {
+
+		// query param continue
+		var qrContinue string
+
+		if o.Continue != nil {
+			qrContinue = *o.Continue
+		}
+		qContinue := qrContinue
+		if qContinue != "" {
+
+			if err := r.SetQueryParam("continue", qContinue); err != nil {
+				return err
+			}
+		}
+	}
 
 	if o.ExcludeOperator != nil {
 
@@ -294,6 +350,23 @@ func (o *ListFilesParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		// query array param includeTags
 		if err := r.SetQueryParam("includeTags", joinedIncludeTags...); err != nil {
 			return err
+		}
+	}
+
+	if o.Limit != nil {
+
+		// query param limit
+		var qrLimit int64
+
+		if o.Limit != nil {
+			qrLimit = *o.Limit
+		}
+		qLimit := swag.FormatInt64(qrLimit)
+		if qLimit != "" {
+
+			if err := r.SetQueryParam("limit", qLimit); err != nil {
+				return err
+			}
 		}
 	}
 

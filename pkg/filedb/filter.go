@@ -45,4 +45,11 @@ type FileFilter struct {
 	// metadata but no content (indicating a failed or in progress upload)
 	// Defaults to false
 	MissingContent bool
+
+	// Limit is the number of results to return from a query
+	Limit int64
+
+	// Continue is the ObjectID of the last file on the previous page.
+	// In other words, it returns all files with an ID greater than this
+	Continue primitive.ObjectID
 }
