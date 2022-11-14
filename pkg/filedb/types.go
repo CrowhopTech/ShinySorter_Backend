@@ -95,6 +95,10 @@ type FileMetadataService interface {
 	// If not found, will return nil, not an error.
 	GetFileByID(ctx context.Context, name primitive.ObjectID) (*File, error)
 
+	// CountFiles will return the count of how many file entries match
+	// the given query.
+	CountFiles(ctx context.Context, filter FileFilter) (int64, error)
+
 	// ListFiles will list files that match the given filter, if provided.
 	// If no filter is provided, all results will be returned (oh no).
 	// If no files match the filter, err will be nil and an empty slice will be returned.

@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/models"
 )
@@ -56,6 +58,11 @@ func NewListFilesOK() *ListFilesOK {
 Search was successful (may return an empty array)
 */
 type ListFilesOK struct {
+
+	/* How many files are matched in total by this query. Only included when "continue" is empty (e.g. the first page)
+	 */
+	XFileCount int64
+
 	Payload []*models.FileEntry
 }
 
@@ -67,6 +74,17 @@ func (o *ListFilesOK) GetPayload() []*models.FileEntry {
 }
 
 func (o *ListFilesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	// hydrates response header X-FileCount
+	hdrXFileCount := response.GetHeader("X-FileCount")
+
+	if hdrXFileCount != "" {
+		valxFileCount, err := swag.ConvertInt64(hdrXFileCount)
+		if err != nil {
+			return errors.InvalidType("X-FileCount", "header", "int64", hdrXFileCount)
+		}
+		o.XFileCount = valxFileCount
+	}
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {

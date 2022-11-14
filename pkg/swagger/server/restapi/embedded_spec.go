@@ -88,6 +88,12 @@ func init() {
               "items": {
                 "$ref": "#/definitions/fileEntry"
               }
+            },
+            "headers": {
+              "X-FileCount": {
+                "type": "integer",
+                "description": "How many files are matched in total by this query. Only included when \"continue\" is empty (e.g. the first page)"
+              }
             }
           },
           "400": {
@@ -1025,6 +1031,12 @@ func init() {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/fileEntry"
+              }
+            },
+            "headers": {
+              "X-FileCount": {
+                "type": "integer",
+                "description": "How many files are matched in total by this query. Only included when \"continue\" is empty (e.g. the first page)"
               }
             }
           },

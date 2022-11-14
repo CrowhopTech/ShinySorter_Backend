@@ -85,6 +85,18 @@ func ListFiles(params files.ListFilesParams) middleware.Responder {
 		filter.Continue = parsedCont
 	}
 
+	count := int64(-1)
+	var err error
+
+	if params.Continue == nil || *params.Continue == "" {
+		logrus.WithField("filter", filter).Debug("First page, running count query")
+		count, err = imageMetadataConnection.CountFiles(requestCtx, filter)
+		if err != nil {
+			return files.NewListFilesInternalServerError().WithPayload(fmt.Sprintf("failed to count images: %v", err))
+		}
+
+	}
+
 	logrus.WithField("filter", filter).Info("Running file query")
 
 	results, err := imageMetadataConnection.ListFiles(requestCtx, &filter)
@@ -99,7 +111,7 @@ func ListFiles(params files.ListFilesParams) middleware.Responder {
 		output = append(output, converted)
 	}
 
-	return files.NewListFilesOK().WithPayload(output)
+	return files.NewListFilesOK().WithPayload(output).WithXFileCount(count)
 }
 
 func GetFileByID(params files.GetFileByIDParams) middleware.Responder {

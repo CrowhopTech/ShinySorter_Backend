@@ -278,6 +278,10 @@ paths:
       responses:
         200:
           description: Search was successful (may return an empty array)
+          headers:
+            X-Filecount:
+              type: integer
+              description: How many files are matched in total by this query. Only included when "continue" is empty (e.g. the first page)
           schema:
             type: array
             items:

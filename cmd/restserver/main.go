@@ -124,7 +124,22 @@ func main() {
 	// Start listening using having the handlers and port already set up.
 	// Add the CORS AllowAll policy since the web UI is running on a different port
 	// on the same address, so technically cross-origin.
-	if err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", *listenPort), cors.AllowAll().Handler(api.Serve(nil))); err != nil {
+	exposeCors := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{
+			http.MethodHead,
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodDelete,
+		},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: false,
+		ExposedHeaders:   []string{"X-Filecount"},
+	})
+
+	if err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", *listenPort), exposeCors.Handler(api.Serve(nil))); err != nil {
 		log.Fatalln(err)
 	}
 }

@@ -45,6 +45,17 @@ func (mc *mongoConnection) getFile(ctx context.Context, query bson.M) (*filedb.F
 	return &img, nil
 }
 
+func (mc *mongoConnection) CountFiles(ctx context.Context, filter filedb.FileFilter) (int64, error) {
+	filter.Continue = primitive.NilObjectID
+	compiledFilter := getQueriesForFilter(&filter)
+
+	count, err := mc.filesCollection.CountDocuments(ctx, compiledFilter)
+	if err != nil {
+		return 0, fmt.Errorf("error while running CountDocuments: %v", err)
+	}
+	return count, nil
+}
+
 // ListFiles will list files that match the given filter, if provided.
 // If no filter is provided, all results will be returned (oh no).
 // If no files match the filter, err will be nil and an empty slice will be returned.

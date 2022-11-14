@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/swag"
 
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/models"
 )
@@ -21,6 +22,10 @@ const ListFilesOKCode int = 200
 swagger:response listFilesOK
 */
 type ListFilesOK struct {
+	/*How many files are matched in total by this query. Only included when "continue" is empty (e.g. the first page)
+
+	 */
+	XFileCount int64 `json:"X-FileCount"`
 
 	/*
 	  In: Body
@@ -32,6 +37,17 @@ type ListFilesOK struct {
 func NewListFilesOK() *ListFilesOK {
 
 	return &ListFilesOK{}
+}
+
+// WithXFileCount adds the xFileCount to the list files o k response
+func (o *ListFilesOK) WithXFileCount(xFileCount int64) *ListFilesOK {
+	o.XFileCount = xFileCount
+	return o
+}
+
+// SetXFileCount sets the xFileCount to the list files o k response
+func (o *ListFilesOK) SetXFileCount(xFileCount int64) {
+	o.XFileCount = xFileCount
 }
 
 // WithPayload adds the payload to the list files o k response
@@ -47,6 +63,13 @@ func (o *ListFilesOK) SetPayload(payload []*models.FileEntry) {
 
 // WriteResponse to the client
 func (o *ListFilesOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	// response header X-FileCount
+
+	xFileCount := swag.FormatInt64(o.XFileCount)
+	if xFileCount != "" {
+		rw.Header().Set("X-FileCount", xFileCount)
+	}
 
 	rw.WriteHeader(200)
 	payload := o.Payload
