@@ -15,7 +15,7 @@ swagger: "2.0"
 definitions:
   fileEntry:
     properties:
-      _id:
+      id:
         type: string
         example: "507f1f77bcf86cd799439011"
         maxLength: 24
@@ -41,7 +41,7 @@ definitions:
         type: string
         example: "image/png"
     required:
-      - _id
+      - id
       - name
       - md5sum
       - tags

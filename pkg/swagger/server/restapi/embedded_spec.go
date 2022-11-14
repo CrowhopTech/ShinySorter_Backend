@@ -630,7 +630,7 @@ func init() {
     "fileCreate": {},
     "fileEntry": {
       "required": [
-        "_id",
+        "id",
         "name",
         "md5sum",
         "tags",
@@ -638,15 +638,15 @@ func init() {
         "mimeType"
       ],
       "properties": {
-        "_id": {
+        "hasBeenTagged": {
+          "type": "boolean",
+          "default": true
+        },
+        "id": {
           "type": "string",
           "maxLength": 24,
           "minLength": 24,
           "example": "507f1f77bcf86cd799439011"
-        },
-        "hasBeenTagged": {
-          "type": "boolean",
-          "default": true
         },
         "md5sum": {
           "type": "string",
@@ -1613,7 +1613,7 @@ func init() {
     "fileCreate": {},
     "fileEntry": {
       "required": [
-        "_id",
+        "id",
         "name",
         "md5sum",
         "tags",
@@ -1621,15 +1621,15 @@ func init() {
         "mimeType"
       ],
       "properties": {
-        "_id": {
+        "hasBeenTagged": {
+          "type": "boolean",
+          "default": true
+        },
+        "id": {
           "type": "string",
           "maxLength": 24,
           "minLength": 24,
           "example": "507f1f77bcf86cd799439011"
-        },
-        "hasBeenTagged": {
-          "type": "boolean",
-          "default": true
         },
         "md5sum": {
           "type": "string",
