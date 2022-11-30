@@ -3,17 +3,70 @@ package filedb
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/sirupsen/logrus"
 )
+
+const (
+	maxFilesEnv     = "MAX_FILE_COUNT"
+	maxTagsEnv      = "MAX_TAG_COUNT"
+	maxQuestionsEnv = "MAX_QUESTION_COUNT"
+
+	defaultMaxFilesCount     = 5
+	defaultMaxTagsCount      = 5
+	defaultMaxQuestionsCount = 5
+)
+
+var (
+	MaxFiles     int64
+	MaxTags      int64
+	MaxQuestions int64
+)
+
+func getCollectionLimits() {
+	filesVar, _ := os.LookupEnv(maxFilesEnv)
+	tagsVar, _ := os.LookupEnv(maxTagsEnv)
+	questionsVar, _ := os.LookupEnv(maxQuestionsEnv)
+
+	MaxFiles = int64(defaultMaxFilesCount)
+	MaxTags = int64(defaultMaxTagsCount)
+	MaxQuestions = int64(defaultMaxQuestionsCount)
+
+	var err error
+
+	if filesVar != "" {
+		MaxFiles, err = strconv.ParseInt(filesVar, 10, 64)
+		if err != nil {
+			logrus.Panicf("Unable to parse max files count '%s' as an int", filesVar)
+		}
+	}
+	if tagsVar != "" {
+		MaxTags, err = strconv.ParseInt(tagsVar, 10, 64)
+		if err != nil {
+			logrus.Panicf("Unable to parse max tags count '%s' as an int", tagsVar)
+		}
+	}
+	if questionsVar != "" {
+		MaxQuestions, err = strconv.ParseInt(questionsVar, 10, 64)
+		if err != nil {
+			logrus.Panicf("Unable to parse max questions count '%s' as an int", questionsVar)
+		}
+	}
+}
+
+func init() {
+	getCollectionLimits()
+}
 
 // FileMetadata contains information that comes from the file itself:
 // the name of the file, its checksum, etc.
 type FileMetadata struct {
-	ID       primitive.ObjectID `bson:"_id"`
-	Name     string             `bson:"name"`
-	Md5Sum   string             `bson:"md5sum"`
-	MIMEType string             `bson:"mimeType"`
+	ID       string `bson:"_id"`
+	Name     string `bson:"name"`
+	Md5Sum   string `bson:"md5sum"`
+	MIMEType string `bson:"mimeType"`
 }
 
 // File represents all data about a file: the file metadata, as well
@@ -47,10 +100,11 @@ type Question struct {
 
 // ConflictsWith returns if the provided file has unresolvable conflicts
 // with this file. This includes:
-//  * Mismatched Md5sums
-//  * Mismatched names
+//   - Mismatched Md5sums
+//   - Mismatched names
+//
 // But does not include:
-//  * Tags in any way
+//   - Tags in any way
 func (i *File) ConflictsWith(other *File) error {
 	if other == nil {
 		return nil // No conflict, other doesn't exist
@@ -93,7 +147,7 @@ type FileMetadataService interface {
 
 	// GetFileByID will get the file with the given ID.
 	// If not found, will return nil, not an error.
-	GetFileByID(ctx context.Context, name primitive.ObjectID) (*File, error)
+	GetFileByID(ctx context.Context, name string) (*File, error)
 
 	// CountFiles will return the count of how many file entries match
 	// the given query.
@@ -109,7 +163,7 @@ type FileMetadataService interface {
 	// If one already exists with the given name, this will check for conflicts
 	// using ConflictsWith. If there is a conflict, an error will be returned.
 	// If not, no action will be taken.
-	CreateFileEntry(ctx context.Context, i *File) (primitive.ObjectID, error)
+	CreateFileEntry(ctx context.Context, i *File) (string, error)
 
 	// ModifyFileEntry will modify the given file. ID/name is required,
 	// If any of the others are set they will overwrite. This includes tags,

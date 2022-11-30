@@ -10,8 +10,6 @@ import (
 	"github.com/h2non/filetype"
 	"github.com/sirupsen/logrus"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"github.com/CrowhopTech/shinysorter/backend/pkg/file"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/filedb"
 	"github.com/CrowhopTech/shinysorter/backend/pkg/swagger/server/restapi/operations/files"
@@ -29,13 +27,8 @@ func getThumbnailPath(imageID string) string {
 func GetFileContent(params files.GetFileContentParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	imgID, err := primitive.ObjectIDFromHex(params.ID)
-	if err != nil {
-		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("invalid image ID '%s': %v", params.ID, err))
-	}
-
 	// Verify that the image exists
-	img, err := imageMetadataConnection.GetFileByID(requestCtx, imgID)
+	img, err := imageMetadataConnection.GetFileByID(requestCtx, params.ID)
 	if err != nil {
 		return files.NewGetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to get images with ID '%s': %v", params.ID, err))
 	}
@@ -78,13 +71,8 @@ func SetFileContent(params files.SetFileContentParams) middleware.Responder {
 		return files.NewSetFileContentBadRequest().WithPayload("no file contents provided")
 	}
 
-	parsedID, err := primitive.ObjectIDFromHex(params.ID)
-	if err != nil {
-		return files.NewSetFileContentBadRequest().WithPayload(fmt.Sprintf("invalid object ID '%s'", params.ID))
-	}
-
 	// Verify that the image exists
-	img, err := imageMetadataConnection.GetFileByID(requestCtx, parsedID)
+	img, err := imageMetadataConnection.GetFileByID(requestCtx, params.ID)
 	if err != nil {
 		return files.NewSetFileContentInternalServerError().WithPayload(fmt.Sprintf("failed to list images with ID filter: %v", err))
 	}
@@ -147,7 +135,7 @@ func SetFileContent(params files.SetFileContentParams) middleware.Responder {
 	t := true
 	_, err = imageMetadataConnection.ModifyFileEntry(requestCtx, &filedb.File{
 		FileMetadata: filedb.FileMetadata{
-			ID:       parsedID,
+			ID:       params.ID,
 			Md5Sum:   md5Sum,
 			MIMEType: fileType.MIME.Value,
 		},

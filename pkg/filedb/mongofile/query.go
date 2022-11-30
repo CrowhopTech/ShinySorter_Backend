@@ -61,11 +61,11 @@ func getComponentQuery(tags []int64, op filedb.TagOperation, exclude bool) bson.
 // getQueriesForFilter takes the given filter and constructs
 // all the various filter components, joining them together with
 // an "and" at the end if there are multiple.
-func getQueriesForFilter(filter *filedb.FileFilter) bson.M {
+func getQueriesForFilter(filter *filedb.FileFilter) (bson.M, error) {
 	hasContentQuery := bson.M{"hasContent": true}
 
 	if filter == nil {
-		return hasContentQuery
+		return hasContentQuery, nil
 	}
 
 	// By default only includes files with content, but can be inverted
@@ -74,9 +74,13 @@ func getQueriesForFilter(filter *filedb.FileFilter) bson.M {
 		hasContentQuery,
 	}
 
-	if filter.ID != primitive.NilObjectID {
+	if filter.ID != "" {
+		parsedID, err := primitive.ObjectIDFromHex(filter.ID)
+		if err != nil {
+			return nil, fmt.Errorf("invalid bson object ID '%s'", filter.ID)
+		}
 		andComponents = append(andComponents, bson.M{
-			"_id": filter.ID,
+			"_id": parsedID,
 		})
 	}
 
@@ -115,14 +119,14 @@ func getQueriesForFilter(filter *filedb.FileFilter) bson.M {
 	}
 
 	if len(andComponents) == 0 {
-		return bson.M{}
+		return bson.M{}, nil
 	}
 
 	if len(andComponents) == 1 {
-		return andComponents[0]
+		return andComponents[0], nil
 	}
 
 	return bson.M{
 		"$and": andComponents,
-	}
+	}, nil
 }

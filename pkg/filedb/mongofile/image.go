@@ -13,7 +13,7 @@ import (
 
 // GetFileByID will get the file with the given ID.
 // If not found, will return nil, not an error.
-func (mc *mongoConnection) GetFileByID(ctx context.Context, id primitive.ObjectID) (*filedb.File, error) {
+func (mc *mongoConnection) GetFileByID(ctx context.Context, id string) (*filedb.File, error) {
 	return mc.getFile(ctx, bson.M{
 		"_id": id,
 	})
@@ -47,7 +47,10 @@ func (mc *mongoConnection) getFile(ctx context.Context, query bson.M) (*filedb.F
 
 func (mc *mongoConnection) CountFiles(ctx context.Context, filter filedb.FileFilter) (int64, error) {
 	filter.Continue = primitive.NilObjectID
-	compiledFilter := getQueriesForFilter(&filter)
+	compiledFilter, err := getQueriesForFilter(&filter)
+	if err != nil {
+		return 0, fmt.Errorf("error while getting query for filter: %v", err)
+	}
 
 	count, err := mc.filesCollection.CountDocuments(ctx, compiledFilter)
 	if err != nil {
@@ -60,7 +63,10 @@ func (mc *mongoConnection) CountFiles(ctx context.Context, filter filedb.FileFil
 // If no filter is provided, all results will be returned (oh no).
 // If no files match the filter, err will be nil and an empty slice will be returned.
 func (mc *mongoConnection) ListFiles(ctx context.Context, filter *filedb.FileFilter) ([]*filedb.File, error) {
-	compiledFilter := getQueriesForFilter(filter)
+	compiledFilter, err := getQueriesForFilter(filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get query for fliter: %v", err)
+	}
 
 	cursor, err := mc.filesCollection.Find(ctx, compiledFilter, &options.FindOptions{
 		Limit: &filter.Limit,
@@ -87,11 +93,11 @@ func (mc *mongoConnection) ListFiles(ctx context.Context, filter *filedb.FileFil
 // If one already exists with the given name, this will check for conflicts
 // using ConflictsWith. If there is a conflict, an error will be returned.
 // If not, no action will be taken.
-func (mc *mongoConnection) CreateFileEntry(ctx context.Context, i *filedb.File) (primitive.ObjectID, error) {
+func (mc *mongoConnection) CreateFileEntry(ctx context.Context, i *filedb.File) (string, error) {
 	// TODO: filter for valid name characters here! (mainly need to restrict colons (:) and pipes (|) for tagging query purposes)
 	existingImg, err := mc.GetFileByName(ctx, i.Name)
 	if err != nil {
-		return primitive.NilObjectID, err
+		return "", err
 	}
 
 	// TODO: validate length and characters of md5sum, and enforce case
@@ -100,24 +106,24 @@ func (mc *mongoConnection) CreateFileEntry(ctx context.Context, i *filedb.File) 
 		// Doesn't exist, let's just create it
 		count, err := mc.filesCollection.CountDocuments(ctx, bson.M{})
 		if err != nil {
-			return primitive.NilObjectID, fmt.Errorf("failed to get document count: %v", err)
+			return "", fmt.Errorf("failed to get document count: %v", err)
 		}
-		if count >= mc.maxFiles {
-			return primitive.NilObjectID, fmt.Errorf("the maximum number of files (%d) have been inserted", mc.maxFiles)
+		if count >= filedb.MaxQuestions {
+			return "", fmt.Errorf("the maximum number of files (%d) have been inserted", filedb.MaxQuestions)
 		}
-		i.ID = primitive.NewObjectID()
+		i.ID = primitive.NewObjectID().Hex()
 
 		res, err := mc.filesCollection.InsertOne(ctx, i)
 		if err != nil {
-			return primitive.NilObjectID, fmt.Errorf("failed to insert file: %v", err)
+			return "", fmt.Errorf("failed to insert file: %v", err)
 		}
 		insertedID := res.InsertedID.(primitive.ObjectID)
-		return insertedID, err
+		return insertedID.Hex(), err
 	}
 
 	err = i.ConflictsWith(existingImg)
 	if err != nil {
-		return primitive.NilObjectID, err
+		return "", err
 	}
 
 	// Already exists, success depends on if the existing file conflicts with the new one

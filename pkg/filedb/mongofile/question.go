@@ -68,8 +68,8 @@ func (mc *mongoConnection) CreateQuestion(ctx context.Context, q *filedb.Questio
 	if err != nil {
 		return nil, fmt.Errorf("failed to get document count: %v", err)
 	}
-	if count >= mc.maxQuestions {
-		return nil, fmt.Errorf("the maximum number of questions (%d) have been inserted", mc.maxQuestions)
+	if count >= filedb.MaxQuestions {
+		return nil, fmt.Errorf("the maximum number of questions (%d) have been inserted", filedb.MaxQuestions)
 	}
 
 	newQuestionID, err := mc.getNewQuestionID(ctx)

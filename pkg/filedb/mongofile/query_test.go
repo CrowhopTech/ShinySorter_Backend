@@ -75,7 +75,7 @@ func Test_getQueriesForFilter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getQueriesForFilter(tt.args.filter); !reflect.DeepEqual(got, tt.want) {
+			if got, _ := getQueriesForFilter(tt.args.filter); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("getQueriesForFilter() = %v, want %v", got, tt.want)
 			}
 		})

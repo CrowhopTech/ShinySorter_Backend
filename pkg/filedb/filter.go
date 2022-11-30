@@ -1,7 +1,5 @@
 package filedb
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
 type TagOperation int
 
 const (
@@ -15,7 +13,7 @@ type TagSearch struct {
 }
 
 type FileFilter struct {
-	ID     primitive.ObjectID
+	ID     string
 	Name   string
 	Md5Sum *string
 
@@ -49,7 +47,7 @@ type FileFilter struct {
 	// Limit is the number of results to return from a query
 	Limit int64
 
-	// Continue is the ObjectID of the last file on the previous page.
+	// Continue is the ID of the last file on the previous page.
 	// In other words, it returns all files with an ID greater than this
-	Continue primitive.ObjectID
+	Continue string
 }

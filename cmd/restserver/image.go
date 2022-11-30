@@ -19,7 +19,7 @@ func translateDBFileToREST(img *filedb.File) *models.FileEntry {
 	if img.Tags != nil {
 		tags = *img.Tags
 	}
-	id := img.ID.Hex()
+	id := img.ID
 	return &models.FileEntry{
 		ID:            &id,
 		Name:          &img.Name,
@@ -30,7 +30,7 @@ func translateDBFileToREST(img *filedb.File) *models.FileEntry {
 	}
 }
 
-//ListFiles gets images matching the given query parameters
+// ListFiles gets images matching the given query parameters
 func ListFiles(params files.ListFilesParams) middleware.Responder {
 	requestCtx := rootCtx
 
@@ -117,13 +117,8 @@ func ListFiles(params files.ListFilesParams) middleware.Responder {
 func GetFileByID(params files.GetFileByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	parsedID, err := primitive.ObjectIDFromHex(params.ID)
-	if err != nil {
-		return files.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("invalid object ID '%s': %v", params.ID, err))
-	}
-
 	results, err := imageMetadataConnection.ListFiles(requestCtx, &filedb.FileFilter{
-		ID: parsedID,
+		ID: params.ID,
 	})
 	if err != nil {
 		return files.NewGetFileByIDInternalServerError().WithPayload(fmt.Sprintf("failed to list images with name filter: %v", err))
@@ -171,11 +166,6 @@ func CreateFile(params files.CreateFileParams) middleware.Responder {
 func PatchFileByID(params files.PatchFileByIDParams) middleware.Responder {
 	requestCtx := rootCtx
 
-	parsedID, err := primitive.ObjectIDFromHex(params.ID)
-	if err != nil {
-		return files.NewPatchFileByIDBadRequest().WithPayload(fmt.Sprintf("invalid object ID '%s': %v", params.ID, err))
-	}
-
 	logrus.WithFields(logrus.Fields{
 		"image_id": params.ID,
 		"patch":    params.Patch,
@@ -183,7 +173,7 @@ func PatchFileByID(params files.PatchFileByIDParams) middleware.Responder {
 
 	img := filedb.File{
 		FileMetadata: filedb.FileMetadata{
-			ID: parsedID,
+			ID: params.ID,
 		},
 	}
 
